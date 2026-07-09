@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prieds Executive Dashboard Suite</title>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb; --primary-hover: #1d4ed8;
+            --success: #16a34a; --warning: #f59e0b; --danger: #ef4444;
+            --dark: #0f172a; --gray-light: #f8fafc; --gray-border: #e2e8f0;
+            --text-main: #334155; --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 280px; background: var(--dark); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo { padding: 24px; font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 800; color: #38bdf8; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px; }
+        .nav-menu { padding: 20px 0; flex: 1; overflow-y: auto; }
+        .nav-item { padding: 14px 24px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: #94a3b8; font-weight: 600; transition: all 0.2s; border-left: 4px solid transparent; }
+        .nav-item:hover { background: #1e293b; color: #fff; }
+        .nav-item.active { background: #1e293b; color: #fff; border-left-color: var(--primary); }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1e293b; }
+
+        /* --- MAIN AREA --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { background: #ffffff; height: 70px; border-bottom: 1px solid var(--gray-border); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; flex-shrink: 0; }
+        .header h1 { font-family: 'Poppins', sans-serif; font-size: 20px; color: var(--dark); }
+        
+        .workspace { flex: 1; display: flex; overflow: hidden; }
+        
+        /* --- EDITOR PANEL --- */
+        .editor-panel { width: 400px; background: #ffffff; border-right: 1px solid var(--gray-border); padding: 24px; overflow-y: auto; flex-shrink: 0; }
+        .section-title { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .editor-section { display: none; }
+        .editor-section.active { display: block; }
+
+        /* --- DASHBOARD PANEL --- */
+        .dashboard-panel { flex: 1; padding: 30px; overflow-y: auto; background: #f8fafc; }
+        .tab-view { display: none; }
+        .tab-view.active { display: block; }
+
+        /* --- REUSABLE BUTTONS --- */
+        .btn { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-outline { background: #fff; border: 1px solid var(--gray-border); color: var(--text-main); }
+        .btn-outline:hover { background: var(--gray-light); }
+
+        /* ================= NPS STYLES ================= */
+        .nps-month-box { background: var(--gray-light); border: 1px solid var(--gray-border); border-radius: 8px; padding: 14px; margin-bottom: 15px; }
+        .nps-month-box h4 { font-size: 13px; margin-bottom: 8px; color: var(--dark); border-bottom: 1px solid var(--gray-border); padding-bottom: 5px; }
+        .nps-input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .input-group label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+        .input-group input { width: 100%; padding: 8px; border: 1px solid var(--gray-border); border-radius: 6px; font-size: 13px; font-weight: 700; text-align: center; }
+
+        .presentation-slide { background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid var(--gray-border); }
+        .slide-header { border-bottom: 2px solid var(--gray-border); padding-bottom: 15px; margin-bottom: 25px; }
+        .slide-header h2 { font-family: 'Poppins'; font-size: 30px; font-weight: 800; color: var(--dark); }
+        .slide-header p { font-size: 14px; color: var(--text-muted); font-style: italic; }
+
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .chart-box { border: 1px solid var(--gray-border); border-radius: 12px; padding: 20px; text-align: center; }
+        .chart-box h5 { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; }
+
+        .pie-container { width: 180px; height: 180px; border-radius: 50%; margin: 0 auto; position: relative; transform: rotate(-90deg); }
+        .pie-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(90deg); width: 100px; height: 110px; background: #fff; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
+        .line-chart-svg { width: 100%; height: 180px; overflow: visible; }
+        .axis { stroke: #e2e8f0; stroke-width: 1; }
+        .trend-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: all 0.5s; }
+        .data-point { r: 5; transition: all 0.5s; }
+
+        .narrative-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .narrative-item { padding: 15px; background: var(--gray-light); border-radius: 8px; border-top: 4px solid; }
+        .narrative-item strong { display: block; font-size: 14px; color: var(--dark); margin-bottom: 5px; }
+        .sequence-text { font-family: 'Roboto Mono', monospace; font-size: 13px; font-weight: 700; margin-bottom: 5px; display: block; }
+
+        /* ================= RETENTION STYLES ================= */
+        .pkg-builder-box { border: 1px solid var(--gray-border); border-radius: 8px; background: var(--gray-light); padding: 14px; margin-bottom: 15px; }
+        .user-builder-row { display: flex; gap: 6px; margin-bottom: 5px; align-items: center; }
+        .user-builder-row input[type="text"] { flex: 1; padding: 5px 8px; border: 1px solid var(--gray-border); border-radius: 4px; font-size: 12px; }
+        .user-builder-row select { padding: 4px; border: 1px solid var(--gray-border); border-radius: 4px; font-size: 11px; }
+
+        .retention-summary-bar { background: var(--dark); color: #fff; border-radius: 12px; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .retention-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .retention-card { background: #fff; border: 1px solid var(--gray-border); border-radius: 12px; padding: 20px; }
+        .r-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--gray-light); padding-bottom: 8px; }
+        .r-list { list-style: none; font-size: 11px; margin-bottom: 12px; display: grid; grid-template-columns: 1fr; gap: 4px; }
+        .r-list.double-col { grid-template-columns: 1fr 1fr; gap: 6px; }
+        .r-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .badge-new { font-size: 9px; background: #dbeafe; color: var(--primary); padding: 1px 5px; border-radius: 8px; font-weight: 700; }
+
+        /* ================= ANOMALY & MODAL STYLES ================= */
+        .anomaly-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        .anomaly-table th, .anomaly-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-border); }
+        .anomaly-table th { background: var(--gray-light); font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 11px; }
+        .anomaly-table tr:hover { background: #f8fafc; }
+
+        /* Kebab Dropdown Menu */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; right: 0; top: 100%; margin-top: 5px; background: #fff; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border-radius: 8px; border: 1px solid var(--gray-border); z-index: 50; min-width: 130px; overflow: hidden; }
+        .dropdown-content.show { display: block; }
+        .dropdown-item { padding: 12px 15px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .dropdown-item:hover { background: #f1f5f9; color: var(--primary); }
+
+        /* Modal Overlay */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: #fff; width: 700px; max-height: 85vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-header { padding: 20px 25px; border-bottom: 1px solid var(--gray-border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+        .modal-body { padding: 20px 25px; overflow-y: auto; flex: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo"><i class="fa-solid fa-cube"></i> PRIEDS SUITE</div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="switchTab('lastlogin', this)"><i class="fa-solid fa-satellite-dish"></i> Last Login Tracker</div>
+            <div class="nav-item" onclick="switchTab('lastlogin_report', this)"><i class="fa-solid fa-file-shield"></i> Last Login Report</div>
+            <div class="nav-item" onclick="switchTab('nps', this)"><i class="fa-solid fa-face-smile"></i> NPS Tracker</div>
+            <div class="nav-item" onclick="switchTab('retention', this)"><i class="fa-solid fa-users"></i> Retention Tracker</div>
+            <div class="nav-item" onclick="switchTab('anomaly', this)"><i class="fa-solid fa-triangle-exclamation"></i> Anomaly Report</div>
+            <div class="nav-item" onclick="switchTab('nps_report', this)"><i class="fa-solid fa-file-chart-column"></i> NPS Report</div>
+        </div>
+        <div class="sidebar-footer">
+            <button class="btn btn-success" style="width:100%;" onclick="exportPPT()"><i class="fa-solid fa-file-powerpoint"></i> EXPORT TO PPT</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1 id="page-header-title">Last Login Tracker Dashboard</h1>
+        </div>
+
+        <div class="workspace">
+            <div class="editor-panel">
+                
+                <div id="editor-lastlogin" class="editor-section active">
+                    <div class="section-title">Data Login Perusahaan</div>
+                    <div style="margin-bottom: 20px; background: #e0f2fe; padding: 15px; border-radius: 8px; border: 1px dashed #38bdf8;">
+                        <label style="font-size:12px; font-weight:700; color:var(--primary); display:block; margin-bottom:8px;">
+                            <i class="fa-solid fa-file-excel"></i> Upload Data Last Login
+                        </label>
+                        <input type="file" id="lastlogin-excel-upload" accept=".xlsx, .xls, .csv" style="font-size:12px; width: 100%; margin-bottom: 10px;" onchange="processLastLoginExcel(event)">
+                        <p style="font-size:10px; color:#0284c7; margin-top:0; margin-bottom:0;">Unggah file Excel/CSV aktivitas login klien (LAST_LOGIN.xlsx).</p>
+                    </div>
+
+                    <div class="section-title">Pengaturan Range & Laporan</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px;">
+                        
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <div style="flex:1;">
+                                <label style="font-weight:700; color:var(--warning); display:block; margin-bottom:4px; font-size:10px;">Need Attention (Mulai Hari ke-)</label>
+                                <input type="number" id="input-limit-attention" value="7" min="1" style="width:100%; padding:6px; border:1px solid var(--gray-border); border-radius:4px; font-weight:700;">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-weight:700; color:var(--danger); display:block; margin-bottom:4px; font-size:10px;">Inactive (Lebih dari Hari ke-)</label>
+                                <input type="number" id="input-limit-inactive" value="15" min="2" style="width:100%; padding:6px; border:1px solid var(--gray-border); border-radius:4px; font-weight:700;">
+                            </div>
+                        </div>
+                        <button class="btn btn-outline" style="width:100%; padding:8px 12px; font-size:11px; margin-bottom:15px;" onclick="updateLoginLimits()">Terapkan Rentang Waktu</button>
+
+                        <hr style="border:0; border-top:1px solid var(--gray-border); margin:15px 0;">
+                        <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px; line-height:1.5;">Simpan kondisi data login dengan rentang waktu di atas ke dalam arsip laporan statis (History Report).</p>
+                        <button class="btn btn-success" style="width:100%;" onclick="generateLastLoginReport()">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Snapshot Laporan
+                        </button>
+                    </div>
+                </div>
+
+                <div id="editor-nps" class="editor-section">    
+                    <div class="section-title">
+                        Data Masukan Bulanan <span style="font-size:11px; color:var(--text-muted);" id="editor-q-label">Q2 2026</span>
+                    </div>
+                    <div style="margin-bottom: 20px; background: #e0f2fe; padding: 15px; border-radius: 8px; border: 1px dashed #38bdf8;">
+                        <label style="font-size:12px; font-weight:700; color:var(--primary); display:block; margin-bottom:8px;">
+                            <i class="fa-solid fa-file-excel"></i> Auto-Summary dari Excel (.xlsx)
+                        </label>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                            <input type="file" id="excel-upload" accept=".xlsx, .xls" style="font-size:12px; width: 100%;" onchange="processExcel(event)">
+                        </div>
+                        <p style="font-size:10px; color:#0284c7; margin-top:0; margin-bottom:0;">Unggah file Excel survei. Pastikan Anda telah mengatur batas waktu deteksi Anomali di Tab Anomaly Report.</p>
+                    </div>
+                    <div id="nps-inputs-box"></div>
+                </div>
+
+                <div id="editor-retention" class="editor-section">
+                    <div class="section-title">
+                        <span>Manajemen Paket</span>
+                        <button class="btn btn-primary" style="padding:4px 8px; font-size:11px;" onclick="addPackage()">+ Paket Baru</button>
+                    </div>
+                    <div id="retention-inputs-box"></div>
+                </div>
+
+                <div id="editor-anomaly" class="editor-section">
+                    <div class="section-title">Pengaturan Deteksi</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px; line-height:1.6;">
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:8px;">Batas Waktu Minimum (Detik)</label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <input type="number" id="anomaly-threshold-input" value="15" min="1" style="flex:1; padding:8px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; font-weight:700;">
+                            <button class="btn btn-primary" style="padding:8px 12px; font-size:11px;" onclick="updateAnomalyThreshold()">Terapkan</button>
+                        </div>
+                        <p style="font-size:10px; color:var(--text-muted); margin-top:10px;">Sistem akan mengklasifikasikan pengguna yang mengisi survei lebih cepat dari batas waktu ini secara otomatis.</p>
+                    </div>
+                </div>
+
+                <div id="editor-lastlogin_report" class="editor-section">
+                    <div class="section-title">Riwayat Last Login</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px; line-height:1.6;">
+                        <p style="color:var(--dark); font-weight:700;"><i class="fa-solid fa-camera"></i> Snapshot Data Statis</p>
+                        <p style="font-size:11px; color:var(--text-muted); margin-top:5px;">Laporan yang tersimpan di sini bersifat permanen (statis) sesuai dengan kondisi data dan batas toleransi (threshold) pada saat tombol simpan ditekan.</p>
+                    </div>
+                </div>  
+
+                <div id="editor-nps_report" class="editor-section">
+                    <div class="section-title">Riwayat Laporan</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px; line-height:1.6;">
+                        <p style="color:var(--dark); font-weight:700;"><i class="fa-solid fa-folder-open"></i> Arsip Log Excel</p>
+                        <p style="font-size:11px; color:var(--text-muted); margin-top:5px;">Setiap kali file Excel baru diunggah pada tab NPS Tracker, ringkasan metrics beserta daftar responden valid akan otomatis diarsipkan secara permanen di tab ini.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="dashboard-panel">
+                
+                <div id="view-lastlogin" class="tab-view active">
+                    <div class="presentation-slide">
+                        <div class="slide-header">
+                            <h2>Last Login Tracker</h2>
+                            <p>Monitoring aktivitas login harian perusahaan untuk mencegah churn rate tinggi</p>
+                        </div>
+                        
+                        <div class="chart-row" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px; gap: 15px;">
+                            <div style="background:var(--success); color:white; padding:20px; border-radius:12px; text-align:center; box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);">
+                                <h5 id="title-active-range" style="font-size:13px; margin-bottom:8px; text-transform:uppercase;">Active (0-6 Hari)</h5>
+                                <h2 id="login-count-active" style="font-size:36px; font-weight:800; margin:0;">0</h2>
+                            </div>
+                            
+                            <div style="background:var(--warning); color:white; padding:20px; border-radius:12px; text-align:center; box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2);">
+                                <h5 id="title-attention-range" style="font-size:13px; margin-bottom:8px; text-transform:uppercase;">Need Attention (7-15 Hari)</h5>
+                                <h2 id="login-count-attention" style="font-size:36px; font-weight:800; margin:0;">0</h2>
+                            </div>
+                            
+                            <div style="background:var(--danger); color:white; padding:20px; border-radius:12px; text-align:center; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);">
+                                <h5 id="title-inactive-range" style="font-size:13px; margin-bottom:8px; text-transform:uppercase;">Inactive (>15 Hari)</h5>
+                                <h2 id="login-count-inactive" style="font-size:36px; font-weight:800; margin:0;">0</h2>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--gray-border); padding-bottom:10px;">
+                            <h3 style="font-size:16px; font-weight:800; color:var(--dark);"><i class="fa-solid fa-list me-2"></i> Daftar Perusahaan</h3>
+                            <div class="btn-group" style="display:flex; gap:8px;">
+                                <button class="btn btn-primary" id="btn-login-all" style="padding:6px 14px; font-size:12px;" onclick="setLastLoginFilter('all')">Semua Data</button>
+                                <button class="btn btn-outline" id="btn-login-attention" style="padding:6px 14px; font-size:12px;" onclick="setLastLoginFilter('attention')">Need Attention</button>
+                                <button class="btn btn-outline" id="btn-login-inactive" style="padding:6px 14px; font-size:12px;" onclick="setLastLoginFilter('inactive')">Inactive</button>
+                            </div>
+                        </div>
+                        
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            <table class="anomaly-table" style="margin-top: 0;">
+                                <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
+                                    <tr>
+                                        <th>Nama Perusahaan</th>
+                                        <th>Company ID</th>
+                                        <th>Tanggal Dibuat</th>
+                                        <th>Terakhir Login</th>
+                                        <th>Status Tracking</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lastlogin-tbody">
+                                    <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">Silakan unggah data Last Login (Excel/CSV) di panel sebelah kiri.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-nps" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header">
+                            <h2 id="slide-nps-title">NPS Q2 2026</h2>
+                            <p>Objective 4: Maintain after sales process</p>
+                        </div>
+                        <h4 id="trend-title" style="text-align:center; font-size:16px; margin-bottom:20px; color:var(--dark);">Tren Promoter, Passive, Detractors Q2 2026</h4>
+                        <div class="chart-row">
+                            <div class="chart-box">
+                                <h5>Data Average NPS Quarter</h5>
+                                <div class="pie-container" id="pie-chart">
+                                    <div class="pie-center">
+                                        <span style="font-size:10px; color:var(--text-muted)">Total User</span>
+                                        <span id="grand-total-users" style="font-size:24px; font-weight:800; color:var(--dark)">0</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex; justify-content:center; gap:15px; margin-top:20px; font-size:11px; font-weight:700;">
+                                    <span style="color:var(--success)">● Promoter</span>
+                                    <span style="color:var(--warning)">● Passive</span>
+                                    <span style="color:var(--danger)">● Detractor</span>
+                                </div>
+                            </div>
+                            <div class="chart-box">
+                                <h5>Promoters, Passive and Detractors (%)</h5>
+                                <svg class="line-chart-svg" viewBox="0 0 400 200">
+                                    <line class="axis" x1="40" y1="20" x2="360" y2="20" />
+                                    <line class="axis" x1="40" y1="60" x2="360" y2="60" />
+                                    <line class="axis" x1="40" y1="100" x2="360" y2="100" />
+                                    <line class="axis" x1="40" y1="140" x2="360" y2="140" />
+                                    <line class="axis" x1="40" y1="180" x2="360" y2="180" />
+                                    <path id="path-p" class="trend-line" stroke="var(--success)" d="" />
+                                    <path id="path-v" class="trend-line" stroke="var(--warning)" d="" />
+                                    <path id="path-d" class="trend-line" stroke="var(--danger)" d="" />
+                                    <g id="points-p" fill="var(--success)"></g>
+                                    <g id="points-v" fill="var(--warning)"></g>
+                                    <g id="points-d" fill="var(--danger)"></g>
+                                    <text x="40" y="198" font-size="10" text-anchor="middle" fill="#94a3b8">Bulan 1</text>
+                                    <text x="200" y="198" font-size="10" text-anchor="middle" fill="#94a3b8">Bulan 2</text>
+                                    <text x="360" y="198" font-size="10" text-anchor="middle" fill="#94a3b8">Bulan 3</text>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="narrative-section">
+                            <div class="narrative-item" style="border-color: var(--success);">
+                                <strong>Promoters (%)</strong>
+                                <span class="sequence-text" id="seq-p" style="color:var(--success);">0% → 0% → 0%</span>
+                                <p style="font-size:12px; color:var(--text-muted);">Sangat puas & merekomendasikan produk.</p>
+                            </div>
+                            <div class="narrative-item" style="border-color: var(--warning);">
+                                <strong>Passive (%)</strong>
+                                <span class="sequence-text" id="seq-v" style="color:var(--warning);">0% → 0% → 0%</span>
+                                <p style="font-size:12px; color:var(--text-muted);">Puas namun tidak antusias, rentan pindah.</p>
+                            </div>
+                            <div class="narrative-item" style="border-color: var(--danger);">
+                                <strong>Detractors (%)</strong>
+                                <span class="sequence-text" id="seq-d" style="color:var(--danger);">0% → 0% → 0%</span>
+                                <p style="font-size:12px; color:var(--text-muted);">Tidak puas dan berisiko merusak citra merek.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-retention" class="tab-view">
+                    <div class="retention-summary-bar">
+                        <div>
+                            <h2 style="font-size:18px; font-weight:700;">Total Retention Performance</h2>
+                            <p style="font-size:12px; color:#cbd5e1; margin-top:2px;" id="ret-total-users">Total Teretensi: 0 / 0 Klien</p>
+                        </div>
+                        <div style="font-size:44px; font-weight:800; color:#38bdf8;" id="ret-total-score">0%</div>
+                    </div>
+                    <div class="retention-grid" id="retention-dashboard-grid"></div>
+                </div>
+
+                <div id="view-anomaly" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header">
+                            <h2>Anomaly Detection Report</h2>
+                            <p id="anomaly-subtitle">Daftar pengguna dengan waktu pengisian (Interval Time) di bawah 15 Detik</p>
+                        </div>
+                        <div id="anomaly-list-container">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">
+                                Silakan unggah file Excel survei terlebih dahulu untuk menjalankan deteksi.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-lastlogin_report" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header">
+                            <h2>Last Login History Report</h2>
+                            <p>Arsip laporan performa login klien dari waktu ke waktu</p>
+                        </div>
+                        <div id="lastlogin-report-table-container">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">
+                                Belum ada riwayat laporan Last Login.
+                            </div>
+                        </div>
+                    </div>
+                </div>      
+
+                <div id="view-nps_report" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header">
+                            <h2>NPS History Report</h2>
+                            <p>Kumpulan log data hasil analisis survei bulanan yang telah berhasil diproses oleh sistem</p>
+                        </div>
+                        <div id="nps-report-table-container">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">
+                                Belum ada riwayat laporan. Silakan unggah file Excel di tab NPS Tracker terlebih dahulu.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="lastlogin-detail-modal" class="modal-overlay">
+    <div class="modal-content" style="width: 850px; max-height: 85vh;">
+        <div class="modal-header">
+            <h3 style="font-size:16px; font-weight:800; color:var(--dark);" id="ll-modal-title-text">Detail Snapshot Report</h3>
+            <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeLastLoginReportModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 25px;">
+            
+            <div>
+                <h4 style="color:var(--success); font-size:12px; font-weight:800; text-transform:uppercase; margin-bottom:6px; display:flex; justify-content:space-between; border-bottom:1px solid var(--gray-border); padding-bottom:4px;">
+                    <span><i class="fa-solid fa-check-circle"></i> Kategori: Active (0-6 Hari Belum Login)</span>
+                    <span id="ll-count-active-badge" style="background:#dcfce7; padding:2px 8px; border-radius:12px; font-size:10px; color:var(--success);">0 Klien</span>
+                </h4>
+                <div id="ll-table-active-container"></div>
+            </div>
+            <div>
+                <h4 style="color:var(--warning); font-size:12px; font-weight:800; text-transform:uppercase; margin-bottom:6px; display:flex; justify-content:space-between; border-bottom:1px solid var(--gray-border); padding-bottom:4px;">
+                    <span><i class="fa-solid fa-bell"></i> Kategori: Need Attention (7-15 Hari Belum Login)</span>
+                    <span id="ll-count-attention-badge" style="background:#fef3c7; padding:2px 8px; border-radius:12px; font-size:10px; color:var(--warning);">0 Klien</span>
+                </h4>
+                <div id="ll-table-attention-container"></div>
+            </div>
+            
+            <div>
+                <h4 style="color:var(--danger); font-size:12px; font-weight:800; text-transform:uppercase; margin-bottom:6px; display:flex; justify-content:space-between; border-bottom:1px solid var(--gray-border); padding-bottom:4px;">
+                    <span><i class="fa-solid fa-skull-crossbones"></i> Kategori: Inactive (>15 Hari Belum Login)</span>
+                    <span id="ll-count-inactive-badge" style="background:#fee2e2; padding:2px 8px; border-radius:12px; font-size:10px; color:var(--danger);">0 Klien</span>
+                </h4>
+                <div id="ll-table-inactive-container"></div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+    <div id="anomaly-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="font-size:16px; font-weight:800; color:var(--dark);" id="modal-title-text">Detail Anomaly</h3>
+                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="anomaly-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">No</th>
+                            <th>Username Pengguna</th>
+                            <th>Interval Pengisian</th>
+                            <th>Status Flagging</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-anomaly-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-detail-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 850px; max-height: 85vh;">
+            <div class="modal-header">
+                <h3 style="font-size:16px; font-weight:800; color:var(--dark);" id="report-modal-title-text">Detail Responden NPS</h3>
+                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeReportModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 25px;">
+                <div>
+                    <h4 style="color:var(--success); font-size:12px; font-weight:800; text-transform:uppercase; margin-bottom:6px; display:flex; justify-content:space-between; border-bottom:1px solid var(--gray-border); padding-bottom:4px;">
+                        <span><i class="fa-solid fa-face-smile"></i> Daftar User Promoter</span>
+                        <span id="count-p-badge" style="background:#dcfce7; padding:2px 8px; border-radius:12px; font-size:10px;">0 Klien</span>
+                    </h4>
+                    <div id="table-detail-p-container"></div>
+                    <div id="pagination-p-container" style="display:flex; justify-content:flex-end; gap:4px; margin-top:6px;"></div>
+                </div>
+                <div>
+                    <h4 style="color:var(--warning); font-size:12px; font-weight:800; text-transform:uppercase; margin-bottom:6px; display:flex; justify-content:space-between; border-bottom:1px solid var(--gray-border); padding-bottom:4px;">
+                        <span><i class="fa-solid fa-face-meh"></i> Daftar User Passive</span>
+                        <span id="count-v-badge" style="background:#fef3c7; padding:2px 8px; border-radius:12px; font-size:10px;">0 Klien</span>
+                    </h4>
+                    <div id="table-detail-v-container"></div>
+                    <div id="pagination-v-container" style="display:flex; justify-content:flex-end; gap:4px; margin-top:6px;"></div>
+                </div>
+                <div>
+                    <h4 style="color:var(--danger); font-size:12px; font-weight:800; text-transform:uppercase; margin-bottom:6px; display:flex; justify-content:space-between; border-bottom:1px solid var(--gray-border); padding-bottom:4px;">
+                        <span><i class="fa-solid fa-face-frown"></i> Daftar User Detractor</span>
+                        <span id="count-d-badge" style="background:#fee2e2; padding:2px 8px; border-radius:12px; font-size:10px;">0 Klien</span>
+                    </h4>
+                    <div id="table-detail-d-container"></div>
+                    <div id="pagination-d-container" style="display:flex; justify-content:flex-end; gap:4px; margin-top:6px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- MASTER DATA SET ---
+        const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const quarterMonths = {
+            1: { name: 'Q1', months: ['Januari', 'Februari', 'Maret'], short: ['Jan', 'Feb', 'Mar'] },
+            2: { name: 'Q2', months: ['April', 'Mei', 'Juni'], short: ['Apr', 'Mei', 'Jun'] },
+            3: { name: 'Q3', months: ['Juli', 'Agustus', 'September'], short: ['Jul', 'Agt', 'Sep'] },
+            4: { name: 'Q4', months: ['Oktober', 'November', 'Desember'], short: ['Okt', 'Nov', 'Des'] }
+        };
+
+        // --- STATE MANAGEMENT ---
+        const appState = {
+            // STATE BARU UNTUK LAST LOGIN TRACKER
+            lastLoginData: [],
+            lastLoginAttentionLimit: 7, 
+            lastLoginInactiveLimit: 15,
+            lastLoginFilter: 'inactive',
+            lastLoginReports: [],
+
+            // STATE ORIGINAL LAINNYA
+            currentQuarter: 2,
+            currentYear: 2026,
+            nps: [
+                { month: 'April', p: 0, v: 0, d: 0 },
+                { month: 'Mei', p: 0, v: 0, d: 0 },
+                { month: 'Juni', p: 0, v: 0, d: 0 }
+            ],
+            retention: [],
+            anomalyThresholdSec: 15,
+            surveyLogs: [],
+            npsReports: [],       
+            activeReportIdx: null, 
+            pages: { p: 1, v: 1, d: 1 }, 
+            rowsPerPage: 5        
+        };
+
+        // --- FIREBASE SAVE & LOAD FUNCTIONS ---
+        async function saveDataToFirebase() {
+            try {
+                // Menyimpan seluruh appState ke koleksi 'prieds_data', dokumen 'main_state'
+                await window.setDoc(window.doc(window.firebaseDb, "prieds_data", "main_state"), appState);
+                console.log("Data berhasil disimpan ke Firebase otomatis.");
+            } catch (e) {
+                console.error("Error saving to Firebase: ", e);
+            }
+        }
+
+        async function loadDataFromFirebase() {
+            try {
+                const docSnap = await window.getDoc(window.doc(window.firebaseDb, "prieds_data", "main_state"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Timpa appState lokal dengan data dari Firebase
+                    Object.assign(appState, data);
+                    console.log("Data berhasil dimuat dari Firebase.");
+                } else {
+                    console.log("Belum ada data di Firebase, menggunakan state awal.");
+                }
+                
+                // Panggil fungsi render setelah data selesai dimuat
+                renderLastLoginDashboard();
+                initNPS();
+                initRetention();
+                initAnomaly(); 
+                initNPSReportTable();
+                initLastLoginReportTable();
+            } catch (e) {
+                console.error("Error loading from Firebase: ", e);
+            }
+        }
+
+        // --- GLOBAL CLICK EVENT ---
+        window.onclick = function(event) {
+            if (!event.target.matches('.fa-ellipsis-vertical') && !event.target.closest('.dropdown button')) {
+                document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            }
+            if (event.target.classList.contains('modal-overlay')) {
+                closeModal();
+                closeReportModal();
+            }
+        }
+
+        function toggleDropdown(id, event) {
+            event.stopPropagation();
+            document.querySelectorAll('.dropdown-content').forEach(el => {
+                if (el.id !== id) el.classList.remove('show');
+            });
+            document.getElementById(id).classList.toggle('show');
+        }
+
+        // --- TAB NAVIGATION ---
+        function switchTab(tab, element) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            element.classList.add('active');
+
+            document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${tab}`).classList.add('active');
+
+            document.querySelectorAll('.editor-section').forEach(e => e.classList.remove('active'));
+            document.getElementById(`editor-${tab}`).classList.add('active');
+
+            const titles = {
+                'lastlogin': 'Last Login Tracker Dashboard', // TITLE TAB BARU
+                'lastlogin_report': 'Last Login History Report',
+                'nps': 'Net Promoter Score (NPS) Dashboard',
+                'retention': 'Retention Rate Dashboard',
+                'anomaly': 'Anomaly Detection Report',
+                'nps_report': 'NPS History Report Archive'
+            };
+            document.getElementById('page-header-title').innerText = titles[tab];
+        }
+
+
+        // ================= LAST LOGIN TRACKER LOGIC (MODUL BARU) =================
+        function processLastLoginExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                // Tambahkan cellDates: true di sini
+                const workbook = XLSX.read(data, {type: 'array', cellDates: true});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Tambahkan raw: false dan dateNF di sini
+                const json = XLSX.utils.sheet_to_json(worksheet, { defval: "", raw: false, dateNF: "dd-mm-yyyy" });
+                
+                // Normalisasi Data Header
+                appState.lastLoginData = json.map(row => {
+                    let newRow = {};
+                    for(let key in row) {
+                        const cleanKey = key.trim().toLowerCase().replace(/\s+/g, '_');
+                        newRow[cleanKey] = row[key];
+                    }
+                    return newRow;
+                });
+                
+                saveDataToFirebase();
+
+                alert(`🎯 Berhasil memproses ${appState.lastLoginData.length} data Last Login.`);
+                renderLastLoginDashboard();
+                event.target.value = ''; // reset input
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function updateLoginThreshold() {
+            const inputVal = parseInt(document.getElementById('login-threshold-input').value);
+            if (!isNaN(inputVal) && inputVal > 0) {
+                appState.lastLoginThreshold = inputVal;
+                saveDataToFirebase();
+                renderLastLoginDashboard();
+            }
+        }
+
+        function setLastLoginFilter(type) {
+            appState.lastLoginFilter = type;
+            
+            // Reset semua tombol ke outline
+            document.getElementById('btn-login-all').className = 'btn btn-outline';
+            document.getElementById('btn-login-attention').className = 'btn btn-outline';
+            document.getElementById('btn-login-inactive').className = 'btn btn-outline';
+            
+            // Aktifkan tombol yang dipilih
+            document.getElementById(`btn-login-${type}`).className = 'btn btn-primary';
+            
+            renderLastLoginDashboard();
+        }
+
+        // Fungsi baru untuk menerapkan input Range
+        function updateLoginLimits() {
+            const att = parseInt(document.getElementById('input-limit-attention').value);
+            const inact = parseInt(document.getElementById('input-limit-inactive').value);
+            
+            if (!isNaN(att) && !isNaN(inact) && att > 0 && inact > att) {
+                appState.lastLoginAttentionLimit = att;
+                appState.lastLoginInactiveLimit = inact;
+                saveDataToFirebase();
+                renderLastLoginDashboard();
+                alert(`Rentang waktu berhasil diperbarui:\nActive: 0 - ${att-1} Hari\nNeed Attention: ${att} - ${inact} Hari\nInactive: > ${inact} Hari`);
+            } else {
+                alert("Input tidak valid! Pastikan angka Inactive lebih besar dari angka Need Attention.");
+            }
+        }
+
+        // Render Dashboard Dinamis
+        function renderLastLoginDashboard() {
+            if(appState.lastLoginData.length === 0) return;
+            
+            const limitAtt = appState.lastLoginAttentionLimit || 7;
+            const limitInact = appState.lastLoginInactiveLimit || 15;
+
+            // Update Teks Judul Dasbor
+            document.getElementById('title-active-range').innerText = `Active (0-${limitAtt-1} Hari)`;
+            document.getElementById('title-attention-range').innerText = `Need Attention (${limitAtt}-${limitInact} Hari)`;
+            document.getElementById('title-inactive-range').innerText = `Inactive (>${limitInact} Hari)`;
+            
+            let countActive = 0, countAttention = 0, countInactive = 0;
+
+            appState.lastLoginData.forEach(row => {
+                let daysStr = row['last_login_in_days'] || row['hari_terakhir_login'] || row['last_login'] || "0";
+                let days = parseInt(daysStr);
+                if (isNaN(days)) days = 0;
+                row.processed_days = days;
+
+                if (days < limitAtt) {
+                    countActive++;
+                    row.status = 'Active';
+                    row.statusColor = 'var(--success)';
+                } else if (days >= limitAtt && days <= limitInact) {
+                    countAttention++;
+                    row.status = 'Need Attention';
+                    row.statusColor = 'var(--warning)';
+                } else {
+                    countInactive++;
+                    row.status = 'Inactive';
+                    row.statusColor = 'var(--danger)';
+                }
+            });
+
+            document.getElementById('login-count-active').innerText = countActive;
+            document.getElementById('login-count-attention').innerText = countAttention;
+            document.getElementById('login-count-inactive').innerText = countInactive;
+
+            let displayData = appState.lastLoginData;
+            if (appState.lastLoginFilter === 'attention') {
+                displayData = appState.lastLoginData.filter(row => row.processed_days >= limitAtt && row.processed_days <= limitInact);
+            } else if (appState.lastLoginFilter === 'inactive') {
+                displayData = appState.lastLoginData.filter(row => row.processed_days > limitInact);
+            }
+            
+            displayData.sort((a, b) => b.processed_days - a.processed_days);
+
+            const tbody = document.getElementById('lastlogin-tbody');
+            if(displayData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">Tidak ada data pada kategori ini.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = displayData.map(row => {
+                const companyName = row['company_name'] || row['nama_perusahaan'] || '-';
+                const companyId = row['company_id'] || row['id_perusahaan'] || '-';
+                const createdTime = row['created_time'] || row['tanggal_dibuat'] || '-';
+                const daysLabel = row.processed_days <= 0 ? "Hari ini / Baru saja" : row.processed_days + " Hari lalu";
+
+                return `
+                    <tr>
+                        <td style="font-weight:700;">${companyName}</td>
+                        <td style="font-size:11px; color:var(--text-muted); font-family:'Roboto Mono', monospace;">${companyId}</td>
+                        <td>${createdTime}</td>
+                        <td><span style="font-weight:800; color:var(--dark);">${daysLabel}</span></td>
+                        <td><span style="background:${row.statusColor}; color:#fff; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase;">${row.status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Generate Report (Menyimpan Range saat itu)
+        function generateLastLoginReport() {
+            if (!appState.lastLoginData || appState.lastLoginData.length === 0) {
+                alert("Belum ada data Last Login untuk disimpan.");
+                return;
+            }
+
+            const limitAtt = appState.lastLoginAttentionLimit || 7;
+            const limitInact = appState.lastLoginInactiveLimit || 15;
+
+            const now = new Date();
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const dateStr = `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()} (${timeString})`;
+
+            const activeUsers = [], attentionUsers = [], inactiveUsers = [];
+
+            appState.lastLoginData.forEach(row => {
+                const days = row.processed_days;
+                if (days < limitAtt) activeUsers.push({...row});
+                else if (days >= limitAtt && days <= limitInact) attentionUsers.push({...row});
+                else inactiveUsers.push({...row});
+            });
+
+            const totalUser = appState.lastLoginData.length;
+            const activePct = totalUser ? ((activeUsers.length / totalUser) * 100).toFixed(1) : 0;
+
+            const reportSnapshot = {
+                reportTime: dateStr,
+                limitAtt: limitAtt,
+                limitInact: limitInact,
+                totalUser: totalUser,
+                activeCount: activeUsers.length,
+                attentionCount: attentionUsers.length,
+                inactiveCount: inactiveUsers.length,
+                activePct: activePct,
+                activeUsers: activeUsers,
+                attentionUsers: attentionUsers,
+                inactiveUsers: inactiveUsers
+            };
+
+            if (!appState.lastLoginReports) appState.lastLoginReports = [];
+            appState.lastLoginReports.unshift(reportSnapshot); 
+            
+            saveDataToFirebase();
+            initLastLoginReportTable();
+            alert(`Laporan snapshot berhasil disimpan permanen!`);
+        }
+
+        function initLastLoginReportTable() {
+            const container = document.getElementById('lastlogin-report-table-container');
+            if (!appState.lastLoginReports || appState.lastLoginReports.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada riwayat laporan Last Login.</div>`;
+                return;
+            }
+
+            const rowsHtml = appState.lastLoginReports.map((report, idx) => `
+                <tr>
+                    <td style="font-weight:700;">${report.reportTime}</td>
+                    <td style="font-weight:800; color:var(--dark);">${report.totalUser}</td>
+                    <td style="color:var(--success); font-weight:700;">${report.activeCount}</td>
+                    <td style="color:var(--warning); font-weight:700;">${report.attentionCount || 0}</td>
+                    <td style="color:var(--danger); font-weight:700;">${report.inactiveCount}</td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="flex:1; height:6px; background:var(--gray-border); border-radius:3px; overflow:hidden;">
+                                <div style="height:100%; width:${report.activePct}%; background:var(--success);"></div>
+                            </div>
+                            <span style="font-weight:800; font-size:11px; color:var(--success);">${report.activePct}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('ll-report-drop-${idx}', event)">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div id="ll-report-drop-${idx}" class="dropdown-content">
+                                <div class="dropdown-item" onclick="openLastLoginReportDetail(${idx})">
+                                    <i class="fa-solid fa-table-list" style="color:var(--primary);"></i> Lihat Detail Klien
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <table class="anomaly-table">
+                    <thead>
+                        <tr>
+                            <th>Report Time</th>
+                            <th>Total User</th>
+                            <th>Active User</th>
+                            <th>Need Attention</th>
+                            <th>Inactive User</th>
+                            <th style="width:150px;">Active Percentage</th>
+                            <th style="width:60px;">Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `;
+        }
+
+        // Ganti fungsi openDetail js nya dengan ini
+function openLastLoginReportDetail(idx) {
+    const report = appState.lastLoginReports[idx];
+    document.getElementById('ll-modal-title-text').innerText = `Snapshot Detail - ${report.reportTime}`;
+    
+    // 1. UPDATE TEKS JUDUL RENTANG HARI AGAR DINAMIS (TERMASUK ACTIVE)
+    document.querySelector('#ll-table-active-container').previousElementSibling.querySelector('span').innerHTML = `<i class="fa-solid fa-check-circle"></i> Active (0-${report.limitAtt - 1} Hari Belum Login)`;
+    document.querySelector('#ll-table-attention-container').previousElementSibling.querySelector('span').innerHTML = `<i class="fa-solid fa-bell"></i> Need Attention (${report.limitAtt}-${report.limitInact} Hari Belum Login)`;
+    document.querySelector('#ll-table-inactive-container').previousElementSibling.querySelector('span').innerHTML = `<i class="fa-solid fa-skull-crossbones"></i> Inactive (>${report.limitInact} Hari Belum Login)`;
+
+    // 2. UPDATE JUMLAH BADGE KLIEN
+    document.getElementById('ll-count-active-badge').innerText = `${report.activeCount || 0} Klien`;
+    document.getElementById('ll-count-attention-badge').innerText = `${report.attentionCount || 0} Klien`;
+    document.getElementById('ll-count-inactive-badge').innerText = `${report.inactiveCount || 0} Klien`;
+
+    const renderSubTable = (users) => {
+        if (!users || users.length === 0) return `<div style="text-align:center; padding:15px; font-size:12px; color:var(--text-muted); background:var(--gray-light); border:1px solid var(--gray-border); border-radius:6px;">Tidak ada klien pada kategori ini.</div>`;
+        
+        const rows = users.map((u, i) => `
+            <tr>
+                <td style="color:var(--text-muted);">${i + 1}</td>
+                <td style="font-weight:700; color:var(--dark);">${u.company_name || u.nama_perusahaan || '-'}</td>
+                <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); font-family:'Roboto Mono', monospace;">${u.company_id || u.id_perusahaan || '-'}</span></td>
+                <td><span style="font-weight:800; color:var(--dark);">${u.processed_days <= 0 ? 'Hari ini' : u.processed_days + ' Hari lalu'}</span></td>
+            </tr>
+        `).join('');
+
+        return `
+            <div style="max-height: 200px; overflow-y: auto;">
+                <table class="anomaly-table" style="font-size:12px; margin-top:5px;">
+                    <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
+                        <tr>
+                            <th style="width:40px;">No</th>
+                            <th>Nama Perusahaan</th>
+                            <th>Company ID</th>
+                            <th>Terakhir Login</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        `;
+    };
+
+    // 3. RENDER KETIGA TABELNYA KE HTML
+    document.getElementById('ll-table-active-container').innerHTML = renderSubTable(report.activeUsers);
+    document.getElementById('ll-table-attention-container').innerHTML = renderSubTable(report.attentionUsers);
+    document.getElementById('ll-table-inactive-container').innerHTML = renderSubTable(report.inactiveUsers);
+
+    // Tutup dropdown dan buka modal
+    document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+    document.getElementById('lastlogin-detail-modal').classList.add('active');
+}
+
+        function closeLastLoginReportModal() {
+            document.getElementById('lastlogin-detail-modal').classList.remove('active');
+        }
+
+        // ================= SISA KODE ORIGINAL (NPS, RETENTION, ANOMALY) =================
+        function initNPS() {
+            const box = document.getElementById('nps-inputs-box');
+            box.innerHTML = '';
+            
+            const qInfo = quarterMonths[appState.currentQuarter];
+            document.getElementById('editor-q-label').innerText = `${qInfo.name} ${appState.currentYear}`;
+            
+            const thresholdMinutes = appState.anomalyThresholdSec / 60;
+
+            appState.nps.forEach((m, idx) => {
+                const targetMonthIdx = (appState.currentQuarter - 1) * 3 + idx;
+                
+                const anomalies = appState.surveyLogs.filter(log => 
+                    log.monthIdx === targetMonthIdx && log.year === appState.currentYear && log.time < thresholdMinutes
+                );
+                
+                const anomP = anomalies.filter(a => a.category === 'p').length;
+                const anomV = anomalies.filter(a => a.category === 'v').length;
+                const anomD = anomalies.filter(a => a.category === 'd').length;
+                const anomTotal = anomP + anomV + anomD;
+
+                const rawP = m.p; const rawV = m.v; const rawD = m.d;
+                const rawTotal = rawP + rawV + rawD;
+
+                const cleanP = Math.max(0, rawP - anomP);
+                const cleanV = Math.max(0, rawV - anomV);
+                const cleanD = Math.max(0, rawD - anomD);
+                const cleanTotal = cleanP + cleanV + cleanD;
+
+                const pctRawP = rawTotal ? ((rawP / rawTotal) * 100).toFixed(1) : 0;
+                const pctRawV = rawTotal ? ((rawV / rawTotal) * 100).toFixed(1) : 0;
+                const pctRawD = rawTotal ? ((rawD / rawTotal) * 100).toFixed(1) : 0;
+
+                const pctCleanP = cleanTotal ? ((cleanP / cleanTotal) * 100).toFixed(1) : 0;
+                const pctCleanV = cleanTotal ? ((cleanV / cleanTotal) * 100).toFixed(1) : 0;
+                const pctCleanD = cleanTotal ? ((cleanD / cleanTotal) * 100).toFixed(1) : 0;
+
+                box.innerHTML += `
+                    <div class="nps-month-box" style="padding: 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; font-size:14px;">
+                            ${m.month} ${appState.currentYear}
+                        </h4>
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase;">Data Awal (Total: ${rawTotal})</span>
+                            <div class="nps-input-grid" style="margin-top: 6px; align-items: end;">
+                                <div class="input-group">
+                                    <label style="color:var(--success); line-height:1.3;">Promoter <br><span style="font-size:9px;">(${pctRawP}%)</span></label>
+                                    <input type="number" value="${rawP}" oninput="updateNPSVal(${idx}, 'p', this.value)">
+                                </div>
+                                <div class="input-group">
+                                    <label style="color:var(--warning); line-height:1.3;">Passive <br><span style="font-size:9px;">(${pctRawV}%)</span></label>
+                                    <input type="number" value="${rawV}" oninput="updateNPSVal(${idx}, 'v', this.value)">
+                                </div>
+                                <div class="input-group">
+                                    <label style="color:var(--danger); line-height:1.3;">Detractor <br><span style="font-size:9px;">(${pctRawD}%)</span></label>
+                                    <input type="number" value="${rawD}" oninput="updateNPSVal(${idx}, 'd', this.value)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <div style="font-size: 11px; font-weight: 700; color: var(--danger); margin-bottom: 10px; display: flex; justify-content: space-between;">
+                                <span><i class="fa-solid fa-triangle-exclamation"></i> Terdeteksi ${anomTotal} Anomali</span>
+                                <span style="color:#64748b;">(P: -${anomP} | V: -${anomV} | D: -${anomD})</span>
+                            </div>
+                            <span style="font-size:10px; font-weight:800; color:var(--primary); text-transform:uppercase;">Data Bersih (Total: ${cleanTotal})</span>
+                            <div class="nps-input-grid" style="margin-top: 6px; align-items: end;">
+                                <div class="input-group">
+                                    <label style="color:var(--success); line-height:1.3;">Promoter <br><span style="font-size:9px;">(${pctCleanP}%)</span></label>
+                                    <div style="padding: 6px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 700; text-align: center; color: var(--success);">${cleanP}</div>
+                                </div>
+                                <div class="input-group">
+                                    <label style="color:var(--warning); line-height:1.3;">Passive <br><span style="font-size:9px;">(${pctCleanV}%)</span></label>
+                                    <div style="padding: 6px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 700; text-align: center; color: var(--warning);">${cleanV}</div>
+                                </div>
+                                <div class="input-group">
+                                    <label style="color:var(--danger); line-height:1.3;">Detractor <br><span style="font-size:9px;">(${pctCleanD}%)</span></label>
+                                    <div style="padding: 6px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 700; text-align: center; color: var(--danger);">${cleanD}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            calcNPS();
+        }
+
+        function updateNPSVal(idx, type, val) {
+            appState.nps[idx][type] = parseInt(val) || 0;
+            saveDataToFirebase();
+            calcNPS();
+        }
+
+        function calcNPS() {
+            let totalP = 0, totalV = 0, totalD = 0, grandTotal = 0;
+            const thresholdMinutes = appState.anomalyThresholdSec / 60;
+
+            let stats = appState.nps.map((d, idx) => {
+                const targetMonthIdx = (appState.currentQuarter - 1) * 3 + idx;
+                
+                const anomalies = appState.surveyLogs.filter(log => 
+                    log.monthIdx === targetMonthIdx && log.year === appState.currentYear && log.time < thresholdMinutes
+                );
+                const anomP = anomalies.filter(a => a.category === 'p').length;
+                const anomV = anomalies.filter(a => a.category === 'v').length;
+                const anomD = anomalies.filter(a => a.category === 'd').length;
+
+                const cleanP = Math.max(0, d.p - anomP);
+                const cleanV = Math.max(0, d.v - anomV);
+                const cleanD = Math.max(0, d.d - anomD);
+                const sum = cleanP + cleanV + cleanD;
+
+                totalP += cleanP; totalV += cleanV; totalD += cleanD; grandTotal += sum;
+                return {
+                    p: sum ? (cleanP / sum * 100) : 0,
+                    v: sum ? (cleanV / sum * 100) : 0,
+                    d: sum ? (cleanD / sum * 100) : 0
+                };
+            });
+
+            const avgP = grandTotal ? (totalP / grandTotal * 100) : 0;
+            const avgV = grandTotal ? (totalV / grandTotal * 100) : 0;
+            const avgD = grandTotal ? (totalD / grandTotal * 100) : 0;
+
+            document.getElementById('grand-total-users').innerText = grandTotal;
+            document.getElementById('pie-chart').style.background = `conic-gradient(var(--success) 0% ${avgP}%, var(--warning) ${avgP}% ${avgP + avgV}%, var(--danger) ${avgP + avgV}% 100%)`;
+
+            const qInfo = quarterMonths[appState.currentQuarter];
+            const mths = qInfo.short;
+            
+            document.getElementById('seq-p').innerText = stats.map((s, i) => `${s.p.toFixed(1)}% (${mths[i]})`).join(' → ');
+            document.getElementById('seq-v').innerText = stats.map((s, i) => `${s.v.toFixed(1)}% (${mths[i]})`).join(' → ');
+            document.getElementById('seq-d').innerText = stats.map((s, i) => `${s.d.toFixed(1)}% (${mths[i]})`).join(' → ');
+
+            const svgTexts = document.querySelectorAll('.line-chart-svg text');
+            if (svgTexts.length >= 3) {
+                svgTexts[0].textContent = qInfo.months[0];
+                svgTexts[1].textContent = qInfo.months[1];
+                svgTexts[2].textContent = qInfo.months[2];
+            }
+
+            document.getElementById('slide-nps-title').innerText = `NPS ${qInfo.name} ${appState.currentYear}`;
+            document.getElementById('trend-title').innerText = `Tren Promoter, Passive, Detractors ${qInfo.name} ${appState.currentYear}`;
+
+            const xCoords = [40, 200, 360];
+            const getHeroY = (pct) => 180 - (pct * 1.6); 
+
+            const createPath = (type) => `M ${xCoords.map((x, i) => `${x},${getHeroY(stats[i][type])}`).join(' L ')}`;
+            document.getElementById('path-p').setAttribute('d', createPath('p'));
+            document.getElementById('path-v').setAttribute('d', createPath('v'));
+            document.getElementById('path-d').setAttribute('d', createPath('d'));
+
+            ['p', 'v', 'd'].forEach(type => {
+                document.getElementById(`points-${type}`).innerHTML = xCoords.map((x, i) => `<circle class="data-point" cx="${x}" cy="${getHeroY(stats[i][type])}" />`).join('');
+            });
+        }
+
+        function addPackage() {
+            appState.retention.push({ id: Date.now(), name: "Nama Paket", users: [] });
+            saveDataToFirebase();
+            initRetention();
+        }
+
+        function addUserToPkg(pkgId) {
+            appState.retention.find(p => p.id === pkgId).users.push({ id: Date.now(), name: "Klien", status: "active", isNew: false });
+            saveDataToFirebase();
+            initRetention();
+        }
+
+        function removeUserFromPkg(pkgId, usrId) {
+            const pkg = appState.retention.find(p => p.id === pkgId);
+            pkg.users = pkg.users.filter(u => u.id !== usrId);
+            saveDataToFirebase();
+            initRetention();
+        }
+
+        function updatePkgName(pkgId, text) {
+            appState.retention.find(p => p.id === pkgId).name = text;
+            saveDataToFirebase();
+            calcRetention();
+        }
+
+        function updateUserField(pkgId, usrId, key, value) {
+            appState.retention.find(p => p.id === pkgId).users.find(u => u.id === usrId)[key] = value;
+            saveDataToFirebase();
+            calcRetention();
+        }
+
+        function initRetention() {
+            const box = document.getElementById('retention-inputs-box');
+            box.innerHTML = '';
+            
+            appState.retention.forEach(pkg => {
+                let uRows = pkg.users.map(u => `
+                    <div class="user-builder-row">
+                        <input type="text" value="${u.name}" oninput="updateUserField(${pkg.id}, ${u.id}, 'name', this.value)">
+                        <select onchange="updateUserField(${pkg.id}, ${u.id}, 'status', this.value)">
+                            <option value="active" ${u.status === 'active' ? 'selected' : ''}>Active</option>
+                            <option value="inactive" ${u.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                            <option value="cancel" ${u.status === 'cancel' ? 'selected' : ''}>Cancel</option>
+                        </select>
+                        <label style="font-size:10px; font-weight:700; display:flex; align-items:center; gap:2px; color:var(--primary);">
+                            <input type="checkbox" ${u.isNew ? 'checked' : ''} onchange="updateUserField(${pkg.id}, ${u.id}, 'isNew', this.checked)"> Baru
+                        </label>
+                        <i class="fa-solid fa-circle-minus" style="color:var(--danger); cursor:pointer;" onclick="removeUserFromPkg(${pkg.id}, ${u.id})"></i>
+                    </div>
+                `).join('');
+
+                box.innerHTML += `
+                    <div class="pkg-builder-box">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; gap:10px;">
+                            <input type="text" value="${pkg.name}" oninput="updatePkgName(${pkg.id}, this.value)" style="font-weight:700; font-size:13px; padding:4px; border:1px solid var(--gray-border); border-radius:4px; flex:1;">
+                            <button class="btn btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addUserToPkg(${pkg.id})">+ Klien</button>
+                        </div>
+                        <div>${uRows}</div>
+                    </div>
+                `;
+            });
+            calcRetention();
+        }
+
+        function calcRetention() {
+            const target = document.getElementById('retention-dashboard-grid');
+            target.innerHTML = '';
+            let totalActives = 0, totalClients = 0;
+
+            appState.retention.forEach(pkg => {
+                const actives = pkg.users.filter(u => u.status === 'active');
+                const nonActives = pkg.users.filter(u => u.status !== 'active');
+                totalActives += actives.length; totalClients += pkg.users.length;
+                
+                const cardPct = pkg.users.length ? ((actives.length / pkg.users.length) * 100).toFixed(1) : 0;
+                const isDouble = pkg.users.length > 8 ? 'double-col' : '';
+
+                target.innerHTML += `
+                    <div class="retention-card">
+                        <div class="r-title-row">
+                            <span style="font-weight:700; font-size:14px;">${pkg.name}</span>
+                            <span style="font-size:16px; font-weight:800; color:var(--primary);">${cardPct}%</span>
+                        </div>
+                        <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">ACTIVE USERS (${actives.length})</div>
+                        <ul class="r-list ${isDouble}">
+                            ${actives.map(u => `<li class="r-item"><i class="fa-solid fa-circle" style="color:var(--success); font-size:5px;"></i> <span style="${u.isNew?'color:var(--primary); font-weight:700;':''}">${u.name}</span> ${u.isNew?'<span class="badge-new">NEW</span>':''}</li>`).join('') || '<li style="color:#cbd5e1">Tidak ada</li>'}
+                        </ul>
+                        
+                        <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">INACTIVE / CHURN (${nonActives.length})</div>
+                        <ul class="r-list ${isDouble}">
+                            ${nonActives.map(u => `<li class="r-item"><i class="fa-solid fa-circle" style="color:${u.status==='cancel'?'var(--danger)':'var(--warning)'}; font-size:5px;"></i> <span style="color:var(--text-muted); text-decoration:line-through;">${u.name}</span></li>`).join('') || '<li style="color:#cbd5e1">Tidak ada</li>'}
+                        </ul>
+                    </div>
+                `;
+            });
+
+            document.getElementById('ret-total-score').innerText = totalClients ? ((totalActives / totalClients) * 100).toFixed(1) + '%' : '0%';
+            document.getElementById('ret-total-users').innerText = `Total Teretensi: ${totalActives} / ${totalClients} Klien`;
+        }
+
+        function updateAnomalyThreshold() {
+            const inputVal = parseFloat(document.getElementById('anomaly-threshold-input').value);
+            if (!isNaN(inputVal) && inputVal > 0) {
+                appState.anomalyThresholdSec = inputVal;
+                saveDataToFirebase();
+                alert(`Batas waktu minimal berhasil diperbarui menjadi ${appState.anomalyThresholdSec} Detik.`);
+                initNPS();
+                initAnomaly(); 
+            }
+        }
+
+        function initAnomaly() {
+            const container = document.getElementById('anomaly-list-container');
+            const currentThreshold = appState.anomalyThresholdSec;
+            const thresholdMinutes = currentThreshold / 60;
+            
+            document.getElementById('anomaly-subtitle').innerText = `Daftar pengguna dengan waktu pengisian (Interval Time) di bawah ${currentThreshold} Detik`;
+            
+            const anomalousLogs = appState.surveyLogs.filter(log => log.time < thresholdMinutes);
+
+            if (anomalousLogs.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:40px; background:var(--gray-light); border-radius:8px; border:1px dashed var(--gray-border);">
+                        <i class="fa-solid fa-check-circle" style="font-size:30px; color:var(--success); margin-bottom:10px;"></i>
+                        <h4 style="color:var(--dark);">Semua Data Terlihat Normal</h4>
+                        <p style="font-size:12px; color:var(--text-muted);">Berdasarkan pengaturan (${currentThreshold} detik), tidak ada data anomali yang terdeteksi.</p>
+                    </div>`;
+                return;
+            }
+
+            const grouped = {};
+            anomalousLogs.forEach(log => {
+                const key = `${log.monthIdx}-${log.year}-${log.quarter}`;
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        monthName: monthNames[log.monthIdx],
+                        monthIdx: log.monthIdx,
+                        year: log.year,
+                        quarter: log.quarter,
+                        count: 0
+                    };
+                }
+                grouped[key].count++;
+            });
+
+            const rowsHtml = Object.values(grouped).map((g, i) => `
+                <tr>
+                    <td style="font-weight:700;">${g.monthName}</td>
+                    <td>${g.year}</td>
+                    <td>Q${g.quarter}</td>
+                    <td style="color:var(--danger); font-weight:800;">${g.count} Pengguna</td>
+                    <td><span style="background:#e0f2fe; color:var(--primary); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;">< ${currentThreshold} Detik</span></td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('drop-${i}', event)">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div id="drop-${i}" class="dropdown-content">
+                                <div class="dropdown-item" onclick="openDetailModal(${g.monthIdx}, ${g.year}, ${g.quarter})">
+                                    <i class="fa-solid fa-table-list" style="color:var(--primary);"></i> Lihat Detail
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <div style="margin-bottom:15px; font-size:13px; font-weight:600; color:var(--danger);">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Ditemukan Total ${anomalousLogs.length} Pengguna Terindikasi Anomali
+                </div>
+                <table class="anomaly-table">
+                    <thead>
+                        <tr>
+                            <th>NPS Month</th>
+                            <th>Year</th>
+                            <th>Quarter</th>
+                            <th>Anomaly User Total</th>
+                            <th>Threshold</th>
+                            <th style="width: 80px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `;
+        }
+
+        function openDetailModal(monthIdx, year, quarter) {
+            const thresholdMinutes = appState.anomalyThresholdSec / 60;
+            const filteredLogs = appState.surveyLogs.filter(log => 
+                log.monthIdx === monthIdx && log.year === year && log.quarter === quarter && log.time < thresholdMinutes
+            );
+            filteredLogs.sort((a, b) => a.time - b.time);
+
+            const tbody = document.getElementById('modal-anomaly-tbody');
+            tbody.innerHTML = filteredLogs.map((a, i) => {
+                let detik = (a.time * 60).toFixed(1);
+                return `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td style="font-weight:700; color:var(--primary);">${a.username}</td>
+                    <td style="font-family:'Roboto Mono', monospace;">${a.time} Menit (${detik} Detik)</td>
+                    <td><span style="background:var(--danger); color:#fff; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800;">TERLALU CEPAT</span></td>
+                </tr>
+                `;
+            }).join('');
+
+            document.getElementById('modal-title-text').innerText = `Detail Anomaly - ${monthNames[monthIdx]} ${year} (Q${quarter})`;
+            document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            document.getElementById('anomaly-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('anomaly-modal').classList.remove('active');
+        }
+
+        function initNPSReportTable() {
+            const container = document.getElementById('nps-report-table-container');
+            if (appState.npsReports.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:30px; color:var(--text-muted);">
+                        Belum ada riwayat laporan. Silakan unggah file Excel di tab NPS Tracker terlebih dahulu.
+                    </div>`;
+                return;
+            }
+
+            const rowsHtml = appState.npsReports.map((report, idx) => `
+                <tr>
+                    <td style="font-weight:700;">${report.monthYear}</td>
+                    <td>${report.quarter}</td>
+                    <td>${report.totalUser}</td>
+                    <td style="color:var(--danger); font-weight:700;">${report.totalAnomaly}</td>
+                    <td style="font-weight:700; color:var(--primary);">${report.totalValidUser}</td>
+                    <td style="color:var(--success); font-weight:700;">${report.promoterUser}</td>
+                    <td style="color:var(--warning); font-weight:700;">${report.passiveUser}</td>
+                    <td style="color:var(--danger); font-weight:700;">${report.detractorUser}</td>
+                    <td><span style="background:#e0f2fe; color:var(--primary); padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${report.npsAvg} / 10</span></td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('report-drop-${idx}', event)">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div id="report-drop-${idx}" class="dropdown-content">
+                                <div class="dropdown-item" onclick="openReportDetailModal(${idx})">
+                                    <i class="fa-solid fa-table-list" style="color:var(--primary);"></i> Lihat Detail
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <table class="anomaly-table">
+                    <thead>
+                        <tr>
+                            <th>Month & Year</th>
+                            <th>Quarter</th>
+                            <th>Total User</th>
+                            <th>Total Anomaly</th>
+                            <th>Total Valid User</th>
+                            <th>Promoter User</th>
+                            <th>Passive User</th>
+                            <th>Detractor User</th>
+                            <th>NPS Avg</th>
+                            <th style="width: 80px;">Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `;
+        }
+
+        function openReportDetailModal(idx) {
+            appState.activeReportIdx = idx;
+            appState.pages = { p: 1, v: 1, d: 1 };
+            
+            const report = appState.npsReports[idx];
+            document.getElementById('report-modal-title-text').innerText = `Detail Responden NPS - ${report.monthYear} (${report.quarter})`;
+            
+            renderDetailTable('p');
+            renderDetailTable('v');
+            renderDetailTable('d');
+
+            document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            document.getElementById('report-detail-modal').classList.add('active');
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-detail-modal').classList.remove('active');
+        }
+
+        function renderDetailTable(type) {
+            const report = appState.npsReports[appState.activeReportIdx];
+            if (!report) return;
+
+            const list = report.details[type] || [];
+            const typeLabel = type === 'p' ? 'p' : type === 'v' ? 'v' : 'd';
+            const container = document.getElementById(`table-detail-${typeLabel}-container`);
+            const paginationContainer = document.getElementById(`pagination-${typeLabel}-container`);
+            const badge = document.getElementById(`count-${typeLabel}-badge`);
+            
+            badge.innerText = `${list.length} Klien`;
+
+            if (list.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:15px; font-size:12px; color:var(--text-muted); background:var(--gray-light); border:1px solid var(--gray-border); border-radius:6px;">Tidak ada data klien yang valid pada kategori ini.</div>`;
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            const currentPage = appState.pages[type];
+            const start = (currentPage - 1) * appState.rowsPerPage;
+            const end = start + appState.rowsPerPage;
+            const paginatedItems = list.slice(start, end);
+            const totalPages = Math.ceil(list.length / appState.rowsPerPage);
+
+            const rowsHtml = paginatedItems.map((item, idx) => `
+                <tr>
+                    <td style="color:var(--text-muted);">${start + idx + 1}</td>
+                    <td style="font-weight:700; color:var(--dark);">${item.username}</td>
+                    <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); background:#f1f5f9; padding:2px 6px; border-radius:4px;">${item.companyId}</span></td>
+                    <td style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.saran}">${item.saran}</td>
+                    <td><span style="font-weight:800; color:var(--primary); font-family:'Roboto Mono', monospace;">${item.score}</span></td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <table class="anomaly-table" style="font-size:12px; margin-top:5px;">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">No</th>
+                            <th>Username</th>
+                            <th>Company ID</th>
+                            <th>Saran</th>
+                            <th style="width:80px;">NPS Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `;
+
+            let pagHtml = '';
+            if (totalPages > 1) {
+                pagHtml += `<button class="btn btn-outline" style="padding:2px 8px; font-size:10px;" ${currentPage === 1 ? 'disabled' : ''} onclick="changeReportPage('${type}', ${currentPage - 1})"><i class="fa-solid fa-chevron-left"></i></button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    pagHtml += `<button class="btn ${i === currentPage ? 'btn-primary' : 'btn-outline'}" style="padding:2px 8px; font-size:10px;" onclick="changeReportPage('${type}', ${i})">${i}</button>`;
+                }
+                pagHtml += `<button class="btn btn-outline" style="padding:2px 8px; font-size:10px;" ${currentPage === totalPages ? 'disabled' : ''} onclick="changeReportPage('${type}', ${currentPage + 1})"><i class="fa-solid fa-chevron-right"></i></button>`;
+            }
+            paginationContainer.innerHTML = pagHtml;
+        }
+
+        function changeReportPage(type, targetPage) {
+            appState.pages[type] = targetPage;
+            renderDetailTable(type);
+        }
+
+        function loadSampleData() {
+            // -- Sample Data Last Login Tracker --
+            appState.lastLoginData = [
+                { company_name: "PT. Maju Bersama", company_id: "ID-9001", created_time: "2026-01-10", last_login_in_days: -1 },
+                { company_name: "PT GAUTAMA INDAH", company_id: "PTGAUTAMA301", created_time: "2026-06-22", last_login_in_days: 12 },
+                { company_name: "CV GLOBAL PET INDO", company_id: "CVGLOBAL282", created_time: "2026-06-22", last_login_in_days: 33 },
+                { company_name: "PT DHARMA DWITUNGGAL", company_id: "PTDHARMA292", created_time: "2026-06-22", last_login_in_days: 45 },
+                { company_name: "PT. Sukses Terus", company_id: "ID-9004", created_time: "2026-04-05", last_login_in_days: 3 }
+            ];
+            renderLastLoginDashboard();
+
+            // -- Sample Data Original Prieds Suite --
+            appState.currentQuarter = 2;
+            appState.currentYear = 2026;
+            appState.nps = [
+                { month: 'April', p: 89, v: 75, d: 62 },
+                { month: 'Mei', p: 82, v: 74, d: 71 },
+                { month: 'Juni', p: 79, v: 93, d: 70 }
+            ];
+
+            appState.retention = [
+                {
+                    id: 1, name: "WMS Lite Pack",
+                    users: [
+                        {id:101, name:"Javareef (VT)", status:"active", isNew:false},
+                        {id:102, name:"Deli Surabaya", status:"active", isNew:false}
+                    ]
+                }
+            ];
+
+            appState.surveyLogs = [
+                { username: "cipondoh-admin01", time: -1.70, monthIdx: 3, year: 2026, quarter: 2, category: 'd' },
+                { username: "cipondoh-admin05", time: 0.10, monthIdx: 3, year: 2026, quarter: 2, category: 'p' },
+                { username: "nopriiclean", time: 0.22, monthIdx: 4, year: 2026, quarter: 2, category: 'v' },
+                { username: "user_normal_01", time: 1.5, monthIdx: 3, year: 2026, quarter: 2, category: 'p' }
+            ];
+            
+            appState.npsReports = [
+                {
+                    monthYear: "Januari 2026",
+                    monthIdx: 0,
+                    year: 2026,
+                    quarter: "Q1",
+                    totalUser: 157,
+                    totalAnomaly: 5,
+                    totalValidUser: 152,
+                    promoterUser: 69,
+                    passiveUser: 38,
+                    detractorUser: 45,
+                    npsAvg: "8.4",
+                    details: {
+                        p: Array(12).fill(null).map((_, i) => ({ username: `promoter_user_${i+1}`, companyId: `ID-${100+i}`, saran: "Sistem sangat membantu operational gudang kami!", score: 10 })),
+                        v: Array(7).fill(null).map((_, i) => ({ username: `passive_user_${i+1}`, companyId: `ID-${200+i}`, saran: "Standard saja, performa stabil.", score: 8 })),
+                        d: Array(8).fill(null).map((_, i) => ({ username: `detractor_user_${i+1}`, companyId: `ID-${300+i}`, saran: "Input interval lag di device mobile.", score: 4 }))
+                    }
+                }
+            ];
+
+            initNPSReportTable();
+            initNPS();
+            initRetention();
+            initAnomaly();
+        }
+
+        window.onload = () => {
+            // Jalankan fungsi load dari Firebase saat halaman dibuka
+            loadDataFromFirebase();
+        };
+
+        // --- PPTXGENJS & EXCEL PARSER ORIGINAL CODE (DI-OMIT UNTUK MENGHEMAT TEMPAT KARENA TIDAK ADA PERUBAHAN) ---
+        // (Copy paste fungsi exportPPT() dan processExcel(event) yang lama di sini jika Anda membutuhkannya)
+
+        function exportPPT() {
+            let pptx = new PptxGenJS();
+            const qInfo = quarterMonths[appState.currentQuarter];
+            
+            let s1 = pptx.addSlide();
+            s1.addText("Retention Rate Analysis", { x: 0.5, y: 0.4, fontSize: 32, bold: true, color: "0f172a" });
+            
+            let gActive = 0, gTotal = 0;
+            appState.retention.forEach(p => { gActive += p.users.filter(u=>u.status==='active').length; gTotal += p.users.length; });
+            const finalRetPct = gTotal ? ((gActive / gTotal) * 100).toFixed(1) + '%' : '0%';
+
+            s1.addText(finalRetPct, { x: 7.5, y: 0.4, w: 2, fontSize: 44, bold: true, color: "2563eb", align: "right" });
+            s1.addText(`TOTAL: ${gActive} / ${gTotal} USERS`, { x: 7.5, y: 1.0, w: 2, fontSize: 11, color: "64748b", align: "right" });
+            s1.addShape(pptx.ShapeType.line, { x: 0.5, y: 1.3, w: 9.0, h: 0, line: { color: "cbd5e1", width: 2 } });
+
+            let boxX = 0.5;
+            appState.retention.slice(0, 5).forEach((pkg) => {
+                const actives = pkg.users.filter(u => u.status === 'active');
+                const inactives = pkg.users.filter(u => u.status !== 'active');
+                const pct = pkg.users.length ? ((actives.length / pkg.users.length) * 100).toFixed(1) : 0;
+
+                s1.addText(pkg.name, { x: boxX, y: 1.6, w: 1.7, fontSize: 13, bold: true, color: "0f172a" });
+                s1.addText(`${pct}%`, { x: boxX + 1.2, y: 1.6, w: 0.5, fontSize: 13, bold: true, color: "2563eb", align: "right" });
+
+                let baseListY = 2.3;
+                s1.addText(`ACTIVE USERS (${actives.length})`, { x: boxX, y: 2.0, w: 1.7, fontSize: 8, bold: true, color: "94a3b8" });
+
+                let lastY = baseListY;
+                actives.forEach((u, idx) => {
+                    if (idx >= 20) return;
+                    let internalCol = (idx >= 10) ? 0.85 : 0;
+                    let internalRow = (idx % 10) * 0.18;
+                    s1.addText(`• ${u.name}`, { x: boxX + internalCol, y: baseListY + internalRow, w: 0.85, fontSize: 8, color: u.isNew ? "2563eb" : "475569", bold: u.isNew });
+                    if(baseListY + internalRow > lastY) lastY = baseListY + internalRow;
+                });
+
+                let inactiveY = (actives.length === 0) ? 2.3 : lastY + 0.3;
+                s1.addText(`INACTIVE/CHURN (${inactives.length})`, { x: boxX, y: inactiveY, w: 1.7, fontSize: 8, bold: true, color: "94a3b8" });
+                
+                inactives.forEach((u, idx) => {
+                    if (idx >= 20) return;
+                    let internalCol = (idx >= 10) ? 0.85 : 0;
+                    let internalRow = (idx % 10) * 0.18;
+                    s1.addText(`• ${u.name}`, { x: boxX + internalCol, y: inactiveY + 0.2 + internalRow, w: 0.85, fontSize: 8, color: u.status==='cancel' ? "ef4444" : "94a3b8" });
+                });
+
+                boxX += 1.85;
+            });
+
+            let s2 = pptx.addSlide();
+            s2.addText(`Net Promoter Score (NPS) ${qInfo.name} ${appState.currentYear}`, { x: 0.5, y: 0.5, fontSize: 32, bold: true, color: "0f172a" });
+            s2.addText("Objective 4: Maintain after sales process", { x: 0.5, y: 1.0, fontSize: 13, italic: true, color: "64748b" });
+
+            let sumP = 0, sumV = 0, sumD = 0;
+            appState.nps.forEach(m => { sumP += m.p; sumV += m.v; sumD += m.d; });
+            const totalNPSRes = sumP + sumV + sumD;
+            const finalP = totalNPSRes ? Math.round((sumP / totalNPSRes) * 100) : 0;
+            const finalD = totalNPSRes ? Math.round((sumD / totalNPSRes) * 100) : 0;
+            const finalScore = finalP - finalD;
+
+            s2.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.8, w: 9.0, h: 4.5, fill: { color: "f8fafc" }, line: { color: "e2e8f0", width: 1 } });
+            
+            s2.addText(`NPS SCORE (KUARTAL ${appState.currentQuarter})`, { x: 0.5, y: 2.2, w: 9.0, fontSize: 14, bold: true, color: "64748b", align: "center" });
+            s2.addText(totalNPSRes ? String(finalScore) : "0", { x: 0.5, y: 3.0, w: 9.0, fontSize: 80, bold: true, color: "2563eb", align: "center" });
+            
+            s2.addText(`Promoters: ${finalP}%`, { x: 2.0, y: 4.5, w: 2.0, fontSize: 16, bold: true, color: "16a34a", align: "center" });
+            s2.addText(`Passives: ${totalNPSRes ? Math.round((sumV/totalNPSRes)*100) : 0}%`, { x: 4.0, y: 4.5, w: 2.0, fontSize: 16, bold: true, color: "f59e0b", align: "center" });
+            s2.addText(`Detractors: ${finalD}%`, { x: 6.0, y: 4.5, w: 2.0, fontSize: 16, bold: true, color: "ef4444", align: "center" });
+            
+            s2.addText(`Total Data Responden: ${totalNPSRes} Klien`, { x: 0.5, y: 5.5, w: 9.0, fontSize: 12, italic: true, color: "94a3b8", align: "center" });
+
+            pptx.writeFile({ fileName: `Prieds_Executive_Suite_${qInfo.name}_${appState.currentYear}.pptx` });
+        }
+
+        function processExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const inputVal = parseFloat(document.getElementById('anomaly-threshold-input').value);
+            if (!isNaN(inputVal) && inputVal > 0) {
+                appState.anomalyThresholdSec = inputVal;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                
+                const workbook = XLSX.read(data, {type: 'array', cellDates: true});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                
+                let monthlyData = Array(12).fill(null).map(() => ({ p: 0, v: 0, d: 0 }));
+                let detectedYear = 2026;
+                let detectedQuarter = 2;
+                let hasValidData = false;
+
+                const headerRow = rows[0] || [];
+                let colCompanyId = -1;
+                let colSaran = -1;
+                
+                headerRow.forEach((col, idx) => {
+                    const colStr = String(col || '').trim().toLowerCase();
+                    if (colStr === 'company id') colCompanyId = idx;
+                    if (colStr.includes('berikan saran dan masukan anda')) colSaran = idx;
+                });
+
+                appState.surveyLogs = []; 
+
+                for(let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || row.length === 0) continue;
+                    
+                    let cellDate = row[0]; 
+                    let mIdx = -1; 
+                    let year = 2026;
+
+                    if (cellDate instanceof Date && !isNaN(cellDate.getTime())) {
+                        mIdx = cellDate.getMonth();
+                        year = cellDate.getFullYear();
+                    } else if (typeof cellDate === 'string') {
+                        let datePart = cellDate.trim().split(' ')[0];
+                        let parts = datePart.split(/[\/\-]/);
+                        if (parts.length === 3) {
+                            if (parts[0].length === 4) { 
+                                mIdx = parseInt(parts[1], 10) - 1;
+                                year = parseInt(parts[0], 10);
+                            } else { 
+                                mIdx = parseInt(parts[1], 10) - 1;
+                                year = parseInt(parts[2], 10);
+                            }
+                        }
+                    }
+
+                    if (mIdx < 0 || mIdx > 11) continue;
+
+                    let quarter = Math.ceil((mIdx + 1) / 3);
+
+                    if (!hasValidData) {
+                        detectedYear = year;
+                        detectedQuarter = quarter; 
+                        hasValidData = true;
+                    }
+
+                    let score = -1;
+                    for (let j = row.length - 1; j >= Math.max(0, row.length - 3); j--) {
+                        const cellVal = parseInt(row[j]);
+                        if (!isNaN(cellVal) && cellVal >= 0 && cellVal <= 10) {
+                            score = cellVal;
+                            break;
+                        }
+                    }
+                    
+                    let category = '';
+                    if (score >= 9) {
+                        monthlyData[mIdx].p++;
+                        category = 'p';
+                    } else if (score >= 7 && score <= 8) {
+                        monthlyData[mIdx].v++;
+                        category = 'v';
+                    } else if (score >= 0 && score <= 6) {
+                        monthlyData[mIdx].d++;
+                        category = 'd';
+                    }
+
+                    const intervalTime = parseFloat(row[2]);
+                    const username = row[3] || 'Anonymous';
+                    const companyId = colCompanyId !== -1 ? (row[colCompanyId] || '-') : (row[1] || '-');
+                    const saran = colSaran !== -1 ? (row[colSaran] || '-') : (row[4] || '-');
+                    
+                    if (!isNaN(intervalTime) && username) {
+                        appState.surveyLogs.push({
+                            username: username,
+                            companyId: companyId,
+                            saran: saran,
+                            score: score,
+                            time: intervalTime,
+                            monthIdx: mIdx,
+                            year: year,
+                            quarter: quarter,
+                            category: category
+                        });
+                    }
+                }
+
+                if (!hasValidData) {
+                    alert("Maaf, sistem tidak berhasil membaca kolom tanggal yang valid dari file Excel Anda.");
+                    return;
+                }
+
+                const thresholdMinutes = appState.anomalyThresholdSec / 60;
+                const excelGroups = {};
+
+                appState.surveyLogs.forEach(log => {
+                    const groupKey = `${log.monthIdx}-${log.year}`;
+                    if (!excelGroups[groupKey]) {
+                        excelGroups[groupKey] = {
+                            monthIdx: log.monthIdx,
+                            monthName: monthNames[log.monthIdx],
+                            year: log.year,
+                            quarter: log.quarter,
+                            allUsers: []
+                        };
+                    }
+                    excelGroups[groupKey].allUsers.push(log);
+                });
+
+                Object.values(excelGroups).forEach(group => {
+                    const totalUser = group.allUsers.length;
+                    const anomalies = group.allUsers.filter(u => u.time < thresholdMinutes);
+                    const totalAnomaly = anomalies.length;
+                    const totalValidUser = totalUser - totalAnomaly;
+
+                    const validUsers = group.allUsers.filter(u => u.time >= thresholdMinutes);
+                    const promoterUser = validUsers.filter(u => u.category === 'p').length;
+                    const passiveUser = validUsers.filter(u => u.category === 'v').length;
+                    const detractorUser = validUsers.filter(u => u.category === 'd').length;
+
+                    let sumScore = 0;
+                    validUsers.forEach(u => { sumScore += u.score; });
+                    const npsAvg = totalValidUser ? (sumScore / totalValidUser).toFixed(1) : "0.0";
+
+                    const reportObject = {
+                        monthYear: `${group.monthName} ${group.year}`,
+                        monthIdx: group.monthIdx,
+                        year: group.year,
+                        quarter: `Q${group.quarter}`,
+                        totalUser: totalUser,
+                        totalAnomaly: totalAnomaly,
+                        totalValidUser: totalValidUser,
+                        promoterUser: promoterUser,
+                        passiveUser: passiveUser,
+                        detractorUser: detractorUser,
+                        npsAvg: npsAvg,
+                        details: {
+                            p: validUsers.filter(u => u.category === 'p'),
+                            v: validUsers.filter(u => u.category === 'v'),
+                            d: validUsers.filter(u => u.category === 'd')
+                        }
+                    };
+
+                    const matchIdx = appState.npsReports.findIndex(r => r.monthIdx === group.monthIdx && r.year === group.year);
+                    if (matchIdx >= 0) {
+                        appState.npsReports[matchIdx] = reportObject;
+                    } else {
+                        appState.npsReports.push(reportObject);
+                    }
+                });
+
+                initNPSReportTable();
+
+                appState.currentQuarter = detectedQuarter;
+                appState.currentYear = detectedYear;
+
+                const qInfo = quarterMonths[detectedQuarter];
+                appState.nps = qInfo.months.map((mName, idx) => {
+                    const targetMonthIdx = (detectedQuarter - 1) * 3 + idx;
+                    return {
+                        month: mName,
+                        p: monthlyData[targetMonthIdx].p,
+                        v: monthlyData[targetMonthIdx].v,
+                        d: monthlyData[targetMonthIdx].d
+                    };
+                });
+                
+                saveDataToFirebase();
+
+                initNPS();
+                initAnomaly(); 
+                
+                alert(`🎯 Data NPS berhasil dimuat!\nKuartal: ${qInfo.name} ${detectedYear}\nLaporan Riwayat Arsip NPS Report otomatis terbentuk.`);
+                event.target.value = '';
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        // Tambahkan getDoc di sini
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // TODO: Ganti dengan konfigurasi Firebase milikmu
+        const firebaseConfig = {
+            apiKey: "AIzaSyXXXXXXXXXXXXX",
+            authDomain: "proyek-kamu.firebaseapp.com",
+            projectId: "proyek-kamu",
+            storageBucket: "proyek-kamu.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Samakan penamaannya dengan fungsi save/load di atas!
+        window.firebaseDb = db;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.doc = doc;
+    </script>
+</body>
+</html>
