@@ -2254,22 +2254,16 @@ function openLastLoginReportDetail(idx) {
             const box = document.getElementById('retention-inputs-box');
             box.innerHTML = '';
             
-            // Build opsi dropdown dari Master Company
-            let companyOptions = '<option value="">-- Pilih Company ID --</option>';
+            // Build opsi DATALIST dari Master Company (Untuk fitur Search)
+            let datalistOptions = '';
             if (appState.masterCompany && appState.masterCompany.length > 0) {
                 appState.masterCompany.forEach(c => {
-                    companyOptions += `<option value="${c.companyId}">${c.companyId}</option>`;
+                    datalistOptions += `<option value="${c.companyId}">`;
                 });
             }
 
             appState.retention.forEach(pkg => {
                 let uRows = pkg.users.map(u => {
-                    // Cek opsi yang sedang terpilih untuk user lama (fallback)
-                    let currentOptions = companyOptions;
-                    if (u.name && !currentOptions.includes(`value="${u.name}"`)) {
-                        currentOptions += `<option value="${u.name}">${u.name}</option>`;
-                    }
-                    currentOptions = currentOptions.replace(`value="${u.name}"`, `value="${u.name}" selected`);
 
                     // Tarik info Last Login dari State
                     let llInfo = '<span style="color:#cbd5e1">-</span>';
@@ -2291,9 +2285,11 @@ function openLastLoginReportDetail(idx) {
                     return `
                     <div class="user-builder-row" style="align-items: flex-start; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed var(--gray-border);">
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
-                            <select onchange="updateUserField(${pkg.id}, ${u.id}, 'name', this.value)" style="width:100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: 4px 6px; border: 1px solid var(--gray-border); border-radius: 4px; font-size: 11px;">
-                                ${currentOptions}
-                            </select>
+                            <!-- Dropdown diubah menjadi Input + Datalist agar bisa di-search -->
+                            <input type="text" list="dl-${pkg.id}-${u.id}" value="${u.name}" placeholder="-- Ketik/Pilih Company ID --" onchange="updateUserField(${pkg.id}, ${u.id}, 'name', this.value)" style="width:100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: 4px 6px; border: 1px solid var(--gray-border); border-radius: 4px; font-size: 11px;">
+                            <datalist id="dl-${pkg.id}-${u.id}">
+                                ${datalistOptions}
+                            </datalist>
                             <span style="font-size: 9px; color: var(--text-muted);"><i class="fa-solid fa-clock-rotate-left"></i> Login: ${llInfo}</span>
                         </div>
                         <select onchange="updateUserField(${pkg.id}, ${u.id}, 'status', this.value)" style="padding: 4px; border: 1px solid var(--gray-border); border-radius: 4px; font-size: 11px; height: 26px;">
