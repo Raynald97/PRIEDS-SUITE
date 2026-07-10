@@ -720,6 +720,47 @@
                             <h2>User Company Master</h2>
                             <p>Pusat integrasi data klien (NPS, Last Login, dan Subskripsi Paket)</p>
                         </div>
+
+                        <!-- 👇 MULAI DARI SINI: KODE MINI DASHBOARD BARU 👇 -->
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+                            <!-- Baris 1: Status Perusahaan & User -->
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total Company</h5>
+                                <h2 id="uc-total-company" style="font-size:26px; font-weight:800; color:var(--dark); margin:0;">0</h2>
+                            </div>
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total User NPS</h5>
+                                <h2 id="uc-total-user" style="font-size:26px; font-weight:800; color:var(--dark); margin:0;">0</h2>
+                            </div>
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Active Company</h5>
+                                <h2 id="uc-active-company" style="font-size:26px; font-weight:800; color:var(--success); margin:0;">0</h2>
+                            </div>
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total WMS Lite</h5>
+                                <h2 id="uc-pkg-wmslite" style="font-size:26px; font-weight:800; color:var(--primary); margin:0;">0</h2>
+                            </div>
+
+                            <!-- Baris 2: Detail Paket -->
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total Starterpack</h5>
+                                <h2 id="uc-pkg-starterpack" style="font-size:26px; font-weight:800; color:var(--primary); margin:0;">0</h2>
+                            </div>
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total Premium</h5>
+                                <h2 id="uc-pkg-premium" style="font-size:26px; font-weight:800; color:var(--primary); margin:0;">0</h2>
+                            </div>
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total ERP</h5>
+                                <h2 id="uc-pkg-erp" style="font-size:26px; font-weight:800; color:var(--primary); margin:0;">0</h2>
+                            </div>
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total RFID</h5>
+                                <h2 id="uc-pkg-rfid" style="font-size:26px; font-weight:800; color:var(--primary); margin:0;">0</h2>
+                            </div>
+                        </div>
+                        <!-- 👆 AKHIR KODE MINI DASHBOARD 👆 -->
+
                         <div id="user-company-table-container">
                             <div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada data master perusahaan.</div>
                         </div>
@@ -1091,16 +1132,13 @@
                 // 2. Data dari Last Login
                 const ll = (appState.lastLoginData || []).find(r => (r.company_id || r.id_perusahaan) === cid);
                 let lastLoginLabel = '-';
-                
-                // 👇 TAMBAHAN 1: Menyimpan angka mentah hari (rawDays) untuk dicek nanti
                 let rawDays = -1; 
                 
                 if (ll) {
                     let days = parseInt(ll.last_login_in_days || ll.hari_terakhir_login || ll.last_login || "0");
                     if(isNaN(days)) days = 0;
                     
-                    rawDays = days; // Simpan nilai angka
-                    
+                    rawDays = days;
                     lastLoginLabel = days <= 0 ? "Hari ini" : days + " Hari lalu";
                 }
 
@@ -1112,7 +1150,6 @@
                 }
 
                 return {
-                    // 👇 TAMBAHAN 2: Mendaftarkan rawDays ke dalam objek yang dikembalikan
                     companyId: cid, totalUser: uniqueUsers, package: pkgName,
                     lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: master.subsDate || '-'
                 };
@@ -1121,7 +1158,7 @@
             // Filter Pencarian
             if(state.search) mergedData = mergedData.filter(d => d.companyId.toLowerCase().includes(state.search));
             
-            // 👇 TAMBAHAN 3: BLOK KALKULASI MINI DASHBOARD 👇
+            // KALKULASI MINI DASHBOARD
             let tUser = 0, tActive = 0;
             let cWMS = 0, cStarter = 0, cPrem = 0, cERP = 0, cRFID = 0;
             const limitAtt = appState.lastLoginAttentionLimit || 7;
@@ -1139,7 +1176,7 @@
                 if (p.includes('rfid')) cRFID++;
             });
 
-            // Update DOM Dashboard menggunakan ID elemen
+            // Update DOM Dashboard
             if (document.getElementById('uc-total-company')) {
                 document.getElementById('uc-total-company').innerText = mergedData.length;
                 document.getElementById('uc-total-user').innerText = tUser;
