@@ -493,6 +493,18 @@
                             <option value="25">25 Data</option>
                             <option value="50">50 Data</option>
                         </select>
+
+                        <button class="btn btn-outline" style="width:100%; margin-top:12px; font-weight:700;" onclick="syncAllCompaniesToMaster(false)">
+                            <i class="fa-solid fa-rotate"></i> Sync Ulang Master Data
+                        </button>
+                        <p style="font-size:10.5px; color:var(--text-muted); margin-top:6px; margin-bottom:0;">Menarik Company ID dari seluruh data NPS & Last Login yang sudah tersimpan, dan menambahkan yang belum ada ke Master.</p>
+
+                        <!-- 👇 TOMBOL RESET DITAMBAHKAN DI SINI 👇 -->
+                        <hr style="border:0; border-top:1px solid var(--gray-border); margin:15px 0;">
+                        <button class="btn btn-outline" style="width:100%; border-color:var(--danger); color:var(--danger); font-weight:700;" onclick="resetMasterCompanyData()">
+                            <i class="fa-solid fa-trash-can"></i> Reset Master Data
+                        </button>
+                        <!-- 👆 AKHIR TOMBOL RESET 👆 -->
                     </div>
                 </div>
 
@@ -1037,24 +1049,39 @@
                         const data = snapshot.val();
                         Object.assign(appState, data);
                         
-                       // Fallback Firebase: Firebase otomatis menghapus Array yang kosong. 
-                        // Kita harus memastikan array tidak undefined agar aplikasi tidak error.
+                        // PERBAIKAN BUG FIREBASE: Pastikan data tidak berubah menjadi Object
                         const arrayKeys = ['lastLoginData', 'lastLoginReports', 'retention', 'surveyLogs', 'npsReports', 'masterCompany'];
                         arrayKeys.forEach(key => {
-                            if (!appState[key]) appState[key] = [];
+                            if (!appState[key]) {
+                                appState[key] = [];
+                            } else if (!Array.isArray(appState[key])) {
+                                // Jika Firebase mengubahnya menjadi Object, kembalikan ke Array
+                                appState[key] = Object.values(appState[key]);
+                            }
+                            
+                            // Bersihkan elemen null/undefined yang bisa menyebabkan error
+                            if (Array.isArray(appState[key])) {
+                                appState[key] = appState[key].filter(item => item !== null && item !== undefined);
+                            }
                         });
 
-                        // JARING PENGAMAN: Cegah error .map() pada Paket Retention yang kosong kliennya
                         appState.retention.forEach(pkg => {
                             if (!pkg.users) pkg.users = [];
                         });
+
+                        // 👇 PERBAIKAN BUG FILTER NYANGKUT 👇
+                        if (appState.masterCompanyState) {
+                            appState.masterCompanyState.search = '';
+                        }
+                        const searchInput = document.getElementById('master-company-search');
+                        if (searchInput) searchInput.value = '';
+                        // 👆 AKHIR PERBAIKAN 👆
 
                         console.log("Data berhasil dimuat dari Firebase.");
                     } else {
                         console.log("Belum ada data di Firebase, menggunakan state awal.");
                     }
                     
-                    // Panggil fungsi render setelah data selesai dimuat
                     renderLastLoginDashboard();
                     initNPS();
                     initRetention();
@@ -1064,6 +1091,7 @@
                     initCompanyReportTable();
                     initLastLoginReportTable();
                     initUserCompanyTable();
+                    syncAllCompaniesToMaster(true); 
                 }).catch((error) => {
                     console.error("Gagal menarik data dari Firebase:", error);
                 });
@@ -1073,18 +1101,134 @@
         }
 
         // ================= LOGIC MASTER DATA COMPANY =================
-        function registerCompanyToMaster(companyId) {
-            const safeId = String(companyId).trim(); // Paksa jadi teks dan bersihkan spasi
-            if(!safeId || safeId === '' || safeId === '-') return;
-            if(!appState.masterCompany) appState.masterCompany = [];
+        // Helper: cari nilai Company ID dari sebuah objek row secara fleksibel.
+        // Tidak lagi bergantung hanya pada key persis 'company_id' / 'id_perusahaan',
+        // tapi juga menerima variasi nama kolom lain (CompanyID, Kode Perusahaan, dst).
+        function getCompanyIdField(obj) {
+            if (!obj) return undefined;
+            if (obj.company_id) return obj.company_id;
+            if (obj.id_perusahaan) return obj.id_perusahaan;
             
-            // Cocokkan juga dengan data lama yang mungkin masih berupa angka
-            const exists = appState.masterCompany.find(c => String(c.companyId).trim() === safeId);
+            // Looping semua key dan hapus spasi/underscore untuk pencocokan yang kebal
+            for (const key in obj) {
+                const k = key.toLowerCase().replace(/[\s_]+/g, '');
+                if (k.includes('companyid') || k.includes('idperusahaan') || k.includes('kodeperusahaan') || k === 'company') {
+                    if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') return obj[key];
+                }
+            }
+            return undefined;
+        }
+
+        // Fungsi untuk mengambil Company Name berdasarkan Company ID
+        function getCompanyNameFromMaster(companyId) {
+            if (!companyId || companyId === '') return '-';
+            
+            if (appState.masterCompany && appState.masterCompany.length > 0) {
+                const comp = appState.masterCompany.find(c => String(c.companyId).trim().toLowerCase() === String(companyId).trim().toLowerCase());
+                
+                // Jika ditemukan dan ada Company Name, tampilkan Name. Jika tidak, tetap tampilkan ID.
+                if (comp && comp.companyName && comp.companyName.trim() !== '') {
+                    return comp.companyName;
+                }
+            }
+            return companyId; 
+        }
+
+        function registerCompanyToMaster(companyId) {
+            if (companyId === undefined || companyId === null) return;
+            
+            // 👇 PERBAIKAN: Hapus karakter enter/newline yang tersembunyi di Excel 👇
+            const safeId = String(companyId).replace(/[\r\n]+/g, ' ').trim(); 
+            
+            if(!safeId || safeId === '' || safeId === '-' || safeId.toLowerCase() === 'undefined' || safeId.toLowerCase() === 'null') return;
+            
+            // Jaring pengaman ekstra
+            if(!appState.masterCompany || !Array.isArray(appState.masterCompany)) {
+                appState.masterCompany = [];
+            }
+            
+            // Bersihkan data lama yang mungkin rusak di memori
+            appState.masterCompany = appState.masterCompany.filter(c => c && c.companyId);
+
+            const exists = appState.masterCompany.find(c => String(c.companyId).trim().toLowerCase() === safeId.toLowerCase());
+            
             if(!exists) {
-                appState.masterCompany.push({ companyId: safeId, companyName: safeId, packageId: null, subsDate: '' });
-                saveDataToLocal();
+                appState.masterCompany.push({ 
+                    companyId: safeId, 
+                    companyName: safeId, // Setel default Company Name sama dengan Company ID
+                    packageId: null, 
+                    subsDate: '' 
+                });
             }
         }
+
+        // Backfill/sinkronisasi: menyisir SEMUA data NPS & Last Login yang sudah
+        // tersimpan (termasuk yang diupload sebelum auto-register aktif) dan
+        // mendaftarkan Company ID yang belum ada ke Master Data.
+        // silent=true -> tanpa alert, dipakai untuk pemanggilan otomatis saat load.
+        function syncAllCompaniesToMaster(silent) {
+            const beforeCount = (appState.masterCompany || []).length;
+
+            // 1. Tarik dari data NPS aktif (Sumber utama Company Report)
+            (appState.surveyLogs || []).forEach(log => {
+                if (log) registerCompanyToMaster(log.companyId);
+            });
+
+            // 2. Tarik dari data Last Login
+            (appState.lastLoginData || []).forEach(row => {
+                if (row) registerCompanyToMaster(getCompanyIdField(row));
+            });
+
+            // 👇 3. (TAMBAHAN) Tarik dari Arsip NPS Reports (Riwayat Laporan) 👇
+            (appState.npsReports || []).forEach(report => {
+                if (report && report.details) {
+                    // Cek di kategori Promoter, Passive, dan Detractor
+                    ['p', 'v', 'd'].forEach(cat => {
+                        (report.details[cat] || []).forEach(log => {
+                            if (log) registerCompanyToMaster(log.companyId);
+                        });
+                    });
+                }
+            });
+            // 👆 AKHIR TAMBAHAN 👆
+
+            const afterCount = (appState.masterCompany || []).length;
+            const added = afterCount - beforeCount;
+
+            if (added > 0) {
+                saveDataToLocal();
+            }
+            initUserCompanyTable();
+
+            if (!silent) {
+                alert(added > 0 ? `✅ Berhasil menambahkan ${added} company baru ke Master Data.` : "ℹ️ Semua company sudah tersinkron, tidak ada yang perlu ditambahkan.");
+            }
+            return added;
+        }
+
+        // 👇 FUNGSI RESET MASTER DATA COMPANY DITAMBAHKAN DI SINI 👇
+        function resetMasterCompanyData() {
+            const confirmReset = confirm("⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA Master Data Perusahaan?\n\nTindakan ini tidak dapat dibatalkan dan akan mengosongkan daftar integrasi klien Anda.");
+            
+            if (confirmReset) {
+                // Kosongkan array master company
+                appState.masterCompany = [];
+                
+                // Kembalikan ke halaman pertama pencarian jika sedang aktif
+                if (appState.masterCompanyState) {
+                    appState.masterCompanyState.page = 1; 
+                }
+                
+                // Simpan state kosong ini ke LocalStorage/Firebase
+                saveDataToLocal();
+                
+                // Render ulang tampilan tabel master data
+                initUserCompanyTable(); 
+                
+                alert("✔️ Berhasil! Seluruh Master Data Perusahaan telah di-reset.");
+            }
+        }
+        // 👆 AKHIR FUNGSI RESET MASTER DATA 👆
 
         function filterUserCompany() {
             if(!appState.masterCompanyState) appState.masterCompanyState = { page: 1, limit: 10, search: '' };
@@ -1118,28 +1262,35 @@
 
             // Kalkulasi Data Terintegrasi
             let mergedData = appState.masterCompany.map(master => {
-                // Konversi semua ID ke Teks yang bersih
+                // Safeguard: Jika ada elemen yang rusak/kosong, lewati
+                if (!master || !master.companyId) return null;
+
                 const cid = String(master.companyId).trim();
                 const cName = master.companyName ? String(master.companyName).trim() : cid;
                 
-                // 1. Data dari NPS (Pastikan dicocokkan sebagai Teks)
-                const logs = (appState.surveyLogs || []).filter(l => String(l.companyId).trim() === cid);
+                // 1. Data dari NPS
+                const logs = (appState.surveyLogs || []).filter(l => l && l.companyId && String(l.companyId).trim() === cid);
                 const uniqueUsers = new Set(logs.map(l => String(l.username).trim())).size;
                 
                 let avgNps = '-', lastMonthAvg = '-';
                 if (logs.length > 0) {
-                    avgNps = (logs.reduce((sum, l) => sum + l.score, 0) / logs.length).toFixed(1);
+                    const validLogs = logs.filter(l => typeof l.score === 'number');
+                    if(validLogs.length > 0) {
+                        avgNps = (validLogs.reduce((sum, l) => sum + l.score, 0) / validLogs.length).toFixed(1);
+                    }
                     
                     let maxTime = -1;
                     logs.forEach(l => { const t = l.year * 12 + l.monthIdx; if (t > maxTime) maxTime = t; });
                     if (maxTime !== -1) {
-                        const lastMonthLogs = logs.filter(l => (l.year * 12 + l.monthIdx) === maxTime);
-                        lastMonthAvg = (lastMonthLogs.reduce((sum, l) => sum + l.score, 0) / lastMonthLogs.length).toFixed(1);
+                        const lastMonthLogs = logs.filter(l => (l.year * 12 + l.monthIdx) === maxTime && typeof l.score === 'number');
+                        if (lastMonthLogs.length > 0) {
+                            lastMonthAvg = (lastMonthLogs.reduce((sum, l) => sum + l.score, 0) / lastMonthLogs.length).toFixed(1);
+                        }
                     }
                 }
 
                 // 2. Data dari Last Login
-                const ll = (appState.lastLoginData || []).find(r => String(r.company_id || r.id_perusahaan).trim() === cid);
+                const ll = (appState.lastLoginData || []).find(r => r && String(getCompanyIdField(r) || '').trim() === cid);
                 let lastLoginLabel = '-';
                 let rawDays = -1; 
                 
@@ -1154,7 +1305,7 @@
                 // 3. Package Name (Retention)
                 let pkgName = '-';
                 if (master.packageId && appState.retention) {
-                    const pkg = appState.retention.find(p => p.id === parseInt(master.packageId));
+                    const pkg = appState.retention.find(p => p && p.id === parseInt(master.packageId));
                     if (pkg) pkgName = pkg.name;
                 }
 
@@ -1162,7 +1313,7 @@
                     companyId: cid, companyName: cName, totalUser: uniqueUsers, package: String(pkgName),
                     lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: master.subsDate || '-'
                 };
-            });
+            }).filter(item => item !== null); // <-- Membuang objek yang tidak valid
 
             // Filter Pencarian (Aman dari error Number)
             if(state.search) {
@@ -1842,36 +1993,34 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
-                // Tambahkan cellDates: true di sini
                 const workbook = XLSX.read(data, {type: 'array', cellDates: true});
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 
-                // Tambahkan raw: false dan dateNF di sini
                 const json = XLSX.utils.sheet_to_json(worksheet, { defval: "", raw: false, dateNF: "dd-mm-yyyy" });
                 
-                // Normalisasi Data Header
+                // Normalisasi Data Header & Pembersihan Value
                 appState.lastLoginData = json.map(row => {
                     let newRow = {};
                     for(let key in row) {
-                        const cleanKey = key.trim().toLowerCase().replace(/\s+/g, '_');
-                        newRow[cleanKey] = row[key];
+                        const cleanKey = key.trim().toLowerCase().replace(/[\r\n]+/g, '').replace(/\s+/g, '_');
+                        let val = row[key];
+                        if (typeof val === 'string') val = val.replace(/[\r\n]+/g, ' ').trim();
+                        newRow[cleanKey] = val;
                     }
                     return newRow;
                 });
                 
-                // AUTO-REGISTER KE MASTER DATA
                 appState.lastLoginData.forEach(row => {
-                    const cid = row['company_id'] || row['id_perusahaan'];
+                    const cid = getCompanyIdField(row);
                     registerCompanyToMaster(cid);
                 });
                 
                 saveDataToLocal();
-
                 alert(`🎯 Berhasil memproses ${appState.lastLoginData.length} data Last Login.`);
                 renderLastLoginDashboard();
-                initUserCompanyTable(); // REFRESH TABEL MASTER DATA DI SINI
-                event.target.value = ''; // reset input
+                initUserCompanyTable(); 
+                event.target.value = ''; 
             };
             reader.readAsArrayBuffer(file);
         }
@@ -1971,7 +2120,7 @@
 
             tbody.innerHTML = displayData.map(row => {
                 const companyName = row['company_name'] || row['nama_perusahaan'] || '-';
-                const companyId = row['company_id'] || row['id_perusahaan'] || '-';
+                const companyId = getCompanyIdField(row) || '-';
                 const createdTime = row['created_time'] || row['tanggal_dibuat'] || '-';
                 const daysLabel = row.processed_days <= 0 ? "Hari ini / Baru saja" : row.processed_days + " Hari lalu";
 
@@ -2112,7 +2261,7 @@ function openLastLoginReportDetail(idx) {
             <tr>
                 <td style="color:var(--text-muted);">${i + 1}</td>
                 <td style="font-weight:700; color:var(--dark);">${u.company_name || u.nama_perusahaan || '-'}</td>
-                <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); font-family:'Roboto Mono', monospace;">${u.company_id || u.id_perusahaan || '-'}</span></td>
+                <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); font-family:'Roboto Mono', monospace;">${getCompanyIdField(u) || '-'}</span></td>
                 <td><span style="font-weight:800; color:var(--dark);">${u.processed_days <= 0 ? 'Hari ini' : u.processed_days + ' Hari lalu'}</span></td>
             </tr>
         `).join('');
@@ -2384,22 +2533,22 @@ function openLastLoginReportDetail(idx) {
             const box = document.getElementById('retention-inputs-box');
             box.innerHTML = '';
             
-            // Build opsi DATALIST dari Master Company (Untuk fitur Search)
+            // Build opsi DATALIST dari Master Company 
             let datalistOptions = '';
             if (appState.masterCompany && appState.masterCompany.length > 0) {
                 appState.masterCompany.forEach(c => {
-                    datalistOptions += `<option value="${c.companyId}">`;
+                    // Tambahkan Company Name sebagai hint di dropdown pencarian
+                    datalistOptions += `<option value="${c.companyId}">${c.companyName !== c.companyId ? c.companyName : ''}</option>`;
                 });
             }
 
             appState.retention.forEach(pkg => {
-                // JARING PENGAMAN: Jika pkg.users undefined, gunakan array kosong []
                 let uRows = (pkg.users || []).map(u => {
 
                     // Tarik info Last Login dari State
                     let llInfo = '<span style="color:#cbd5e1">-</span>';
                     if (u.name && appState.lastLoginData) {
-                        const ll = appState.lastLoginData.find(r => (r.company_id || r.id_perusahaan) === u.name);
+                        const ll = appState.lastLoginData.find(r => String(getCompanyIdField(r) || '') === String(u.name));
                         if (ll) {
                             let days = parseInt(ll.last_login_in_days || ll.hari_terakhir_login || ll.last_login || "0");
                             if (isNaN(days)) days = 0;
@@ -2413,14 +2562,18 @@ function openLastLoginReportDetail(idx) {
                         }
                     }
 
+                    // 👇 TAMBAH INDIKATOR COMPANY NAME DI BAWAH INPUT 👇
+                    let dName = getCompanyNameFromMaster(u.name);
+                    let aliasHint = (dName && dName !== u.name && dName !== '-') ? `<span style="font-size:10px; font-weight:700; color:var(--primary); display:block; margin-top:2px;">${dName}</span>` : '';
+
                     return `
                     <div class="user-builder-row" style="align-items: flex-start; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed var(--gray-border);">
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
-                            <!-- Dropdown diubah menjadi Input + Datalist agar bisa di-search -->
                             <input type="text" list="dl-${pkg.id}-${u.id}" value="${u.name}" placeholder="-- Ketik/Pilih Company ID --" onchange="updateUserField(${pkg.id}, ${u.id}, 'name', this.value)" style="width:100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: 4px 6px; border: 1px solid var(--gray-border); border-radius: 4px; font-size: 11px;">
                             <datalist id="dl-${pkg.id}-${u.id}">
                                 ${datalistOptions}
                             </datalist>
+                            ${aliasHint}
                             <span style="font-size: 9px; color: var(--text-muted);"><i class="fa-solid fa-clock-rotate-left"></i> Login: ${llInfo}</span>
                         </div>
                         <select onchange="updateUserField(${pkg.id}, ${u.id}, 'status', this.value)" style="padding: 4px; border: 1px solid var(--gray-border); border-radius: 4px; font-size: 11px; height: 26px;">
@@ -2439,7 +2592,7 @@ function openLastLoginReportDetail(idx) {
                         <i class="fa-solid fa-circle-minus" style="color:var(--danger); cursor:pointer; margin-left:4px; margin-top: 6px;" onclick="removeUserFromPkg(${pkg.id}, ${u.id})"></i>
                     </div>
                 `}).join('');
-
+                
                 box.innerHTML += `
                     <div class="pkg-builder-box">
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px; gap:10px;">
@@ -2472,6 +2625,7 @@ function openLastLoginReportDetail(idx) {
                 const cardPct = visibleUsers.length ? ((actives.length / visibleUsers.length) * 100).toFixed(1) : 0;
                 const isDouble = visibleUsers.length > 8 ? 'double-col' : '';
 
+                // 👇 PERUBAHAN ADA PADA getCompanyNameFromMaster(u.name) 👇
                 target.innerHTML += `
                     <div class="retention-card">
                         <div class="r-title-row">
@@ -2480,12 +2634,12 @@ function openLastLoginReportDetail(idx) {
                         </div>
                         <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">ACTIVE USERS (${actives.length})</div>
                         <ul class="r-list ${isDouble}">
-                            ${actives.map(u => `<li class="r-item"><i class="fa-solid fa-circle" style="color:var(--success); font-size:5px;"></i> <span style="${u.isNew?'color:var(--primary); font-weight:700;':''}">${u.name}</span> ${u.isNew?'<span class="badge-new">NEW</span>':''}</li>`).join('') || '<li style="color:#cbd5e1">Tidak ada</li>'}
+                            ${actives.map(u => `<li class="r-item"><i class="fa-solid fa-circle" style="color:var(--success); font-size:5px;"></i> <span style="${u.isNew?'color:var(--primary); font-weight:700;':''}">${getCompanyNameFromMaster(u.name)}</span> ${u.isNew?'<span class="badge-new">NEW</span>':''}</li>`).join('') || '<li style="color:#cbd5e1">Tidak ada</li>'}
                         </ul>
                         
                         <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">INACTIVE / CHURN (${nonActives.length})</div>
                         <ul class="r-list ${isDouble}">
-                            ${nonActives.map(u => `<li class="r-item"><i class="fa-solid fa-circle" style="color:${u.status==='cancel'?'var(--danger)':'var(--warning)'}; font-size:5px;"></i> <span style="color:var(--text-muted); text-decoration:line-through;">${u.name}</span></li>`).join('') || '<li style="color:#cbd5e1">Tidak ada</li>'}
+                            ${nonActives.map(u => `<li class="r-item"><i class="fa-solid fa-circle" style="color:${u.status==='cancel'?'var(--danger)':'var(--warning)'}; font-size:5px;"></i> <span style="color:var(--text-muted); text-decoration:line-through;">${getCompanyNameFromMaster(u.name)}</span></li>`).join('') || '<li style="color:#cbd5e1">Tidak ada</li>'}
                         </ul>
                     </div>
                 `;
@@ -3088,37 +3242,30 @@ function openLastLoginReportDetail(idx) {
                 }
 
                 if (headerRowIdx === -1) {
-                    alert("⚠️ Format file tidak dikenali. Pastikan terdapat kolom bertuliskan 'Start Time' atau 'Created Time'.");
+                    alert("⚠️ Format file tidak dikenali. Pastikan terdapat kolom bertuliskan 'Start Time'.");
                     return;
                 }
 
                 const headers = rows[headerRowIdx];
                 
-                // 2. Deteksi indeks kolom secara dinamis dan spesifik
-                let colStartTime = headers.findIndex(h => h && h.toString().toLowerCase().includes('start time'));
-                let colInterval = headers.findIndex(h => h && h.toString().toLowerCase().includes('interval time'));
-                let colUsername = headers.findIndex(h => h && h.toString().toLowerCase().includes('username'));
-                let colCompanyId = headers.findIndex(h => h && h.toString().toLowerCase().includes('company id'));
-                let colSaran = headers.findIndex(h => h && h.toString().toLowerCase().includes('saran'));
-                
-                // PENCARIAN ABSOLUT KOLOM SKOR REKOMENDASI NPS
-                let colScore = headers.findIndex(h => {
-                    if (!h) return false;
-                    const hStr = h.toString().toLowerCase();
-                    return hStr.includes('merekomendasikan') || hStr.includes('rekomendasi kami ke kolega');
-                });
+                // 👇 PERBAIKAN: Deteksi Kolom Dinamis (Meskipun Bergeser) 👇
+                let colStartTime = headers.findIndex(h => h && /time|waktu/i.test(h.toString()));
+                let colInterval = headers.findIndex(h => h && /interval/i.test(h.toString()));
+                let colUsername = headers.findIndex(h => h && /username/i.test(h.toString()));
+                let colCompanyId = headers.findIndex(h => h && /company/i.test(h.toString()));
+                let colSaran = headers.findIndex(h => h && /saran|masukan/i.test(h.toString()));
+                let colScore = headers.findIndex(h => h && /merekomendasikan/i.test(h.toString()));
 
-                // Fallback aman jika pencarian kata kunci meleset
+                // Fallback aman jika kolom tidak ditemukan sama sekali
                 if (colStartTime === -1) colStartTime = 0;
                 if (colInterval === -1) colInterval = 3; 
                 if (colUsername === -1) colUsername = 4;
                 if (colCompanyId === -1) colCompanyId = 5;
                 if (colSaran === -1) colSaran = 6;
-                if (colScore === -1) colScore = headers.length - 1; // Jika gagal, ambil kolom paling kanan
+                if (colScore === -1) colScore = headers.length - 1; 
 
                 let detectedYear = new Date().getFullYear();
                 let hasValidData = false;
-
                 let newLogs = [];
 
                 // 3. Looping data setelah baris Header asli ditemukan
@@ -3130,15 +3277,13 @@ function openLastLoginReportDetail(idx) {
                     let mIdx = -1;
                     let year = detectedYear;
 
-                    // Mengurai Tanggal dari Excel secara aman
                     if (rawDate instanceof Date && !isNaN(rawDate)) {
                         mIdx = rawDate.getMonth();
                         year = rawDate.getFullYear();
                     } else {
-                        // Jika format string (Contoh: "5/7/2026 17.35.53")
                         const parts = rawDate.toString().split(' ')[0].split('/');
                         if (parts.length >= 3) {
-                            mIdx = parseInt(parts[1]) - 1; // Ambil angka tengah (bulan)
+                            mIdx = parseInt(parts[1]) - 1; 
                             year = parseInt(parts[2]);
                         }
                     }
@@ -3148,10 +3293,8 @@ function openLastLoginReportDetail(idx) {
                     detectedYear = year;
                     hasValidData = true;
 
-                    // Tentukan Kuartal otomatis
                     const quarter = Math.floor(mIdx / 3) + 1;
 
-                    // Ambil skor NPS, bersihkan spasi kosong, dan ubah menjadi Angka bulat dasar 10 secara mutlak
                     let rawScore = row[colScore];
                     if (rawScore !== undefined && rawScore !== null) {
                         rawScore = rawScore.toString().trim();
@@ -3167,7 +3310,11 @@ function openLastLoginReportDetail(idx) {
 
                     const intervalTime = parseFloat(row[colInterval]) || 0;
                     const username = String(row[colUsername] || 'Anonymous').trim();
-                    const companyId = String(row[colCompanyId] || '-').trim();
+                    
+                    // 👇 PERBAIKAN: Hapus karakter enter di sel Excel sebelum masuk sistem 👇
+                    let companyId = String(row[colCompanyId] || '-').trim();
+                    companyId = companyId.replace(/[\r\n]+/g, ' '); 
+                    
                     const saran = String(row[colSaran] || '-').trim();
 
                     newLogs.push({
@@ -3183,8 +3330,8 @@ function openLastLoginReportDetail(idx) {
                     });
                 }
 
-                if (!hasValidData) {
-                    alert("⚠️ Sistem tidak berhasil mendeteksi baris tanggal/bulan dari file ini.");
+                if (!hasValidData || newLogs.length === 0) {
+                    alert("⚠️ Sistem gagal mengekstrak data. Pastikan format kolom NPS sudah benar dan memiliki nilai angka 0-10.");
                     return;
                 }
 
