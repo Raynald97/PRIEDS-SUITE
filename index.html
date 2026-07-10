@@ -1539,10 +1539,7 @@
             const cid = document.getElementById('edit-company-id').value;
             const cName = document.getElementById('edit-company-name').value; 
             const cat = document.getElementById('edit-company-category').value; 
-            
-            // 👇 Ambil nilai Implementor 👇
             const impl = document.getElementById('edit-company-implementor').value; 
-            
             const pkgId = document.getElementById('edit-company-package').value;
             const sDate = document.getElementById('edit-company-subsdate').value;
             
@@ -1550,15 +1547,54 @@
             if(comp) {
                 comp.companyName = cName.trim() !== '' ? cName : cid;
                 comp.category = cat.trim(); 
-                
-                // 👇 Simpan nilai Implementor 👇
                 comp.implementor = impl.trim(); 
 
-                comp.packageId = pkgId ? parseInt(pkgId) : null;
+                const newPkgId = pkgId ? parseInt(pkgId) : null;
+                comp.packageId = newPkgId;
                 comp.subsDate = sDate;
                 
+                // 👇 LOGIKA SINKRONISASI 2 ARAH KE RETENTION TRACKER 👇
+                if (appState.retention) {
+                    let existingUserObj = null;
+
+                    // 1. Cari dan cabut user dari paket lama (simpan state status/isNew-nya agar tidak hilang)
+                    appState.retention.forEach(pkg => {
+                        // Perhatikan: di retention tracker, 'name' adalah tempat menyimpan Company ID
+                        const userIndex = pkg.users.findIndex(u => u.name === cid);
+                        if (userIndex !== -1) {
+                            existingUserObj = pkg.users[userIndex]; // Simpan data riwayatnya
+                            pkg.users.splice(userIndex, 1); // Hapus dari paket lama
+                        }
+                    });
+
+                    // 2. Masukkan ke paket yang baru dipilih
+                    if (newPkgId !== null) {
+                        const targetPkg = appState.retention.find(p => p.id === newPkgId);
+                        if (targetPkg) {
+                            if (existingUserObj) {
+                                // Jika sebelumnya sudah ada, masukkan kembali dengan status lamanya
+                                targetPkg.users.push(existingUserObj);
+                            } else {
+                                // Jika ini klien baru di Retention Tracker, buat default object-nya
+                                targetPkg.users.push({
+                                    id: Date.now(),
+                                    name: cid,
+                                    status: "active",
+                                    isNew: false,
+                                    isHidden: false
+                                });
+                            }
+                        }
+                    }
+                }
+                // 👆 AKHIR LOGIKA SINKRONISASI 👆
+
                 saveDataToLocal();
                 initUserCompanyTable();
+                
+                // Panggil initRetention agar UI Retention Tracker langsung ter-update di balik layar
+                if (typeof initRetention === "function") initRetention(); 
+                
                 closeEditCompanyModal();
                 alert('✔️ Data untuk Company ID ' + cid + ' berhasil diperbarui.');
             }
