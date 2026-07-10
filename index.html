@@ -513,11 +513,13 @@
                         </button>
                         <p style="font-size:10.5px; color:var(--text-muted); margin-top:6px; margin-bottom:0;">Menarik Company ID dari seluruh data NPS & Last Login yang sudah tersimpan, dan menambahkan yang belum ada ke Master.</p>
 
-                        <!-- 👇 TOMBOL RESET DITAMBAHKAN DI SINI 👇 -->
+                        <!-- 👇 TOMBOL RESET DINONAKTIFKAN SEMENTARA 👇 -->
+                        <!--
                         <hr style="border:0; border-top:1px solid var(--gray-border); margin:15px 0;">
                         <button class="btn btn-outline" style="width:100%; border-color:var(--danger); color:var(--danger); font-weight:700;" onclick="resetMasterCompanyData()">
                             <i class="fa-solid fa-trash-can"></i> Reset Master Data
                         </button>
+                        -->
                         <!-- 👆 AKHIR TOMBOL RESET 👆 -->
                     </div>
                 </div>
@@ -963,6 +965,12 @@
                 <datalist id="edit-category-list"></datalist>
                 <!-- 👆 AKHIR TAMBAHAN 👆 -->
 
+                <!-- 👇 TAMBAHAN INPUT IMPLEMENTOR 👇 -->
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Implementor</label>
+                <input type="text" id="edit-company-implementor" list="edit-implementor-list" placeholder="Ketik atau pilih implementor..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+                <datalist id="edit-implementor-list"></datalist>
+                <!-- 👆 AKHIR TAMBAHAN 👆 -->
+
                 <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Pilih Paket (Retention Tracker)</label>
                 <select id="edit-company-package" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
                     <!-- Diisi via JS -->
@@ -1316,7 +1324,7 @@
 
             const state = appState.masterCompanyState || { page: 1, limit: 10, search: '', category: 'all', sortLogin: 'none' };
 
-            // 1. Ambil daftar Kategori Unik untuk dropdown filter
+            // Ambil daftar Kategori Unik untuk dropdown filter
             const uniqueCategories = [...new Set(appState.masterCompany.map(c => c.category).filter(c => c && c.trim() !== ''))];
             const catSelect = document.getElementById('master-company-category');
             if (catSelect) {
@@ -1333,6 +1341,9 @@
                 const cid = String(master.companyId).trim();
                 const cName = master.companyName ? String(master.companyName).trim() : cid;
                 const category = master.category && master.category.trim() !== '' ? master.category : '-';
+                
+                // 👇 Ambil nilai Implementor 👇
+                const implementor = master.implementor && master.implementor.trim() !== '' ? master.implementor : '-';
 
                 const logs = (appState.surveyLogs || []).filter(l => l && l.companyId && String(l.companyId).trim() === cid);
                 const uniqueUsers = new Set(logs.map(l => String(l.username).trim())).size;
@@ -1371,12 +1382,12 @@
                 const useDateLabel = calculateUseDate(subsDateStr, rawDays);
 
                 return {
-                    companyId: cid, companyName: cName, category: category, totalUser: uniqueUsers, package: String(pkgName),
+                    companyId: cid, companyName: cName, category: category, implementor: implementor, totalUser: uniqueUsers, package: String(pkgName),
                     lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: subsDateStr, useDate: useDateLabel
                 };
             }).filter(item => item !== null);
 
-            // 2. Filter Search
+            // Filter Search
             if(state.search) {
                 const keyword = state.search.toLowerCase();
                 mergedData = mergedData.filter(d => 
@@ -1385,12 +1396,12 @@
                 );
             }
 
-            // 3. Filter Kategori
+            // Filter Kategori
             if(state.category && state.category !== 'all') {
                 mergedData = mergedData.filter(d => d.category === state.category);
             }
 
-            // 4. Sorting Last Login
+            // Sorting Last Login
             if(state.sortLogin === 'asc') {
                 mergedData.sort((a, b) => a.rawDays - b.rawDays); 
             } else if (state.sortLogin === 'desc') {
@@ -1428,12 +1439,13 @@
             const startIndex = (currentPage - 1) * state.limit;
             const paginatedData = mergedData.slice(startIndex, startIndex + state.limit);
             
+            // 👇 TAMBAHKAN KOLOM IMPLEMENTOR DI BARIS TABEL 👇
             const rowsHtml = paginatedData.map((d, idx) => `
                 <tr>
                     <td style="font-weight:700; color:var(--dark); font-family:'Roboto Mono', monospace;">${d.companyId}</td>
                     <td style="font-weight:700; color:var(--primary);">${d.companyName}</td>
                     <td><span style="font-size:11px; font-weight:700; color:var(--text-muted); background:#f8fafc; padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.category}</span></td>
-                    <td><span style="font-weight:800; color:var(--dark);">${d.totalUser}</span></td>
+                    <td><span style="font-size:11px; font-weight:700; color:var(--dark); background:#f1f5f9; padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.implementor}</span></td>
                     <td><span style="font-size:11px; background:var(--gray-light); padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.package}</span></td>
                     <td><span style="font-weight:700;">${d.lastLogin}</span></td>
                     <td><span style="${getScoreBadgeStyle(d.avgNps)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${d.avgNps}</span></td>
@@ -1461,7 +1473,7 @@
                             <th>Company ID</th>
                             <th>Company Name</th>
                             <th>Category</th>
-                            <th>User NPS</th>
+                            <th>Implementor</th>
                             <th>Package</th>
                             <th>Last Login</th>
                             <th>Avg Score</th>
@@ -1493,10 +1505,19 @@
             const comp = appState.masterCompany.find(c => c.companyId === companyId);
             document.getElementById('edit-company-name').value = comp.companyName || comp.companyId;
             
-            // 👇 Set Kategori dan Isi Auto-complete (Datalist) 👇
+            // Set Kategori 
             document.getElementById('edit-company-category').value = comp.category || '';
             const uniqueCategories = [...new Set(appState.masterCompany.map(c => c.category).filter(c => c && c.trim() !== ''))];
             document.getElementById('edit-category-list').innerHTML = uniqueCategories.map(c => `<option value="${c}">`).join('');
+            
+            // 👇 Set Implementor (Gabungkan opsi statis dan dinamis) 👇
+            document.getElementById('edit-company-implementor').value = comp.implementor || '';
+            
+            const defaultImplementors = ['Prieds', 'Synectic', 'Vulcan', 'SAC'];
+            const existingImplementors = appState.masterCompany.map(c => c.implementor).filter(c => c && c.trim() !== '');
+            const allImplementors = [...new Set([...defaultImplementors, ...existingImplementors])];
+            
+            document.getElementById('edit-implementor-list').innerHTML = allImplementors.map(i => `<option value="${i}">`).join('');
             // 👆 AKHIR TAMBAHAN 👆
 
             let selectHtml = '<option value="">-- Pilih Paket --</option>';
@@ -1517,14 +1538,22 @@
         function saveCompanyEdit() {
             const cid = document.getElementById('edit-company-id').value;
             const cName = document.getElementById('edit-company-name').value; 
-            const cat = document.getElementById('edit-company-category').value; // Ambil Value Kategori
+            const cat = document.getElementById('edit-company-category').value; 
+            
+            // 👇 Ambil nilai Implementor 👇
+            const impl = document.getElementById('edit-company-implementor').value; 
+            
             const pkgId = document.getElementById('edit-company-package').value;
             const sDate = document.getElementById('edit-company-subsdate').value;
             
             const comp = appState.masterCompany.find(c => c.companyId === cid);
             if(comp) {
                 comp.companyName = cName.trim() !== '' ? cName : cid;
-                comp.category = cat.trim(); // Simpan Kategori
+                comp.category = cat.trim(); 
+                
+                // 👇 Simpan nilai Implementor 👇
+                comp.implementor = impl.trim(); 
+
                 comp.packageId = pkgId ? parseInt(pkgId) : null;
                 comp.subsDate = sDate;
                 
