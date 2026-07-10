@@ -1074,14 +1074,12 @@
 
         // ================= LOGIC MASTER DATA COMPANY =================
         function registerCompanyToMaster(companyId) {
-            // 👇 TAMBAHAN: Paksa tipe data menjadi String (Teks) agar tidak error saat di-trim
-            const safeId = String(companyId); 
-
-            // Gunakan safeId untuk pengecekan
-            if(!safeId || safeId.trim() === '' || safeId === '-') return;
+            const safeId = String(companyId).trim(); // Paksa jadi teks dan bersihkan spasi
+            if(!safeId || safeId === '' || safeId === '-') return;
             if(!appState.masterCompany) appState.masterCompany = [];
             
-            const exists = appState.masterCompany.find(c => c.companyId === safeId);
+            // Cocokkan juga dengan data lama yang mungkin masih berupa angka
+            const exists = appState.masterCompany.find(c => String(c.companyId).trim() === safeId);
             if(!exists) {
                 appState.masterCompany.push({ companyId: safeId, companyName: safeId, packageId: null, subsDate: '' });
                 saveDataToLocal();
@@ -1120,11 +1118,13 @@
 
             // Kalkulasi Data Terintegrasi
             let mergedData = appState.masterCompany.map(master => {
-                const cid = master.companyId;
+                // Konversi semua ID ke Teks yang bersih
+                const cid = String(master.companyId).trim();
+                const cName = master.companyName ? String(master.companyName).trim() : cid;
                 
-                // 1. Data dari NPS
-                const logs = (appState.surveyLogs || []).filter(l => l.companyId === cid);
-                const uniqueUsers = new Set(logs.map(l => l.username)).size;
+                // 1. Data dari NPS (Pastikan dicocokkan sebagai Teks)
+                const logs = (appState.surveyLogs || []).filter(l => String(l.companyId).trim() === cid);
+                const uniqueUsers = new Set(logs.map(l => String(l.username).trim())).size;
                 
                 let avgNps = '-', lastMonthAvg = '-';
                 if (logs.length > 0) {
@@ -1139,7 +1139,7 @@
                 }
 
                 // 2. Data dari Last Login
-                const ll = (appState.lastLoginData || []).find(r => (r.company_id || r.id_perusahaan) === cid);
+                const ll = (appState.lastLoginData || []).find(r => String(r.company_id || r.id_perusahaan).trim() === cid);
                 let lastLoginLabel = '-';
                 let rawDays = -1; 
                 
@@ -1158,16 +1158,20 @@
                     if (pkg) pkgName = pkg.name;
                 }
 
-                const cName = master.companyName || cid;
-
                 return {
-                    companyId: cid, companyName: cName, totalUser: uniqueUsers, package: pkgName,
+                    companyId: cid, companyName: cName, totalUser: uniqueUsers, package: String(pkgName),
                     lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: master.subsDate || '-'
                 };
             });
 
-            // Filter Pencarian
-            if(state.search) mergedData = mergedData.filter(d => d.companyId.toLowerCase().includes(state.search));
+            // Filter Pencarian (Aman dari error Number)
+            if(state.search) {
+                const keyword = state.search.toLowerCase();
+                mergedData = mergedData.filter(d => 
+                    String(d.companyId).toLowerCase().includes(keyword) || 
+                    String(d.companyName).toLowerCase().includes(keyword)
+                );
+            }
             
             // KALKULASI MINI DASHBOARD
             let tUser = 0, tActive = 0;
@@ -1209,7 +1213,6 @@
             const rowsHtml = paginatedData.map((d, idx) => `
                 <tr>
                     <td style="font-weight:700; color:var(--dark); font-family:'Roboto Mono', monospace;">${d.companyId}</td>
-                    <!-- 👇 TAMBAHAN KOLOM NAMA PERUSAHAAN 👇 -->
                     <td style="font-weight:700; color:var(--primary);">${d.companyName}</td>
                     <td><span style="font-weight:800; color:var(--dark);">${d.totalUser}</span></td>
                     <td><span style="font-size:11px; background:var(--gray-light); padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.package}</span></td>
@@ -1237,7 +1240,7 @@
                     <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
                         <tr>
                             <th>Company ID</th>
-                            <th>Company Name</th> <!-- 👈 HEADER BARU -->
+                            <th>Company Name</th>
                             <th>Total User NPS</th>
                             <th>Package</th>
                             <th>Last Login</th>
@@ -1247,7 +1250,6 @@
                             <th style="width: 70px;">Action</th>
                         </tr>
                     </thead>
-                    <!-- 👇 Colspan diubah dari 8 menjadi 9 👇 -->
                     <tbody>${rowsHtml || '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data.</td></tr>'}</tbody>
                 </table>
             `;
@@ -3164,9 +3166,9 @@ function openLastLoginReportDetail(idx) {
                     else category = 'd';
 
                     const intervalTime = parseFloat(row[colInterval]) || 0;
-                    const username = row[colUsername] || 'Anonymous';
-                    const companyId = row[colCompanyId] || '-';
-                    const saran = row[colSaran] || '-';
+                    const username = String(row[colUsername] || 'Anonymous').trim();
+                    const companyId = String(row[colCompanyId] || '-').trim();
+                    const saran = String(row[colSaran] || '-').trim();
 
                     newLogs.push({
                         username: username,
