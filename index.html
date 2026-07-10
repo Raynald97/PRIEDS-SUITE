@@ -990,11 +990,16 @@
                         const data = snapshot.val();
                         Object.assign(appState, data);
                         
-                        // Fallback Firebase: Firebase otomatis menghapus Array yang kosong. 
+                       // Fallback Firebase: Firebase otomatis menghapus Array yang kosong. 
                         // Kita harus memastikan array tidak undefined agar aplikasi tidak error.
                         const arrayKeys = ['lastLoginData', 'lastLoginReports', 'retention', 'surveyLogs', 'npsReports', 'masterCompany'];
                         arrayKeys.forEach(key => {
                             if (!appState[key]) appState[key] = [];
+                        });
+
+                        // JARING PENGAMAN: Cegah error .map() pada Paket Retention yang kosong kliennya
+                        appState.retention.forEach(pkg => {
+                            if (!pkg.users) pkg.users = [];
                         });
 
                         console.log("Data berhasil dimuat dari Firebase.");
@@ -2263,7 +2268,8 @@ function openLastLoginReportDetail(idx) {
             }
 
             appState.retention.forEach(pkg => {
-                let uRows = pkg.users.map(u => {
+                // JARING PENGAMAN: Jika pkg.users undefined, gunakan array kosong []
+                let uRows = (pkg.users || []).map(u => {
 
                     // Tarik info Last Login dari State
                     let llInfo = '<span style="color:#cbd5e1">-</span>';
