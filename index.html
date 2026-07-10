@@ -2288,6 +2288,30 @@ function openLastLoginReportDetail(idx) {
             initRetention();
         }
 
+        // 👇 FUNGSI BARU UNTUK HAPUS PAKET BESERTA POP-UP VERIFIKASI 👇
+        function deletePackage(pkgId) {
+            // Memunculkan Pop-Up Verifikasi (Yes/No)
+            const confirmDelete = confirm("⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus paket ini beserta seluruh klien di dalamnya?");
+            
+            // Jika user menekan 'Yes' / 'OK'
+            if (confirmDelete) {
+                // Lepaskan ikatan paket dari klien di Master Data
+                if (appState.masterCompany) {
+                    appState.masterCompany.forEach(comp => {
+                        if (comp.packageId === pkgId) comp.packageId = null;
+                    });
+                }
+                
+                // Hapus paket dari state retention
+                appState.retention = appState.retention.filter(p => p.id !== pkgId);
+                
+                // Simpan dan render ulang tampilan
+                saveDataToLocal();
+                initRetention();
+                initUserCompanyTable(); // Refresh tabel master
+            }
+        }
+
         function addUserToPkg(pkgId) {
             // Ubah default nama menjadi kosong agar dropdown menampilkan placeholder
             appState.retention.find(p => p.id === pkgId).users.push({ id: Date.now(), name: "", status: "active", isNew: false, isHidden: false });
@@ -2397,6 +2421,8 @@ function openLastLoginReportDetail(idx) {
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px; gap:10px;">
                             <input type="text" value="${pkg.name}" oninput="updatePkgName(${pkg.id}, this.value)" style="font-weight:700; font-size:13px; padding:4px; border:1px solid var(--gray-border); border-radius:4px; flex:1;">
                             <button class="btn btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addUserToPkg(${pkg.id})">+ Klien</button>
+                            <!-- 👇 INI ADALAH TOMBOL DELETE YANG BARU 👇 -->
+                            <button class="btn btn-outline" style="padding:2px 8px; font-size:11px; color:var(--danger); border-color:var(--danger);" onclick="deletePackage(${pkg.id})" title="Hapus Paket"><i class="fa-solid fa-trash"></i></button>
                         </div>
                         <div>${uRows}</div>
                     </div>
