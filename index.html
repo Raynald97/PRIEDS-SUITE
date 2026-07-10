@@ -486,6 +486,20 @@
                         <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Company ID</label>
                         <input type="text" id="master-company-search" placeholder="Ketik ID Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterUserCompany()">
                         
+                        <!-- 👇 TAMBAHAN FILTER KATEGORI DAN SORTING 👇 -->
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Filter Kategori</label>
+                        <select id="master-company-category" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" onchange="filterUserCompany()">
+                            <option value="all">Semua Kategori</option>
+                        </select>
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Urutkan Last Login</label>
+                        <select id="master-company-sort-login" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" onchange="filterUserCompany()">
+                            <option value="none">Default</option>
+                            <option value="asc">Terbaru ke Terlama</option>
+                            <option value="desc">Terlama ke Terbaru</option>
+                        </select>
+                        <!-- 👆 AKHIR TAMBAHAN 👆 -->
+
                         <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
                         <select id="master-company-limit" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeUserCompanyLimit()">
                             <option value="5">5 Data</option>
@@ -940,9 +954,13 @@
                 <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Company ID</label>
                 <input type="text" id="edit-company-id-display" disabled style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px; background:#f1f5f9; font-weight:700;">
 
-                <!-- 👇 TAMBAHAN INPUT COMPANY NAME 👇 -->
                 <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Company Name</label>
                 <input type="text" id="edit-company-name" placeholder="Masukkan Nama Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+
+                <!-- 👇 TAMBAHAN INPUT CATEGORY 👇 -->
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Kategori Perusahaan</label>
+                <input type="text" id="edit-company-category" list="edit-category-list" placeholder="Ketik atau pilih kategori..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+                <datalist id="edit-category-list"></datalist>
                 <!-- 👆 AKHIR TAMBAHAN 👆 -->
 
                 <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Pilih Paket (Retention Tracker)</label>
@@ -1231,10 +1249,48 @@
         // 👆 AKHIR FUNGSI RESET MASTER DATA 👆
 
         function filterUserCompany() {
-            if(!appState.masterCompanyState) appState.masterCompanyState = { page: 1, limit: 10, search: '' };
+            if(!appState.masterCompanyState) appState.masterCompanyState = { page: 1, limit: 10, search: '', category: 'all', sortLogin: 'none' };
             appState.masterCompanyState.search = document.getElementById('master-company-search').value.toLowerCase();
+            
+            // Tangkap nilai dari filter baru
+            appState.masterCompanyState.category = document.getElementById('master-company-category').value;
+            appState.masterCompanyState.sortLogin = document.getElementById('master-company-sort-login').value;
+            
             appState.masterCompanyState.page = 1;
             initUserCompanyTable();
+        }
+
+        // FUNGSI HELPER UNTUK MENGHITUNG USE DATE
+        function calculateUseDate(subsDateStr, rawDaysAgo) {
+            if (!subsDateStr || subsDateStr === '-' || rawDaysAgo === 9999) return '-';
+            
+            let start = new Date(subsDateStr);
+            let end = new Date();
+            end.setDate(end.getDate() - rawDaysAgo); // Tanggal last login
+
+            if (end < start || isNaN(start.getTime())) return '-'; // Jika tidak valid atau belum mulai
+
+            let y = end.getFullYear() - start.getFullYear();
+            let m = end.getMonth() - start.getMonth();
+            let d = end.getDate() - start.getDate();
+
+            if (d < 0) {
+                m--;
+                let prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+                d += prevMonth.getDate();
+            }
+            if (m < 0) {
+                y--;
+                m += 12;
+            }
+
+            let result = [];
+            if (y > 0) result.push(y + ' Y');
+            if (m > 0) result.push(m + ' M');
+            if (d > 0) result.push(d + ' D');
+            if (result.length === 0) return "0 D";
+
+            return result.join(' ');
         }
 
         function changeUserCompanyLimit() {
@@ -1258,64 +1314,69 @@
                 return;
             }
 
-            const state = appState.masterCompanyState || { page: 1, limit: 10, search: '' };
+            const state = appState.masterCompanyState || { page: 1, limit: 10, search: '', category: 'all', sortLogin: 'none' };
 
-            // Kalkulasi Data Terintegrasi
+            // 1. Ambil daftar Kategori Unik untuk dropdown filter
+            const uniqueCategories = [...new Set(appState.masterCompany.map(c => c.category).filter(c => c && c.trim() !== ''))];
+            const catSelect = document.getElementById('master-company-category');
+            if (catSelect) {
+                const currentCat = state.category || 'all';
+                let catOptions = `<option value="all">Semua Kategori</option>`;
+                uniqueCategories.forEach(c => {
+                    catOptions += `<option value="${c}" ${currentCat === c ? 'selected' : ''}>${c}</option>`;
+                });
+                if (catSelect.innerHTML !== catOptions) catSelect.innerHTML = catOptions;
+            }
+
             let mergedData = appState.masterCompany.map(master => {
-                // Safeguard: Jika ada elemen yang rusak/kosong, lewati
                 if (!master || !master.companyId) return null;
-
                 const cid = String(master.companyId).trim();
                 const cName = master.companyName ? String(master.companyName).trim() : cid;
-                
-                // 1. Data dari NPS
+                const category = master.category && master.category.trim() !== '' ? master.category : '-';
+
                 const logs = (appState.surveyLogs || []).filter(l => l && l.companyId && String(l.companyId).trim() === cid);
                 const uniqueUsers = new Set(logs.map(l => String(l.username).trim())).size;
                 
                 let avgNps = '-', lastMonthAvg = '-';
                 if (logs.length > 0) {
                     const validLogs = logs.filter(l => typeof l.score === 'number');
-                    if(validLogs.length > 0) {
-                        avgNps = (validLogs.reduce((sum, l) => sum + l.score, 0) / validLogs.length).toFixed(1);
-                    }
+                    if(validLogs.length > 0) avgNps = (validLogs.reduce((sum, l) => sum + l.score, 0) / validLogs.length).toFixed(1);
                     
                     let maxTime = -1;
                     logs.forEach(l => { const t = l.year * 12 + l.monthIdx; if (t > maxTime) maxTime = t; });
                     if (maxTime !== -1) {
                         const lastMonthLogs = logs.filter(l => (l.year * 12 + l.monthIdx) === maxTime && typeof l.score === 'number');
-                        if (lastMonthLogs.length > 0) {
-                            lastMonthAvg = (lastMonthLogs.reduce((sum, l) => sum + l.score, 0) / lastMonthLogs.length).toFixed(1);
-                        }
+                        if (lastMonthLogs.length > 0) lastMonthAvg = (lastMonthLogs.reduce((sum, l) => sum + l.score, 0) / lastMonthLogs.length).toFixed(1);
                     }
                 }
 
-                // 2. Data dari Last Login
                 const ll = (appState.lastLoginData || []).find(r => r && String(getCompanyIdField(r) || '').trim() === cid);
                 let lastLoginLabel = '-';
-                let rawDays = -1; 
+                let rawDays = 9999; 
                 
                 if (ll) {
                     let days = parseInt(ll.last_login_in_days || ll.hari_terakhir_login || ll.last_login || "0");
                     if(isNaN(days)) days = 0;
-                    
                     rawDays = days;
                     lastLoginLabel = days <= 0 ? "Hari ini" : days + " Hari lalu";
                 }
 
-                // 3. Package Name (Retention)
                 let pkgName = '-';
                 if (master.packageId && appState.retention) {
                     const pkg = appState.retention.find(p => p && p.id === parseInt(master.packageId));
                     if (pkg) pkgName = pkg.name;
                 }
 
-                return {
-                    companyId: cid, companyName: cName, totalUser: uniqueUsers, package: String(pkgName),
-                    lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: master.subsDate || '-'
-                };
-            }).filter(item => item !== null); // <-- Membuang objek yang tidak valid
+                const subsDateStr = master.subsDate || '-';
+                const useDateLabel = calculateUseDate(subsDateStr, rawDays);
 
-            // Filter Pencarian (Aman dari error Number)
+                return {
+                    companyId: cid, companyName: cName, category: category, totalUser: uniqueUsers, package: String(pkgName),
+                    lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: subsDateStr, useDate: useDateLabel
+                };
+            }).filter(item => item !== null);
+
+            // 2. Filter Search
             if(state.search) {
                 const keyword = state.search.toLowerCase();
                 mergedData = mergedData.filter(d => 
@@ -1323,17 +1384,25 @@
                     String(d.companyName).toLowerCase().includes(keyword)
                 );
             }
-            
-            // KALKULASI MINI DASHBOARD
-            let tUser = 0, tActive = 0;
-            let cWMS = 0, cStarter = 0, cPrem = 0, cERP = 0, cRFID = 0;
-            const limitAtt = appState.lastLoginAttentionLimit || 7;
 
+            // 3. Filter Kategori
+            if(state.category && state.category !== 'all') {
+                mergedData = mergedData.filter(d => d.category === state.category);
+            }
+
+            // 4. Sorting Last Login
+            if(state.sortLogin === 'asc') {
+                mergedData.sort((a, b) => a.rawDays - b.rawDays); 
+            } else if (state.sortLogin === 'desc') {
+                mergedData.sort((a, b) => b.rawDays - a.rawDays); 
+            }
+
+            // Kalkulasi Dashboard
+            let tUser = 0, tActive = 0, cWMS = 0, cStarter = 0, cPrem = 0, cERP = 0, cRFID = 0;
+            const limitAtt = appState.lastLoginAttentionLimit || 7;
             mergedData.forEach(d => {
                 tUser += d.totalUser;
-                // Active = punya history login dan kurang dari batas "Need Attention"
                 if (d.rawDays >= 0 && d.rawDays < limitAtt) tActive++;
-                
                 let p = d.package.toLowerCase();
                 if (p.includes('wms lite')) cWMS++;
                 if (p.includes('starterpack') || p.includes('starter pack')) cStarter++;
@@ -1342,7 +1411,6 @@
                 if (p.includes('rfid')) cRFID++;
             });
 
-            // Update DOM Dashboard
             if (document.getElementById('uc-total-company')) {
                 document.getElementById('uc-total-company').innerText = mergedData.length;
                 document.getElementById('uc-total-user').innerText = tUser;
@@ -1354,7 +1422,6 @@
                 document.getElementById('uc-pkg-rfid').innerText = cRFID;
             }
 
-            // Pagination Lanjutan
             const totalItems = mergedData.length;
             const totalPages = Math.ceil(totalItems / state.limit) || 1;
             const currentPage = Math.min(state.page, totalPages);
@@ -1365,12 +1432,13 @@
                 <tr>
                     <td style="font-weight:700; color:var(--dark); font-family:'Roboto Mono', monospace;">${d.companyId}</td>
                     <td style="font-weight:700; color:var(--primary);">${d.companyName}</td>
+                    <td><span style="font-size:11px; font-weight:700; color:var(--text-muted); background:#f8fafc; padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.category}</span></td>
                     <td><span style="font-weight:800; color:var(--dark);">${d.totalUser}</span></td>
                     <td><span style="font-size:11px; background:var(--gray-light); padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.package}</span></td>
                     <td><span style="font-weight:700;">${d.lastLogin}</span></td>
                     <td><span style="${getScoreBadgeStyle(d.avgNps)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${d.avgNps}</span></td>
-                    <td><span style="font-weight:700; ${getScoreTextStyle(d.lastMonthAvg)}">${d.lastMonthAvg}</span></td>
                     <td style="font-size:11px;">${d.subsDate}</td>
+                    <td style="font-size:11px; font-weight:700; color:var(--success);">${d.useDate}</td>
                     <td>
                         <div class="dropdown">
                             <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('master-drop-${startIndex + idx}', event)">
@@ -1392,20 +1460,20 @@
                         <tr>
                             <th>Company ID</th>
                             <th>Company Name</th>
-                            <th>Total User NPS</th>
+                            <th>Category</th>
+                            <th>User NPS</th>
                             <th>Package</th>
                             <th>Last Login</th>
-                            <th>Avg NPS Score</th>
-                            <th>Last Month Avg</th>
+                            <th>Avg Score</th>
                             <th>Subs Date</th>
+                            <th>Use Date</th>
                             <th style="width: 70px;">Action</th>
                         </tr>
                     </thead>
-                    <tbody>${rowsHtml || '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data.</td></tr>'}</tbody>
+                    <tbody>${rowsHtml || '<tr><td colspan="10" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data.</td></tr>'}</tbody>
                 </table>
             `;
 
-            // Pagination UI
             let pagHtml = '';
             if (totalPages > 1) {
                 pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === 1 ? 'disabled' : ''} onclick="changeUserCompanyPage(${currentPage - 1})">Prev</button>`;
@@ -1423,11 +1491,14 @@
             document.getElementById('edit-company-id-display').value = companyId;
             
             const comp = appState.masterCompany.find(c => c.companyId === companyId);
-            
-            // 👇 Set isi input field Company Name (Fallback ke ID jika belum ada) 👇
             document.getElementById('edit-company-name').value = comp.companyName || comp.companyId;
             
-            // Populate dropdown package
+            // 👇 Set Kategori dan Isi Auto-complete (Datalist) 👇
+            document.getElementById('edit-company-category').value = comp.category || '';
+            const uniqueCategories = [...new Set(appState.masterCompany.map(c => c.category).filter(c => c && c.trim() !== ''))];
+            document.getElementById('edit-category-list').innerHTML = uniqueCategories.map(c => `<option value="${c}">`).join('');
+            // 👆 AKHIR TAMBAHAN 👆
+
             let selectHtml = '<option value="">-- Pilih Paket --</option>';
             if(appState.retention) {
                 appState.retention.forEach(pkg => {
@@ -1445,17 +1516,18 @@
 
         function saveCompanyEdit() {
             const cid = document.getElementById('edit-company-id').value;
-            const cName = document.getElementById('edit-company-name').value; // 👈 Tangkap inputan Company Name
+            const cName = document.getElementById('edit-company-name').value; 
+            const cat = document.getElementById('edit-company-category').value; // Ambil Value Kategori
             const pkgId = document.getElementById('edit-company-package').value;
             const sDate = document.getElementById('edit-company-subsdate').value;
             
             const comp = appState.masterCompany.find(c => c.companyId === cid);
             if(comp) {
-                // 👇 Simpan Company Name ke memori (Jika sengaja dikosongkan user, kembalikan ke ID) 👇
                 comp.companyName = cName.trim() !== '' ? cName : cid;
-                
+                comp.category = cat.trim(); // Simpan Kategori
                 comp.packageId = pkgId ? parseInt(pkgId) : null;
                 comp.subsDate = sDate;
+                
                 saveDataToLocal();
                 initUserCompanyTable();
                 closeEditCompanyModal();
