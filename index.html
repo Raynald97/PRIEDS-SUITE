@@ -24,11 +24,57 @@
         /* --- SIDEBAR --- */
         .sidebar { width: 280px; background: var(--dark); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
         .logo { padding: 24px; font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 800; color: #38bdf8; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px; }
-        .nav-menu { padding: 20px 0; flex: 1; overflow-y: auto; }
-        .nav-item { padding: 14px 24px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: #94a3b8; font-weight: 600; transition: all 0.2s; border-left: 4px solid transparent; }
-        .nav-item:hover { background: #1e293b; color: #fff; }
-        .nav-item.active { background: #1e293b; color: #fff; border-left-color: var(--primary); }
         .sidebar-footer { padding: 20px; border-top: 1px solid #1e293b; }
+
+        /* --- NAV MENU & GROUPING REVISION --- */
+        .nav-menu { padding: 20px 0; flex: 1; overflow-y: auto; }
+        .nav-group { margin-bottom: 12px; }
+        
+        /* Elemen Judul Kategori Utama */
+        .nav-item.header-group { 
+            padding: 12px 24px; 
+            color: #f8fafc; 
+            font-weight: 700; 
+            font-size: 14px; 
+            cursor: pointer !important; /* Diubah menjadi pointer agar user tahu bisa diklik */
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(255, 255, 255, 0.03); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+            user-select: none;
+        }
+        .nav-item.header-group .arrow-icon { font-size: 10px; color: #64748b; transition: transform 0.2s; }
+        
+        /* Wrapper Submenu Kotak Putih Melayang - Sembunyi secara default */
+        .sub-menu { 
+            display: none; /* Menyembunyikan anak halaman di awal */
+            background: #ffffff; 
+            margin: 8px 16px 8px 24px; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+        }
+
+        /* Saat parent memiliki class .open, tampilkan submenu & putar icon panah */
+        .nav-group.open .sub-menu { display: block; }
+        .nav-group.open .arrow-icon { transform: rotate(180deg); }
+        
+        /* Item di dalam Submenu */
+        .sub-menu .nav-item { 
+            padding: 10px 16px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            cursor: pointer; 
+            color: #475569; 
+            font-weight: 600; 
+            font-size: 13px; 
+            transition: all 0.2s; 
+            border-left: 3px solid transparent; 
+        }
+        .sub-menu .nav-item:hover { background: #f1f5f9; color: var(--primary); }
+        .sub-menu .nav-item.active { background: #e0f2fe; color: var(--primary); border-left-color: var(--primary); }
 
         /* --- MAIN AREA --- */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -125,12 +171,34 @@
     <div class="sidebar">
         <div class="logo"><i class="fa-solid fa-cube"></i> PRIEDS SUITE</div>
         <div class="nav-menu">
-            <div class="nav-item active" onclick="switchTab('lastlogin', this)"><i class="fa-solid fa-satellite-dish"></i> Last Login Tracker</div>
-            <div class="nav-item" onclick="switchTab('lastlogin_report', this)"><i class="fa-solid fa-file-shield"></i> Last Login Report</div>
-            <div class="nav-item" onclick="switchTab('nps', this)"><i class="fa-solid fa-face-smile"></i> NPS Tracker</div>
-            <div class="nav-item" onclick="switchTab('retention', this)"><i class="fa-solid fa-users"></i> Retention Tracker</div>
-            <div class="nav-item" onclick="switchTab('anomaly', this)"><i class="fa-solid fa-triangle-exclamation"></i> Anomaly Report</div>
-            <div class="nav-item" onclick="switchTab('nps_report', this)"><i class="fa-solid fa-file-chart-column"></i> NPS Report</div>
+            <div class="nav-group open"> <div class="nav-item header-group" onclick="toggleGroup(this)"><i class="fa-solid fa-right-to-bracket"></i> Last Login <i class="fa-solid fa-chevron-down arrow-icon"></i></div>
+                <div class="sub-menu">
+                    <div class="nav-item active" onclick="switchTab('lastlogin', this)"><i class="fa-solid fa-satellite-dish"></i> Last Login Tracker</div>
+                    <div class="nav-item" onclick="switchTab('lastlogin_report', this)"><i class="fa-solid fa-file-shield"></i> Last Login Report</div>
+                    
+                    <!-- Retention Tracker sekarang berada di dalam grup Last Login -->
+                    <div class="nav-item" onclick="switchTab('retention', this)"><i class="fa-solid fa-user-check"></i> Retention Tracker</div>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-item header-group" onclick="toggleGroup(this)"><i class="fa-solid fa-face-smile"></i> NPS <i class="fa-solid fa-chevron-down arrow-icon"></i></div>
+                <div class="sub-menu">
+                    <div class="nav-item" onclick="switchTab('nps', this)"><i class="fa-solid fa-chart-line"></i> NPS Tracker</div>
+                    <div class="nav-item" onclick="switchTab('nps_report', this)"><i class="fa-solid fa-file-chart-column"></i> NPS Report</div>
+                    <div class="nav-item" onclick="switchTab('anomaly', this)"><i class="fa-solid fa-triangle-exclamation"></i> Anomaly Report</div>
+                    <div class="nav-item" onclick="switchTab('user_report', this)"><i class="fa-solid fa-user-tag"></i> User Report</div>
+                    <div class="nav-item" onclick="switchTab('company_report', this)"><i class="fa-solid fa-building"></i> Company Report</div>
+                </div>
+            </div>
+
+            <!-- MENU MASTER DATA DITAMBAHKAN DI SINI -->
+            <div class="nav-group">
+                <div class="nav-item header-group" onclick="toggleGroup(this)"><i class="fa-solid fa-database"></i> Master Data <i class="fa-solid fa-chevron-down arrow-icon"></i></div>
+                <div class="sub-menu">
+                    <div class="nav-item" onclick="switchTab('user_company', this)"><i class="fa-solid fa-building-user"></i> User Company Master</div>
+                </div>
+            </div>
         </div>
         <div class="sidebar-footer">
             <button class="btn btn-success" style="width:100%;" onclick="exportPPT()"><i class="fa-solid fa-file-powerpoint"></i> EXPORT TO PPT</button>
@@ -204,13 +272,140 @@
 
                 <div id="editor-anomaly" class="editor-section">
                     <div class="section-title">Pengaturan Deteksi</div>
-                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px; line-height:1.6;">
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px; line-height:1.6; margin-bottom:15px;">
                         <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:8px;">Batas Waktu Minimum (Detik)</label>
                         <div style="display:flex; align-items:center; gap:10px;">
                             <input type="number" id="anomaly-threshold-input" value="15" min="1" style="flex:1; padding:8px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; font-weight:700;">
                             <button class="btn btn-primary" style="padding:8px 12px; font-size:11px;" onclick="updateAnomalyThreshold()">Terapkan</button>
                         </div>
-                        <p style="font-size:10px; color:var(--text-muted); margin-top:10px;">Sistem akan mengklasifikasikan pengguna yang mengisi survei lebih cepat dari batas waktu ini secara otomatis.</p>
+                        <p style="font-size:10px; color:var(--text-muted); margin-top:10px;">Sistem akan mengklasifikasikan pengguna sebagai anomali secara otomatis jika mengisi survei lebih cepat dari batas waktu ini, atau jika masukannya mengandung kata 'DUMMY'.</p>
+                    </div>
+
+                    <div class="section-title">Filter Laporan</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Urutkan Waktu</label>
+                        <select id="anomaly-sort" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" onchange="filterAnomaly()">
+                            <option value="desc">Terbaru ke Terlama (Descending)</option>
+                            <option value="asc">Terlama ke Terbaru (Ascending)</option>
+                        </select>
+
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Tahun</label>
+                                <div style="max-height: 80px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px; font-size: 10px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-year" value="2024" onchange="filterAnomaly()"> 2024</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-year" value="2025" onchange="filterAnomaly()"> 2025</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-year" value="2026" onchange="filterAnomaly()"> 2026</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Quarter</label>
+                                <div style="max-height: 80px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px; font-size: 10px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-quarter" value="1" onchange="filterAnomaly()"> Q1</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-quarter" value="2" onchange="filterAnomaly()"> Q2</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-quarter" value="3" onchange="filterAnomaly()"> Q3</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-quarter" value="4" onchange="filterAnomaly()"> Q4</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Bulan</label>
+                                <div style="max-height: 80px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px; font-size: 10px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-month" value="0" onchange="filterAnomaly()"> Jan</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-month" value="1" onchange="filterAnomaly()"> Feb</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="anomaly-filter-month" value="2" onchange="filterAnomaly()"> Mar</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
+                        <select id="anomaly-limit-select" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeAnomalyLimit()">
+                            <option value="5" selected>5 Data</option>
+                            <option value="10">10 Data</option>
+                            <option value="25">25 Data</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="editor-user_report" class="editor-section">
+                    <div class="section-title">Laporan Pengguna Spesifik</div>
+                    
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px; margin-bottom:15px;">
+                        
+                        <!-- BARIS TAMBAHAN: Filter Tahun, Quarter & Bulan (Checkbox) -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+            <!-- Kolom Tahun -->
+            <div>
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Tahun</label>
+                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2024" onchange="filterUserReport()"> 2024</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2025" onchange="filterUserReport()"> 2025</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2026" onchange="filterUserReport()"> 2026</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2027" onchange="filterUserReport()"> 2027</label>
+                </div>
+            </div>
+
+            <div id="editor-company_report" class="editor-section">
+                    <div class="section-title">Laporan Perusahaan</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Company ID</label>
+                        <input type="text" id="company-report-search" placeholder="Ketik ID Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterCompanyReport()">
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
+                        <select id="company-report-limit" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeCompanyLimit()">
+                            <option value="5">5 Data</option>
+                            <option value="10" selected>10 Data</option>
+                            <option value="25">25 Data</option>
+                            <option value="50">50 Data</option>
+                        </select>
+                    </div>
+                </div>
+
+            <!-- Kolom Quarter -->
+            <div>
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Quarter</label>
+                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-quarter" value="1" onchange="filterUserReport()"> Q1</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-quarter" value="2" onchange="filterUserReport()"> Q2</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-quarter" value="3" onchange="filterUserReport()"> Q3</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-quarter" value="4" onchange="filterUserReport()"> Q4</label>
+                </div>
+            </div>
+
+            <!-- Kolom Bulan -->
+            <div>
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Bulan</label>
+                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="0" onchange="filterUserReport()"> Januari</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="1" onchange="filterUserReport()"> Februari</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="2" onchange="filterUserReport()"> Maret</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="3" onchange="filterUserReport()"> April</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="4" onchange="filterUserReport()"> Mei</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="5" onchange="filterUserReport()"> Juni</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="6" onchange="filterUserReport()"> Juli</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="7" onchange="filterUserReport()"> Agustus</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="8" onchange="filterUserReport()"> September</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="9" onchange="filterUserReport()"> Oktober</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="10" onchange="filterUserReport()"> November</label>
+                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="11" onchange="filterUserReport()"> Desember</label>
+                </div>
+            </div>
+        </div>
+        <p style="font-size:10px; color:var(--text-muted); margin-top:-6px; margin-bottom:12px; font-style:italic;">*Kosongkan centang untuk menampilkan semua data pada kategori tersebut.</p>
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Username</label>
+                        <input type="text" id="user-search-input" placeholder="Ketik username..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterUserReport()">
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Filter Company ID</label>
+                        <input list="company-list" id="company-filter-input" placeholder="Ketik atau pilih Company ID..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterUserReport()">
+                        <datalist id="company-list"></datalist>
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
+                        <select id="user-limit-select" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeUserReportLimit()">
+                            <option value="5">5 Data</option>
+                            <option value="10" selected>10 Data</option>
+                            <option value="25">25 Data</option>
+                            <option value="50">50 Data</option>
+                        </select>
                     </div>
                 </div>
 
@@ -224,9 +419,75 @@
 
                 <div id="editor-nps_report" class="editor-section">
                     <div class="section-title">Riwayat Laporan</div>
-                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px; line-height:1.6;">
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px; line-height:1.6; margin-bottom:15px;">
                         <p style="color:var(--dark); font-weight:700;"><i class="fa-solid fa-folder-open"></i> Arsip Log Excel</p>
-                        <p style="font-size:11px; color:var(--text-muted); margin-top:5px;">Setiap kali file Excel baru diunggah pada tab NPS Tracker, ringkasan metrics beserta daftar responden valid akan otomatis diarsipkan secara permanen di tab ini.</p>
+                        <p style="font-size:11px; color:var(--text-muted); margin-top:5px; margin-bottom:15px;">Setiap kali file Excel baru diunggah pada tab NPS Tracker, ringkasan metrics beserta daftar responden valid akan otomatis diarsipkan secara permanen di tab ini.</p>
+                        
+                        <hr style="border:0; border-top:1px solid var(--gray-border); margin:15px 0;">
+                        <button class="btn btn-outline" style="width:100%; border-color:var(--danger); color:var(--danger); font-weight:700;" onclick="resetNPSData()">
+                            <i class="fa-solid fa-trash-can"></i> Reset Semua Data NPS
+                        </button>
+                    </div>
+
+                    <div class="section-title">Filter Laporan</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Urutkan Waktu</label>
+                        <select id="nps-sort" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" onchange="filterNPSReport()">
+                            <option value="desc">Terbaru ke Terlama (Descending)</option>
+                            <option value="asc">Terlama ke Terbaru (Ascending)</option>
+                        </select>
+
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Tahun</label>
+                                <div style="max-height: 80px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px; font-size: 10px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-year" value="2024" onchange="filterNPSReport()"> 2024</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-year" value="2025" onchange="filterNPSReport()"> 2025</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-year" value="2026" onchange="filterNPSReport()"> 2026</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Quarter</label>
+                                <div style="max-height: 80px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px; font-size: 10px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-quarter" value="Q1" onchange="filterNPSReport()"> Q1</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-quarter" value="Q2" onchange="filterNPSReport()"> Q2</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-quarter" value="Q3" onchange="filterNPSReport()"> Q3</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-quarter" value="Q4" onchange="filterNPSReport()"> Q4</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Bulan</label>
+                                <div style="max-height: 80px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 6px; font-size: 10px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-month" value="0" onchange="filterNPSReport()"> Jan</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-month" value="1" onchange="filterNPSReport()"> Feb</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="nps-filter-month" value="2" onchange="filterNPSReport()"> Mar</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
+                        <select id="nps-limit-select" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeNPSLimit()">
+                            <option value="5" selected>5 Data</option>
+                            <option value="10">10 Data</option>
+                            <option value="25">25 Data</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- MASTER DATA EDITOR DITAMBAHKAN DI SINI -->
+                <div id="editor-user_company" class="editor-section">
+                    <div class="section-title">Master Data Perusahaan</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Company ID</label>
+                        <input type="text" id="master-company-search" placeholder="Ketik ID Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterUserCompany()">
+                        
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
+                        <select id="master-company-limit" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeUserCompanyLimit()">
+                            <option value="5">5 Data</option>
+                            <option value="10" selected>10 Data</option>
+                            <option value="25">25 Data</option>
+                            <option value="50">50 Data</option>
+                        </select>
                     </div>
                 </div>
 
@@ -363,13 +624,61 @@
                     <div class="presentation-slide">
                         <div class="slide-header">
                             <h2>Anomaly Detection Report</h2>
-                            <p id="anomaly-subtitle">Daftar pengguna dengan waktu pengisian (Interval Time) di bawah 15 Detik</p>
+                            <p id="anomaly-subtitle">Daftar pengguna (Interval Time terlalu cepat atau mengandung kata DUMMY)</p>
                         </div>
                         <div id="anomaly-list-container">
                             <div style="text-align:center; padding:30px; color:var(--text-muted);">
                                 Silakan unggah file Excel survei terlebih dahulu untuk menjalankan deteksi.
                             </div>
                         </div>
+                        <div id="anomaly-pagination-container" style="display:flex; justify-content:flex-end; gap:5px; margin-top:15px;"></div>
+                    </div>
+                </div>
+
+                <div id="view-user_report" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header" style="margin-bottom:20px;">
+                            <h2>User Behavior & Feedback Report</h2>
+                            <p>Rekapitulasi nilai dan riwayat masukan (remark) dari setiap responden secara personal</p>
+                        </div>
+                        
+                        <!-- Mini Dashboard -->
+                        <div class="chart-row" style="grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total User (Filtered)</h5>
+                                <h2 id="mini-total-user" style="font-size:28px; font-weight:800; color:var(--dark); margin:0;">0</h2>
+                            </div>
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Average Score</h5>
+                                <h2 id="mini-avg-score" style="font-size:28px; font-weight:800; color:var(--primary); margin:0;">0.0</h2>
+                            </div>
+                            <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Score Trend</h5>
+                                <h2 id="mini-score-trend" style="font-size:28px; font-weight:800; margin:0; color:var(--success);">-</h2>
+                                <span style="font-size:10px; color:var(--text-muted);">Perbandingan dgn Skor Sebelumnya</span>
+                            </div>
+                        </div>
+
+                        <div id="user-report-table-container">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">
+                                Belum ada data user.
+                            </div>
+                        </div>
+                        <!-- Pagination Container -->
+                        <div id="user-pagination-container" style="display:flex; justify-content:flex-end; gap:5px; margin-top:15px;"></div>
+                    </div>
+                </div>
+
+                <div id="view-company_report" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header" style="margin-bottom:20px;">
+                            <h2>Company NPS Report</h2>
+                            <p>Rekapitulasi performa NPS berdasarkan entitas Perusahaan/Klien</p>
+                        </div>
+                        <div id="company-report-table-container">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada data perusahaan.</div>
+                        </div>
+                        <div id="company-pagination-container" style="display:flex; justify-content:flex-end; gap:5px; margin-top:15px;"></div>
                     </div>
                 </div>
 
@@ -394,13 +703,24 @@
                             <p>Kumpulan log data hasil analisis survei bulanan yang telah berhasil diproses oleh sistem</p>
                         </div>
                         <div id="nps-report-table-container">
-                            <div style="text-align:center; padding:30px; color:var(--text-muted);">
-                                Belum ada riwayat laporan. Silakan unggah file Excel di tab NPS Tracker terlebih dahulu.
-                            </div>
                         </div>
+                        <div id="nps-report-pagination-container" style="display:flex; justify-content:flex-end; gap:5px; margin-top:15px;"></div>
                     </div>
                 </div>
 
+                <!-- MASTER DATA VIEW DITAMBAHKAN DI SINI -->
+                <div id="view-user_company" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header" style="margin-bottom:20px;">
+                            <h2>User Company Master</h2>
+                            <p>Pusat integrasi data klien (NPS, Last Login, dan Subskripsi Paket)</p>
+                        </div>
+                        <div id="user-company-table-container">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada data master perusahaan.</div>
+                        </div>
+                        <div id="user-company-pagination-container" style="display:flex; justify-content:flex-end; gap:5px; margin-top:15px;"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -504,6 +824,77 @@
         </div>
     </div>
 
+
+    <div id="user-detail-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 800px; max-height: 85vh;">
+            <div class="modal-header">
+                <h3 style="font-size:16px; font-weight:800; color:var(--dark);" id="user-modal-title-text">Riwayat NPS</h3>
+                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeUserDetailModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="anomaly-table">
+                    <!-- ... isi tabel user detail ... -->
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= BARIS TAMBAHAN: MODAL COMPANY REPORT ================= -->
+    <div id="company-detail-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 850px; max-height: 85vh;">
+            <div class="modal-header">
+                <h3 style="font-size:16px; font-weight:800; color:var(--dark);" id="company-modal-title">Detail User Perusahaan</h3>
+                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeCompanyDetailModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="anomaly-table" style="margin-top:0;">
+                    <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
+                        <tr>
+                            <th>Username</th>
+                            <th style="width:120px;">Last Q Avg</th>
+                            <th style="width:120px;">This Q Avg</th>
+                            <th style="width:120px;">Last Month Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="company-detail-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div> <!-- Catatan: Menambahkan tag penutup div untuk company-detail-modal yang sebelumnya kurang -->
+
+    <!-- MASTER DATA MODAL DITAMBAHKAN DI SINI -->
+    <div id="edit-company-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 450px;">
+            <div class="modal-header">
+                <h3 style="font-size:16px; font-weight:800; color:var(--dark);">Edit Data Perusahaan</h3>
+                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeEditCompanyModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <input type="hidden" id="edit-company-id">
+                
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Company ID</label>
+                <input type="text" id="edit-company-id-display" disabled style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px; background:#f1f5f9; font-weight:700;">
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Pilih Paket (Retention Tracker)</label>
+                <select id="edit-company-package" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+                    <!-- Diisi via JS -->
+                </select>
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Subs Date (Tanggal Langganan)</label>
+                <input type="date" id="edit-company-subsdate" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:20px; font-size:12px;">
+
+                <button class="btn btn-primary" style="width:100%;" onclick="saveCompanyEdit()">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- MASTER DATA SET ---
         const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -537,30 +928,47 @@
             npsReports: [],       
             activeReportIdx: null, 
             pages: { p: 1, v: 1, d: 1 }, 
-            rowsPerPage: 5        
+            rowsPerPage: 5,
+            // TAMBAHAN STATE MASTER DATA:
+            masterCompany: [],
+            masterCompanyState: { page: 1, limit: 10, search: '' }
         };
 
+        // ================= FUNGSI BANTUAN WARNA SKOR NPS =================
+        function getScoreBadgeStyle(score) {
+            if (score === '-' || isNaN(score)) return 'background:#f1f5f9; color:var(--text-muted);';
+            const num = parseFloat(score);
+            if (num >= 9) return 'background:#dcfce7; color:var(--success);'; // Promoter (Hijau)
+            if (num >= 7) return 'background:#f1f5f9; color:#64748b;'; // Passive (Abu-abu)
+            return 'background:#fee2e2; color:var(--danger);'; // Detractor (Merah)
+        }
+
+        function getScoreTextStyle(score) {
+            if (score === '-' || isNaN(score)) return 'color:var(--text-muted);';
+            const num = parseFloat(score);
+            if (num >= 9) return 'color:var(--success);';
+            if (num >= 7) return 'color:#64748b;';
+            return 'color:var(--danger);';
+        }
+
         // --- FIREBASE SAVE & LOAD FUNCTIONS ---
-        async function saveDataToFirebase() {
+        function saveDataToLocal() {
             try {
-                // Menyimpan seluruh appState ke koleksi 'prieds_data', dokumen 'main_state'
-                await window.setDoc(window.doc(window.firebaseDb, "prieds_data", "main_state"), appState);
-                console.log("Data berhasil disimpan ke Firebase otomatis.");
+                localStorage.setItem('prieds_main_state', JSON.stringify(appState));
+                console.log("Data berhasil disimpan ke Local Storage otomatis.");
             } catch (e) {
-                console.error("Error saving to Firebase: ", e);
+                console.error("Error saving to Local Storage: ", e);
             }
         }
 
-        async function loadDataFromFirebase() {
+        function loadDataFromLocal() {
             try {
-                const docSnap = await window.getDoc(window.doc(window.firebaseDb, "prieds_data", "main_state"));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    // Timpa appState lokal dengan data dari Firebase
-                    Object.assign(appState, data);
-                    console.log("Data berhasil dimuat dari Firebase.");
+                const data = localStorage.getItem('prieds_main_state');
+                if (data) {
+                    Object.assign(appState, JSON.parse(data));
+                    console.log("Data berhasil dimuat dari Local Storage.");
                 } else {
-                    console.log("Belum ada data di Firebase, menggunakan state awal.");
+                    console.log("Belum ada data di Local Storage, menggunakan state awal.");
                 }
                 
                 // Panggil fungsi render setelah data selesai dimuat
@@ -569,10 +977,658 @@
                 initRetention();
                 initAnomaly(); 
                 initNPSReportTable();
+                initUserReportTable();
+                initCompanyReportTable();
                 initLastLoginReportTable();
+                initUserCompanyTable(); // RENDER TABEL MASTER DATA
             } catch (e) {
-                console.error("Error loading from Firebase: ", e);
+                console.error("Error loading from Local Storage: ", e);
             }
+        }
+
+        // ================= LOGIC MASTER DATA COMPANY =================
+        function registerCompanyToMaster(companyId) {
+            if(!companyId || companyId.trim() === '' || companyId === '-') return;
+            if(!appState.masterCompany) appState.masterCompany = [];
+            
+            const exists = appState.masterCompany.find(c => c.companyId === companyId);
+            if(!exists) {
+                appState.masterCompany.push({ companyId: companyId, packageId: null, subsDate: '' });
+                saveDataToLocal();
+            }
+        }
+
+        function filterUserCompany() {
+            if(!appState.masterCompanyState) appState.masterCompanyState = { page: 1, limit: 10, search: '' };
+            appState.masterCompanyState.search = document.getElementById('master-company-search').value.toLowerCase();
+            appState.masterCompanyState.page = 1;
+            initUserCompanyTable();
+        }
+
+        function changeUserCompanyLimit() {
+            appState.masterCompanyState.limit = parseInt(document.getElementById('master-company-limit').value);
+            appState.masterCompanyState.page = 1;
+            initUserCompanyTable();
+        }
+
+        function changeUserCompanyPage(page) {
+            appState.masterCompanyState.page = page;
+            initUserCompanyTable();
+        }
+
+        function initUserCompanyTable() {
+            const container = document.getElementById('user-company-table-container');
+            const pagContainer = document.getElementById('user-company-pagination-container');
+
+            if (!appState.masterCompany || appState.masterCompany.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada master data perusahaan terdaftar.</div>`;
+                if(pagContainer) pagContainer.innerHTML = '';
+                return;
+            }
+
+            const state = appState.masterCompanyState || { page: 1, limit: 10, search: '' };
+
+            // Kalkulasi Data Terintegrasi
+            let mergedData = appState.masterCompany.map(master => {
+                const cid = master.companyId;
+                
+                // 1. Data dari NPS
+                const logs = (appState.surveyLogs || []).filter(l => l.companyId === cid);
+                const uniqueUsers = new Set(logs.map(l => l.username)).size;
+                
+                let avgNps = '-', lastMonthAvg = '-';
+                if (logs.length > 0) {
+                    avgNps = (logs.reduce((sum, l) => sum + l.score, 0) / logs.length).toFixed(1);
+                    
+                    let maxTime = -1;
+                    logs.forEach(l => { const t = l.year * 12 + l.monthIdx; if (t > maxTime) maxTime = t; });
+                    if (maxTime !== -1) {
+                        const lastMonthLogs = logs.filter(l => (l.year * 12 + l.monthIdx) === maxTime);
+                        lastMonthAvg = (lastMonthLogs.reduce((sum, l) => sum + l.score, 0) / lastMonthLogs.length).toFixed(1);
+                    }
+                }
+
+                // 2. Data dari Last Login
+                const ll = (appState.lastLoginData || []).find(r => (r.company_id || r.id_perusahaan) === cid);
+                let lastLoginLabel = '-';
+                if (ll) {
+                    let days = parseInt(ll.last_login_in_days || ll.hari_terakhir_login || ll.last_login || "0");
+                    if(isNaN(days)) days = 0;
+                    lastLoginLabel = days <= 0 ? "Hari ini" : days + " Hari lalu";
+                }
+
+                // 3. Package Name (Retention)
+                let pkgName = '-';
+                if (master.packageId && appState.retention) {
+                    const pkg = appState.retention.find(p => p.id === parseInt(master.packageId));
+                    if (pkg) pkgName = pkg.name;
+                }
+
+                return {
+                    companyId: cid, totalUser: uniqueUsers, package: pkgName,
+                    lastLogin: lastLoginLabel, avgNps, lastMonthAvg, subsDate: master.subsDate || '-'
+                };
+            });
+
+            // Filter & Pagination
+            if(state.search) mergedData = mergedData.filter(d => d.companyId.toLowerCase().includes(state.search));
+            
+            const totalItems = mergedData.length;
+            const totalPages = Math.ceil(totalItems / state.limit) || 1;
+            const currentPage = Math.min(state.page, totalPages);
+            const startIndex = (currentPage - 1) * state.limit;
+            const paginatedData = mergedData.slice(startIndex, startIndex + state.limit);
+
+            const rowsHtml = paginatedData.map((d, idx) => `
+                <tr>
+                    <td style="font-weight:700; color:var(--dark); font-family:'Roboto Mono', monospace;">${d.companyId}</td>
+                    <td><span style="font-weight:800; color:var(--primary);">${d.totalUser}</span></td>
+                    <td><span style="font-size:11px; background:var(--gray-light); padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.package}</span></td>
+                    <td><span style="font-weight:700;">${d.lastLogin}</span></td>
+                    <td><span style="${getScoreBadgeStyle(d.avgNps)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${d.avgNps}</span></td>
+                    <td><span style="font-weight:700; ${getScoreTextStyle(d.lastMonthAvg)}">${d.lastMonthAvg}</span></td>
+                    <td style="font-size:11px;">${d.subsDate}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('master-drop-${startIndex + idx}', event)">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div id="master-drop-${startIndex + idx}" class="dropdown-content">
+                                <div class="dropdown-item" onclick="openEditCompanyModal('${d.companyId}')">
+                                    <i class="fa-solid fa-pen" style="color:var(--warning);"></i> Edit Data
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <table class="anomaly-table">
+                    <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
+                        <tr>
+                            <th>Company ID</th>
+                            <th>Total User NPS</th>
+                            <th>Package</th>
+                            <th>Last Login</th>
+                            <th>Avg NPS Score</th>
+                            <th>Last Month Avg</th>
+                            <th>Subs Date</th>
+                            <th style="width: 70px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml || '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data.</td></tr>'}</tbody>
+                </table>
+            `;
+
+            // Pagination UI
+            let pagHtml = '';
+            if (totalPages > 1) {
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === 1 ? 'disabled' : ''} onclick="changeUserCompanyPage(${currentPage - 1})">Prev</button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    pagHtml += `<button class="btn ${i === currentPage ? 'btn-primary' : 'btn-outline'}" style="padding:4px 10px; font-size:11px;" onclick="changeUserCompanyPage(${i})">${i}</button>`;
+                }
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === totalPages ? 'disabled' : ''} onclick="changeUserCompanyPage(${currentPage + 1})">Next</button>`;
+            }
+            if(pagContainer) pagContainer.innerHTML = pagHtml;
+        }
+
+        // Logic Modal Edit
+        function openEditCompanyModal(companyId) {
+            document.getElementById('edit-company-id').value = companyId;
+            document.getElementById('edit-company-id-display').value = companyId;
+            
+            const comp = appState.masterCompany.find(c => c.companyId === companyId);
+            
+            // Populate dropdown package
+            let selectHtml = '<option value="">-- Pilih Paket --</option>';
+            if(appState.retention) {
+                appState.retention.forEach(pkg => {
+                    selectHtml += `<option value="${pkg.id}" ${comp.packageId == pkg.id ? 'selected' : ''}>${pkg.name}</option>`;
+                });
+            }
+            document.getElementById('edit-company-package').innerHTML = selectHtml;
+            document.getElementById('edit-company-subsdate').value = comp.subsDate || '';
+            
+            document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            document.getElementById('edit-company-modal').classList.add('active');
+        }
+
+        function closeEditCompanyModal() { document.getElementById('edit-company-modal').classList.remove('active'); }
+
+        function saveCompanyEdit() {
+            const cid = document.getElementById('edit-company-id').value;
+            const pkgId = document.getElementById('edit-company-package').value;
+            const sDate = document.getElementById('edit-company-subsdate').value;
+            
+            const comp = appState.masterCompany.find(c => c.companyId === cid);
+            if(comp) {
+                comp.packageId = pkgId ? parseInt(pkgId) : null;
+                comp.subsDate = sDate;
+                saveDataToLocal();
+                initUserCompanyTable();
+                closeEditCompanyModal();
+                alert('✔️ Data untuk Company ID ' + cid + ' berhasil diperbarui.');
+            }
+        }
+
+        // ================= FUNGSI BANTUAN FILTER & PAGINATION =================
+        // Helper baru untuk mengambil nilai dari checkbox yang dicentang
+        function getCheckedValues(className) {
+            const checkboxes = document.querySelectorAll('.' + className + ':checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        function filterUserReport() {
+            if(!appState.userReport) appState.userReport = { page: 1, limit: 10, search: '', company: '', month: [], quarter: [], year: [] };
+            appState.userReport.search = document.getElementById('user-search-input').value.toLowerCase();
+            appState.userReport.company = document.getElementById('company-filter-input').value;
+            appState.userReport.year = getCheckedValues('filter-year');
+            appState.userReport.quarter = getCheckedValues('filter-quarter');
+            appState.userReport.month = getCheckedValues('filter-month');
+            appState.userReport.page = 1; 
+            initUserReportTable();
+        }
+
+        function changeUserReportLimit() {
+            if(!appState.userReport) appState.userReport = { page: 1, limit: 10, search: '', company: '', month: [], quarter: [], year: [] };
+            appState.userReport.limit = parseInt(document.getElementById('user-limit-select').value);
+            appState.userReport.page = 1;
+            initUserReportTable();
+        }
+
+        function changeUserReportPage(page) {
+            appState.userReport.page = page;
+            initUserReportTable();
+        }
+
+        // ================= FUNGSI UTAMA GENERATE TABLE =================
+        function initUserReportTable() {
+            const container = document.getElementById('user-report-table-container');
+            const pagContainer = document.getElementById('user-pagination-container');
+            const dataList = document.getElementById('company-list');
+
+            if (!appState.surveyLogs || appState.surveyLogs.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada data. Silakan unggah file Excel di tab NPS Tracker terlebih dahulu.</div>`;
+                pagContainer.innerHTML = '';
+                return;
+            }
+
+            const state = appState.userReport || { search: '', company: '', limit: 10, page: 1, month: [], quarter: [], year: [] };
+
+            // 1. FILTER BERDASARKAN CHECKBOX (TAHUN, QUARTER, BULAN)
+            let logsToProcess = appState.surveyLogs;
+            
+            // Jika ada tahun yang dicentang, lakukan filter
+            if (state.year && state.year.length > 0) {
+                logsToProcess = logsToProcess.filter(l => state.year.includes(String(l.year)));
+            }
+            // Jika ada quarter yang dicentang, lakukan filter
+            if (state.quarter && state.quarter.length > 0) {
+                logsToProcess = logsToProcess.filter(l => state.quarter.includes(String(l.quarter)));
+            }
+            // Jika ada bulan yang dicentang, lakukan filter
+            if (state.month && state.month.length > 0) {
+                logsToProcess = logsToProcess.filter(l => state.month.includes(String(l.monthIdx)));
+            }
+
+            // 2. Grouping Data User & Koleksi Company ID
+            const userMap = {};
+            const companies = new Set();
+
+            appState.surveyLogs.forEach(log => { if(log.companyId) companies.add(log.companyId); });
+
+            logsToProcess.forEach(log => {
+                const un = log.username || 'Anonymous';
+                const cid = log.companyId || '-';
+
+                if (!userMap[un]) {
+                    userMap[un] = { username: un, companyId: cid, logs: [] };
+                }
+                userMap[un].logs.push(log);
+            });
+
+            if(dataList && dataList.options.length !== companies.size) { 
+                dataList.innerHTML = Array.from(companies).map(c => `<option value="${c}">`).join('');
+            }
+
+            const userArray = Object.values(userMap);
+            
+            userArray.forEach(u => {
+                u.logs.sort((a, b) => {
+                    if (a.year !== b.year) return a.year - b.year;
+                    return a.monthIdx - b.monthIdx;
+                });
+                const latestLog = u.logs[u.logs.length - 1];
+                u.latestScore = latestLog.score;
+                u.latestRemark = latestLog.saran;
+                
+                const totalScore = u.logs.reduce((sum, l) => sum + l.score, 0);
+                u.avgScoreNum = totalScore / u.logs.length;
+                u.avgScore = u.avgScoreNum.toFixed(1);
+            });
+
+            // 3. Terapkan Filter Search & Company
+            let filteredUsers = userArray.filter(u => {
+                let matchSearch = u.username.toLowerCase().includes(state.search);
+                let matchCompany = state.company === '' || u.companyId === state.company;
+                return matchSearch && matchCompany;
+            });
+
+            // 4. Kalkulasi Mini Dashboard
+            const totalUser = filteredUsers.length;
+            const avgScoreSum = filteredUsers.reduce((sum, u) => sum + u.avgScoreNum, 0);
+            const overallAvg = totalUser > 0 ? (avgScoreSum / totalUser).toFixed(1) : "0.0";
+
+            let latestScoresSum = 0;
+            let previousScoresSum = 0;
+            let countPrev = 0;
+
+            filteredUsers.forEach(u => {
+                latestScoresSum += u.logs[u.logs.length - 1].score;
+                if(u.logs.length > 1) { 
+                    previousScoresSum += u.logs[u.logs.length - 2].score;
+                    countPrev++;
+                }
+            });
+            
+            const avgLatest = totalUser > 0 ? (latestScoresSum / totalUser) : 0;
+            const avgPrev = countPrev > 0 ? (previousScoresSum / countPrev) : 0;
+            
+            let trendHtml = '-';
+            let trendColor = 'var(--text-muted)';
+            
+            if (countPrev > 0) {
+                const diff = avgLatest - avgPrev;
+                if (diff > 0) {
+                    trendHtml = `<i class="fa-solid fa-arrow-trend-up"></i> +${diff.toFixed(1)}`;
+                    trendColor = 'var(--success)';
+                } else if (diff < 0) {
+                    trendHtml = `<i class="fa-solid fa-arrow-trend-down"></i> ${diff.toFixed(1)}`;
+                    trendColor = 'var(--danger)';
+                } else {
+                    trendHtml = `<i class="fa-solid fa-minus"></i> 0.0`;
+                    trendColor = 'var(--warning)';
+                }
+            } else if (totalUser > 0) {
+                 trendHtml = `Baru`;
+                 trendColor = 'var(--primary)';
+            }
+
+            document.getElementById('mini-total-user').innerText = totalUser;
+            document.getElementById('mini-avg-score').innerText = overallAvg;
+            document.getElementById('mini-avg-score').style = getScoreTextStyle(overallAvg) + " font-size:28px; font-weight:800; margin:0;"; // Baris Tambahan
+            document.getElementById('mini-score-trend').innerHTML = trendHtml;
+
+            // 5. Pagination System
+            const totalPages = Math.ceil(totalUser / state.limit) || 1;
+            const currentPage = Math.min(state.page, totalPages);
+            const startIndex = (currentPage - 1) * state.limit;
+            const paginatedUsers = filteredUsers.slice(startIndex, startIndex + state.limit);
+
+            // 6. Render Tabel HTML
+            const rowsHtml = paginatedUsers.map((u, idx) => `
+                <tr>
+                    <td style="font-weight:700; color:var(--dark);">${u.username}</td>
+                    <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); font-family:'Roboto Mono', monospace;">${u.companyId}</span></td>
+                    <td><span style="${getScoreBadgeStyle(u.avgScore)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${u.avgScore}</span></td>
+                    <td><span style="${getScoreTextStyle(u.latestScore)} font-weight:800;">${u.latestScore}</span></td>
+                    <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${u.latestRemark}">${u.latestRemark}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('user-drop-${startIndex + idx}', event)">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div id="user-drop-${startIndex + idx}" class="dropdown-content">
+                                <div class="dropdown-item" onclick="openUserDetailModal('${u.username}')">
+                                    <i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i> Riwayat NPS
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <table class="anomaly-table">
+                    <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
+                        <tr>
+                            <th>Username</th>
+                            <th>Company ID</th>
+                            <th>Average Score</th>
+                            <th>Latest Score</th>
+                            <th>Latest Remark</th>
+                            <th style="width: 80px;">Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data yang sesuai filter.</td></tr>'}</tbody>
+                </table>
+            `;
+
+            // 7. Render Tombol Paginasi
+            let pagHtml = '';
+            if (totalPages > 1) {
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === 1 ? 'disabled' : ''} onclick="changeUserReportPage(${currentPage - 1})">Prev</button>`;
+                
+                let startP = Math.max(1, currentPage - 2);
+                let endP = Math.min(totalPages, startP + 4);
+                if (endP - startP < 4) startP = Math.max(1, endP - 4);
+
+                for (let i = startP; i <= endP; i++) {
+                    pagHtml += `<button class="btn ${i === currentPage ? 'btn-primary' : 'btn-outline'}" style="padding:4px 10px; font-size:11px;" onclick="changeUserReportPage(${i})">${i}</button>`;
+                }
+                
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === totalPages ? 'disabled' : ''} onclick="changeUserReportPage(${currentPage + 1})">Next</button>`;
+            }
+            pagContainer.innerHTML = pagHtml;
+        }
+
+        // ================= FUNGSI COMPANY REPORT =================
+        let processedCompanyData = []; // Menyimpan data sementara untuk modal
+
+        function filterCompanyReport() {
+            if(!appState.companyReport) appState.companyReport = { page: 1, limit: 10, search: '' };
+            appState.companyReport.search = document.getElementById('company-report-search').value.toLowerCase();
+            appState.companyReport.page = 1;
+            initCompanyReportTable();
+        }
+
+        function changeCompanyLimit() {
+            if(!appState.companyReport) appState.companyReport = { page: 1, limit: 10, search: '' };
+            appState.companyReport.limit = parseInt(document.getElementById('company-report-limit').value);
+            appState.companyReport.page = 1;
+            initCompanyReportTable();
+        }
+
+        function changeCompanyPage(page) {
+            // BARIS TAMBAHAN: Buat penampung default jika belum ada
+            if(!appState.companyReport) appState.companyReport = { page: 1, limit: 10, search: '' };
+            
+            appState.companyReport.page = page;
+            initCompanyReportTable();
+        }
+
+        function initCompanyReportTable() {
+            const container = document.getElementById('company-report-table-container');
+            const pagContainer = document.getElementById('company-pagination-container');
+
+            if (!appState.surveyLogs || appState.surveyLogs.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada data. Silakan unggah file Excel di tab NPS Tracker terlebih dahulu.</div>`;
+                if(pagContainer) pagContainer.innerHTML = '';
+                return;
+            }
+
+            const state = appState.companyReport || { page: 1, limit: 10, search: '' };
+
+            // 1. Tentukan Kuartal dan Tahun Saat Ini & Sebelumnya
+            const thisQ = appState.currentQuarter;
+            const thisY = appState.currentYear;
+            const lastQ = thisQ === 1 ? 4 : thisQ - 1;
+            const lastY = thisQ === 1 ? thisY - 1 : thisY;
+
+            // 2. Grouping Data by Company ID
+            const compMap = {};
+            appState.surveyLogs.forEach(log => {
+                const cid = log.companyId || 'Tidak Ada ID';
+                if (!compMap[cid]) {
+                    compMap[cid] = { companyId: cid, logs: [], users: {} };
+                }
+                compMap[cid].logs.push(log);
+                
+                const un = log.username || 'Anonymous';
+                if (!compMap[cid].users[un]) compMap[cid].users[un] = [];
+                compMap[cid].users[un].push(log);
+            });
+
+            // 3. Helper untuk menghitung metrik (Bisa dipakai untuk Company & User)
+            const calculateMetrics = (logsArray) => {
+                const thisQLogs = logsArray.filter(l => l.quarter === thisQ && l.year === thisY);
+                const lastQLogs = logsArray.filter(l => l.quarter === lastQ && l.year === lastY);
+
+                const thisQAvg = thisQLogs.length ? (thisQLogs.reduce((sum, l) => sum + l.score, 0) / thisQLogs.length).toFixed(1) : '-';
+                const lastQAvg = lastQLogs.length ? (lastQLogs.reduce((sum, l) => sum + l.score, 0) / lastQLogs.length).toFixed(1) : '-';
+
+                // Cari Bulan Terakhir (Last Month)
+                let maxTime = -1;
+                logsArray.forEach(l => {
+                    const t = l.year * 12 + l.monthIdx;
+                    if (t > maxTime) maxTime = t;
+                });
+                
+                let lastMonthAvg = '-';
+                if (maxTime !== -1) {
+                    const lastMonthLogs = logsArray.filter(l => (l.year * 12 + l.monthIdx) === maxTime);
+                    lastMonthAvg = (lastMonthLogs.reduce((sum, l) => sum + l.score, 0) / lastMonthLogs.length).toFixed(1);
+                }
+
+                return { thisQAvg, lastQAvg, lastMonthAvg };
+            };
+
+            // 4. Proses kalkulasi ke dalam Array
+            const compArray = Object.values(compMap).map(comp => {
+                const compMetrics = calculateMetrics(comp.logs);
+                
+                // Proses juga detail masing-masing user di dalam company
+                const userList = Object.keys(comp.users).map(username => {
+                    const uMetrics = calculateMetrics(comp.users[username]);
+                    return { username, ...uMetrics };
+                });
+
+                return {
+                    companyId: comp.companyId,
+                    totalUsers: Object.keys(comp.users).length,
+                    ...compMetrics,
+                    userList: userList
+                };
+            });
+
+            // Simpan ke variabel global agar bisa diakses oleh Modal
+            processedCompanyData = compArray; 
+
+            // 5. Filter Pencarian
+            let filteredComps = compArray.filter(c => c.companyId.toLowerCase().includes(state.search));
+
+            // 6. Pagination
+            const totalItems = filteredComps.length;
+            const totalPages = Math.ceil(totalItems / state.limit) || 1;
+            const currentPage = Math.min(state.page, totalPages);
+            const startIndex = (currentPage - 1) * state.limit;
+            const paginatedComps = filteredComps.slice(startIndex, startIndex + state.limit);
+
+            // 7. Render Baris Tabel
+            const rowsHtml = paginatedComps.map((c, idx) => `
+                <tr>
+                    <td style="font-weight:700; color:var(--dark); font-family:'Roboto Mono', monospace;">${c.companyId}</td>
+                    <td><span style="font-weight:700; ${getScoreTextStyle(c.lastQAvg)}">${c.lastQAvg}</span></td>
+                    <td><span style="${getScoreBadgeStyle(c.thisQAvg)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${c.thisQAvg}</span></td>
+                    <td><span style="font-weight:700; ${getScoreTextStyle(c.lastMonthAvg)}">${c.lastMonthAvg}</span></td>
+                    <td><span style="font-weight:800; color:var(--dark);">${c.totalUsers} User</span></td>
+                    <td>
+                        <button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" onclick="openCompanyDetailModal('${c.companyId}')">
+                            <i class="fa-solid fa-users-viewfinder"></i> Detail User
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <table class="anomaly-table">
+                    <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
+                        <tr>
+                            <th>Company ID</th>
+                            <th>Last Q Avg Score (Q${lastQ} ${lastY})</th>
+                            <th>This Q Avg Score (Q${thisQ} ${thisY})</th>
+                            <th>Last Month Score</th>
+                            <th>Total User</th>
+                            <th style="width: 100px;">Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data perusahaan.</td></tr>'}</tbody>
+                </table>
+            `;
+
+            // 8. Render Pagination Buttons
+            let pagHtml = '';
+            if (totalPages > 1) {
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === 1 ? 'disabled' : ''} onclick="changeCompanyPage(${currentPage - 1})">Prev</button>`;
+                
+                let startP = Math.max(1, currentPage - 2);
+                let endP = Math.min(totalPages, startP + 4);
+                if (endP - startP < 4) startP = Math.max(1, endP - 4);
+
+                for (let i = startP; i <= endP; i++) {
+                    pagHtml += `<button class="btn ${i === currentPage ? 'btn-primary' : 'btn-outline'}" style="padding:4px 10px; font-size:11px;" onclick="changeCompanyPage(${i})">${i}</button>`;
+                }
+                
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === totalPages ? 'disabled' : ''} onclick="changeCompanyPage(${currentPage + 1})">Next</button>`;
+            }
+            if(pagContainer) pagContainer.innerHTML = pagHtml;
+        }
+
+        // ================= FUNGSI MODAL COMPANY REPORT =================
+        function openCompanyDetailModal(companyId) {
+            document.getElementById('company-modal-title').innerText = `Detail User - ${companyId}`;
+            
+            const company = processedCompanyData.find(c => c.companyId === companyId);
+            const tbody = document.getElementById('company-detail-tbody');
+            
+            if (!company || !company.userList || company.userList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Tidak ada data user.</td></tr>';
+            } else {
+                tbody.innerHTML = company.userList.map(u => `
+                    <tr>
+                        <td style="font-weight:700; color:var(--dark);">${u.username}</td>
+                        <td><span style="font-weight:700; ${getScoreTextStyle(u.lastQAvg)}">${u.lastQAvg}</span></td>
+                        <td><span style="${getScoreBadgeStyle(u.thisQAvg)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${u.thisQAvg}</span></td>
+                        <td><span style="font-weight:700; ${getScoreTextStyle(u.lastMonthAvg)}">${u.lastMonthAvg}</span></td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('company-detail-modal').classList.add('active');
+        }
+
+        function closeCompanyDetailModal() {
+            document.getElementById('company-detail-modal').classList.remove('active');
+        }
+
+        // ================= FUNGSI MODAL USER (DENGAN SORTING ASC/DESC) =================
+        let currentModalUsername = ''; // Variabel global untuk menyimpan username yg sedang dilihat
+
+        function openUserDetailModal(username) {
+            currentModalUsername = username;
+            document.getElementById('user-modal-title-text').innerText = `Riwayat NPS - ${username}`;
+            document.getElementById('user-history-sort').value = 'desc'; // Default Descending
+            renderUserHistory();
+            
+            document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            document.getElementById('user-detail-modal').classList.add('active');
+        }
+
+        function renderUserHistory() {
+            if (!currentModalUsername) return;
+            
+            const sortType = document.getElementById('user-history-sort').value;
+            const logs = appState.surveyLogs.filter(l => l.username === currentModalUsername);
+            
+            // Sort data berdasarkan tipe (Asc/Desc)
+            logs.sort((a, b) => {
+                if (sortType === 'desc') {
+                    if (b.year !== a.year) return b.year - a.year;
+                    return b.monthIdx - a.monthIdx;
+                } else {
+                    if (a.year !== b.year) return a.year - b.year;
+                    return a.monthIdx - b.monthIdx;
+                }
+            });
+
+            const thresholdMinutes = appState.anomalyThresholdSec / 60;
+            
+            const rowsHtml = logs.map((log) => {
+                const isAnomaly = (log.time < thresholdMinutes || (log.saran && String(log.saran).toLowerCase().includes('dummy')));
+                const statusBadge = isAnomaly 
+                    ? `<span style="background:var(--danger); color:#fff; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800;">ANOMALY</span>`
+                    : `<span style="background:var(--success); color:#fff; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800;">NORMAL</span>`;
+                
+                let detik = (log.time * 60).toFixed(1);
+                
+                return `
+                    <tr>
+                        <td style="font-weight:700;">Q${log.quarter}</td>
+                        <td>${monthNames[log.monthIdx]} ${log.year}</td>
+                        <td><span style="font-weight:800; ${getScoreTextStyle(log.score)} font-family:'Roboto Mono', monospace;">${log.score}</span></td>
+                        <td style="max-width:300px; white-space:normal; font-size:11px; line-height:1.4;">${log.saran}</td>
+                        <td style="font-family:'Roboto Mono', monospace; font-size:11px;">${log.time}m <br><span style="color:var(--text-muted);">(${detik}s)</span></td>
+                        <td>${statusBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('user-detail-tbody').innerHTML = rowsHtml;
+        }
+
+        function closeUserDetailModal() {
+            document.getElementById('user-detail-modal').classList.remove('active');
         }
 
         // --- GLOBAL CLICK EVENT ---
@@ -583,6 +1639,8 @@
             if (event.target.classList.contains('modal-overlay')) {
                 closeModal();
                 closeReportModal();
+                closeUserDetailModal();
+                closeLastLoginReportModal();
             }
         }
 
@@ -596,7 +1654,9 @@
 
         // --- TAB NAVIGATION ---
         function switchTab(tab, element) {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            // PERBAIKAN: Hanya hapus class active dari menu yang ada di dalam .sub-menu, 
+            // agar class header-group tidak sengaja ikut terhapus warnanya.
+            document.querySelectorAll('.sub-menu .nav-item').forEach(i => i.classList.remove('active'));
             element.classList.add('active');
 
             document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
@@ -606,14 +1666,31 @@
             document.getElementById(`editor-${tab}`).classList.add('active');
 
             const titles = {
-                'lastlogin': 'Last Login Tracker Dashboard', // TITLE TAB BARU
+                'lastlogin': 'Last Login Tracker Dashboard', 
                 'lastlogin_report': 'Last Login History Report',
                 'nps': 'Net Promoter Score (NPS) Dashboard',
                 'retention': 'Retention Rate Dashboard',
                 'anomaly': 'Anomaly Detection Report',
-                'nps_report': 'NPS History Report Archive'
+                'user_report': 'User Behavior & Feedback Report',
+                'company_report': 'Company Performance Report',
+                'nps_report': 'NPS History Report Archive',
+                'user_company': 'User Company Master Data' // TAB BARU
             };
             document.getElementById('page-header-title').innerText = titles[tab];
+        }
+
+        // FUNGSI BARU: Mengontrol buka-tutup submenu secara dinamis (Accordion System)
+        function toggleGroup(element) {
+            const group = element.parentElement;
+            const isOpen = group.classList.contains('open');
+            
+            // JIKA INGIN SISTEM ACCORDION: Saat satu modul dibuka, modul lain otomatis menutup.
+            document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+            
+            // Jika modul yang diklik aslinya tertutup, buka sekarang.
+            if (!isOpen) {
+                group.classList.add('open');
+            }
         }
 
 
@@ -643,10 +1720,17 @@
                     return newRow;
                 });
                 
-                saveDataToFirebase();
+                // AUTO-REGISTER KE MASTER DATA
+                appState.lastLoginData.forEach(row => {
+                    const cid = row['company_id'] || row['id_perusahaan'];
+                    registerCompanyToMaster(cid);
+                });
+                
+                saveDataToLocal();
 
                 alert(`🎯 Berhasil memproses ${appState.lastLoginData.length} data Last Login.`);
                 renderLastLoginDashboard();
+                initUserCompanyTable(); // REFRESH TABEL MASTER DATA DI SINI
                 event.target.value = ''; // reset input
             };
             reader.readAsArrayBuffer(file);
@@ -656,7 +1740,7 @@
             const inputVal = parseInt(document.getElementById('login-threshold-input').value);
             if (!isNaN(inputVal) && inputVal > 0) {
                 appState.lastLoginThreshold = inputVal;
-                saveDataToFirebase();
+                saveDataToLocal();
                 renderLastLoginDashboard();
             }
         }
@@ -683,7 +1767,7 @@
             if (!isNaN(att) && !isNaN(inact) && att > 0 && inact > att) {
                 appState.lastLoginAttentionLimit = att;
                 appState.lastLoginInactiveLimit = inact;
-                saveDataToFirebase();
+                saveDataToLocal();
                 renderLastLoginDashboard();
                 alert(`Rentang waktu berhasil diperbarui:\nActive: 0 - ${att-1} Hari\nNeed Attention: ${att} - ${inact} Hari\nInactive: > ${inact} Hari`);
             } else {
@@ -806,7 +1890,7 @@
             if (!appState.lastLoginReports) appState.lastLoginReports = [];
             appState.lastLoginReports.unshift(reportSnapshot); 
             
-            saveDataToFirebase();
+            saveDataToLocal();
             initLastLoginReportTable();
             alert(`Laporan snapshot berhasil disimpan permanen!`);
         }
@@ -938,7 +2022,7 @@ function openLastLoginReportDetail(idx) {
                 const targetMonthIdx = (appState.currentQuarter - 1) * 3 + idx;
                 
                 const anomalies = appState.surveyLogs.filter(log => 
-                    log.monthIdx === targetMonthIdx && log.year === appState.currentYear && log.time < thresholdMinutes
+                    log.monthIdx === targetMonthIdx && log.year === appState.currentYear && (log.time < thresholdMinutes || (log.saran && String(log.saran).toLowerCase().includes('dummy')))
                 );
                 
                 const anomP = anomalies.filter(a => a.category === 'p').length;
@@ -1014,7 +2098,7 @@ function openLastLoginReportDetail(idx) {
 
         function updateNPSVal(idx, type, val) {
             appState.nps[idx][type] = parseInt(val) || 0;
-            saveDataToFirebase();
+            saveDataToLocal();
             calcNPS();
         }
 
@@ -1026,7 +2110,7 @@ function openLastLoginReportDetail(idx) {
                 const targetMonthIdx = (appState.currentQuarter - 1) * 3 + idx;
                 
                 const anomalies = appState.surveyLogs.filter(log => 
-                    log.monthIdx === targetMonthIdx && log.year === appState.currentYear && log.time < thresholdMinutes
+                    log.monthIdx === targetMonthIdx && log.year === appState.currentYear && (log.time < thresholdMinutes || (log.saran && String(log.saran).toLowerCase().includes('dummy')))
                 );
                 const anomP = anomalies.filter(a => a.category === 'p').length;
                 const anomV = anomalies.filter(a => a.category === 'v').length;
@@ -1084,54 +2168,116 @@ function openLastLoginReportDetail(idx) {
 
         function addPackage() {
             appState.retention.push({ id: Date.now(), name: "Nama Paket", users: [] });
-            saveDataToFirebase();
+            saveDataToLocal();
             initRetention();
         }
 
         function addUserToPkg(pkgId) {
-            appState.retention.find(p => p.id === pkgId).users.push({ id: Date.now(), name: "Klien", status: "active", isNew: false });
-            saveDataToFirebase();
+            // Ubah default nama menjadi kosong agar dropdown menampilkan placeholder
+            appState.retention.find(p => p.id === pkgId).users.push({ id: Date.now(), name: "", status: "active", isNew: false, isHidden: false });
+            saveDataToLocal();
             initRetention();
         }
 
         function removeUserFromPkg(pkgId, usrId) {
             const pkg = appState.retention.find(p => p.id === pkgId);
+            const usr = pkg.users.find(u => u.id === usrId);
+            
+            // Hapus sinkronisasi paket dari master company jika klien dihapus dari tracker ini
+            if (usr && usr.name && appState.masterCompany) {
+                const comp = appState.masterCompany.find(c => c.companyId === usr.name);
+                if (comp && comp.packageId === pkgId) comp.packageId = null;
+            }
+
             pkg.users = pkg.users.filter(u => u.id !== usrId);
-            saveDataToFirebase();
+            saveDataToLocal();
             initRetention();
+            initUserCompanyTable(); // Refresh tabel master
         }
 
         function updatePkgName(pkgId, text) {
             appState.retention.find(p => p.id === pkgId).name = text;
-            saveDataToFirebase();
+            saveDataToLocal();
             calcRetention();
+            initUserCompanyTable(); // Refresh nama paket di master data
         }
 
         function updateUserField(pkgId, usrId, key, value) {
             appState.retention.find(p => p.id === pkgId).users.find(u => u.id === usrId)[key] = value;
-            saveDataToFirebase();
+            
+            // Sinkronisasi dua arah: Jika mengubah company di dropdown, update datanya di Master Data
+            if (key === 'name' && appState.masterCompany) {
+                const comp = appState.masterCompany.find(c => c.companyId === value);
+                if (comp) comp.packageId = pkgId;
+            }
+
+            saveDataToLocal();
             calcRetention();
+            if (key === 'name') initUserCompanyTable(); // Refresh tabel master
         }
 
         function initRetention() {
             const box = document.getElementById('retention-inputs-box');
             box.innerHTML = '';
             
+            // Build opsi dropdown dari Master Company
+            let companyOptions = '<option value="">-- Pilih Company ID --</option>';
+            if (appState.masterCompany && appState.masterCompany.length > 0) {
+                appState.masterCompany.forEach(c => {
+                    companyOptions += `<option value="${c.companyId}">${c.companyId}</option>`;
+                });
+            }
+
             appState.retention.forEach(pkg => {
-                let uRows = pkg.users.map(u => `
-                    <div class="user-builder-row">
-                        <input type="text" value="${u.name}" oninput="updateUserField(${pkg.id}, ${u.id}, 'name', this.value)">
-                        <select onchange="updateUserField(${pkg.id}, ${u.id}, 'status', this.value)">
+                let uRows = pkg.users.map(u => {
+                    // Cek opsi yang sedang terpilih untuk user lama (fallback)
+                    let currentOptions = companyOptions;
+                    if (u.name && !currentOptions.includes(`value="${u.name}"`)) {
+                        currentOptions += `<option value="${u.name}">${u.name}</option>`;
+                    }
+                    currentOptions = currentOptions.replace(`value="${u.name}"`, `value="${u.name}" selected`);
+
+                    // Tarik info Last Login dari State
+                    let llInfo = '<span style="color:#cbd5e1">-</span>';
+                    if (u.name && appState.lastLoginData) {
+                        const ll = appState.lastLoginData.find(r => (r.company_id || r.id_perusahaan) === u.name);
+                        if (ll) {
+                            let days = parseInt(ll.last_login_in_days || ll.hari_terakhir_login || ll.last_login || "0");
+                            if (isNaN(days)) days = 0;
+                            if (days <= 0) {
+                                llInfo = '<span style="color:var(--success)">Hari ini</span>';
+                            } else if (days > 365) {
+                                llInfo = `<span style="color:var(--danger); font-weight:700;">${days} Hari lalu (>1 thn)</span>`;
+                            } else {
+                                llInfo = `${days} Hari lalu`;
+                            }
+                        }
+                    }
+
+                    return `
+                    <div class="user-builder-row" style="align-items: flex-start; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed var(--gray-border);">
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+                            <select onchange="updateUserField(${pkg.id}, ${u.id}, 'name', this.value)" style="width:100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: 4px 6px; border: 1px solid var(--gray-border); border-radius: 4px; font-size: 11px;">
+                                ${currentOptions}
+                            </select>
+                            <span style="font-size: 9px; color: var(--text-muted);"><i class="fa-solid fa-clock-rotate-left"></i> Login: ${llInfo}</span>
+                        </div>
+                        <select onchange="updateUserField(${pkg.id}, ${u.id}, 'status', this.value)" style="padding: 4px; border: 1px solid var(--gray-border); border-radius: 4px; font-size: 11px; height: 26px;">
                             <option value="active" ${u.status === 'active' ? 'selected' : ''}>Active</option>
                             <option value="inactive" ${u.status === 'inactive' ? 'selected' : ''}>Inactive</option>
                             <option value="cancel" ${u.status === 'cancel' ? 'selected' : ''}>Cancel</option>
                         </select>
-                        <label style="font-size:10px; font-weight:700; display:flex; align-items:center; gap:2px; color:var(--primary);">
-                            <input type="checkbox" ${u.isNew ? 'checked' : ''} onchange="updateUserField(${pkg.id}, ${u.id}, 'isNew', this.checked)"> Baru
-                        </label>
-                        <i class="fa-solid fa-circle-minus" style="color:var(--danger); cursor:pointer;" onclick="removeUserFromPkg(${pkg.id}, ${u.id})"></i>
+                        <div style="display: flex; flex-direction: column; gap: 4px; margin-left: 2px;">
+                            <label style="font-size:9px; font-weight:700; display:flex; align-items:center; gap:2px; color:var(--primary);">
+                                <input type="checkbox" ${u.isNew ? 'checked' : ''} onchange="updateUserField(${pkg.id}, ${u.id}, 'isNew', this.checked)"> Baru
+                            </label>
+                            <label style="font-size:9px; font-weight:700; display:flex; align-items:center; gap:2px; color:var(--text-muted);">
+                                <input type="checkbox" ${u.isHidden ? 'checked' : ''} onchange="updateUserField(${pkg.id}, ${u.id}, 'isHidden', this.checked)"> Hide
+                            </label>
+                        </div>
+                        <i class="fa-solid fa-circle-minus" style="color:var(--danger); cursor:pointer; margin-left:4px; margin-top: 6px;" onclick="removeUserFromPkg(${pkg.id}, ${u.id})"></i>
                     </div>
-                `).join('');
+                `}).join('');
 
                 box.innerHTML += `
                     <div class="pkg-builder-box">
@@ -1152,12 +2298,16 @@ function openLastLoginReportDetail(idx) {
             let totalActives = 0, totalClients = 0;
 
             appState.retention.forEach(pkg => {
-                const actives = pkg.users.filter(u => u.status === 'active');
-                const nonActives = pkg.users.filter(u => u.status !== 'active');
-                totalActives += actives.length; totalClients += pkg.users.length;
+                // Saring user agar yang memiliki status isHidden = true tidak dihitung
+                const visibleUsers = pkg.users.filter(u => !u.isHidden);
+
+                const actives = visibleUsers.filter(u => u.status === 'active');
+                const nonActives = visibleUsers.filter(u => u.status !== 'active');
+                totalActives += actives.length; 
+                totalClients += visibleUsers.length;
                 
-                const cardPct = pkg.users.length ? ((actives.length / pkg.users.length) * 100).toFixed(1) : 0;
-                const isDouble = pkg.users.length > 8 ? 'double-col' : '';
+                const cardPct = visibleUsers.length ? ((actives.length / visibleUsers.length) * 100).toFixed(1) : 0;
+                const isDouble = visibleUsers.length > 8 ? 'double-col' : '';
 
                 target.innerHTML += `
                     <div class="retention-card">
@@ -1186,21 +2336,45 @@ function openLastLoginReportDetail(idx) {
             const inputVal = parseFloat(document.getElementById('anomaly-threshold-input').value);
             if (!isNaN(inputVal) && inputVal > 0) {
                 appState.anomalyThresholdSec = inputVal;
-                saveDataToFirebase();
+                saveDataToLocal();
                 alert(`Batas waktu minimal berhasil diperbarui menjadi ${appState.anomalyThresholdSec} Detik.`);
                 initNPS();
                 initAnomaly(); 
             }
         }
 
+        // ================= FUNGSI ANOMALY REPORT =================
+        function filterAnomaly() {
+            if(!appState.anomalyFilter) appState.anomalyFilter = { page: 1, limit: 5, sort: 'desc', year: [], quarter: [], month: [] };
+            appState.anomalyFilter.sort = document.getElementById('anomaly-sort').value;
+            appState.anomalyFilter.year = getCheckedValues('anomaly-filter-year');
+            appState.anomalyFilter.quarter = getCheckedValues('anomaly-filter-quarter');
+            appState.anomalyFilter.month = getCheckedValues('anomaly-filter-month');
+            appState.anomalyFilter.page = 1; 
+            initAnomaly();
+        }
+
+        function changeAnomalyLimit() {
+            if(!appState.anomalyFilter) appState.anomalyFilter = { page: 1, limit: 5, sort: 'desc', year: [], quarter: [], month: [] };
+            appState.anomalyFilter.limit = parseInt(document.getElementById('anomaly-limit-select').value);
+            appState.anomalyFilter.page = 1;
+            initAnomaly();
+        }
+
+        function changeAnomalyPage(page) {
+            appState.anomalyFilter.page = page;
+            initAnomaly();
+        }
+
         function initAnomaly() {
             const container = document.getElementById('anomaly-list-container');
+            const pagContainer = document.getElementById('anomaly-pagination-container');
             const currentThreshold = appState.anomalyThresholdSec;
             const thresholdMinutes = currentThreshold / 60;
             
-            document.getElementById('anomaly-subtitle').innerText = `Daftar pengguna dengan waktu pengisian (Interval Time) di bawah ${currentThreshold} Detik`;
+            document.getElementById('anomaly-subtitle').innerText = `Daftar pengguna (Interval Time < ${currentThreshold} Detik atau mengandung kata DUMMY)`;
             
-            const anomalousLogs = appState.surveyLogs.filter(log => log.time < thresholdMinutes);
+            let anomalousLogs = appState.surveyLogs.filter(log => (log.time < thresholdMinutes || (log.saran && String(log.saran).toLowerCase().includes('dummy'))));
 
             if (anomalousLogs.length === 0) {
                 container.innerHTML = `
@@ -1209,37 +2383,60 @@ function openLastLoginReportDetail(idx) {
                         <h4 style="color:var(--dark);">Semua Data Terlihat Normal</h4>
                         <p style="font-size:12px; color:var(--text-muted);">Berdasarkan pengaturan (${currentThreshold} detik), tidak ada data anomali yang terdeteksi.</p>
                     </div>`;
+                if(pagContainer) pagContainer.innerHTML = '';
                 return;
             }
 
+            // FILTER
+            const state = appState.anomalyFilter || { page: 1, limit: 5, sort: 'desc', year: [], quarter: [], month: [] };
+            
+            if (state.year && state.year.length > 0) anomalousLogs = anomalousLogs.filter(l => state.year.includes(String(l.year)));
+            if (state.quarter && state.quarter.length > 0) anomalousLogs = anomalousLogs.filter(l => state.quarter.includes(String(l.quarter)));
+            if (state.month && state.month.length > 0) anomalousLogs = anomalousLogs.filter(l => state.month.includes(String(l.monthIdx)));
+
+            // GROUPING
             const grouped = {};
             anomalousLogs.forEach(log => {
                 const key = `${log.monthIdx}-${log.year}-${log.quarter}`;
                 if (!grouped[key]) {
-                    grouped[key] = {
-                        monthName: monthNames[log.monthIdx],
-                        monthIdx: log.monthIdx,
-                        year: log.year,
-                        quarter: log.quarter,
-                        count: 0
-                    };
+                    grouped[key] = { monthName: monthNames[log.monthIdx], monthIdx: log.monthIdx, year: log.year, quarter: log.quarter, count: 0 };
                 }
                 grouped[key].count++;
             });
 
-            const rowsHtml = Object.values(grouped).map((g, i) => `
+            let groupsArray = Object.values(grouped);
+
+            // SORTING
+            groupsArray.sort((a, b) => {
+                if (state.sort === 'desc') {
+                    if (b.year !== a.year) return b.year - a.year;
+                    return b.monthIdx - a.monthIdx;
+                } else {
+                    if (a.year !== b.year) return a.year - b.year;
+                    return a.monthIdx - b.monthIdx;
+                }
+            });
+
+            // PAGINATION
+            const totalItems = groupsArray.length;
+            const totalPages = Math.ceil(totalItems / state.limit) || 1;
+            const currentPage = Math.min(state.page, totalPages);
+            const startIndex = (currentPage - 1) * state.limit;
+            const paginatedItems = groupsArray.slice(startIndex, startIndex + state.limit);
+
+            const rowsHtml = paginatedItems.map((g, i) => `
                 <tr>
                     <td style="font-weight:700;">${g.monthName}</td>
                     <td>${g.year}</td>
                     <td>Q${g.quarter}</td>
                     <td style="color:var(--danger); font-weight:800;">${g.count} Pengguna</td>
-                    <td><span style="background:#e0f2fe; color:var(--primary); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;">< ${currentThreshold} Detik</span></td>
+                    <td><span style="background:#e0f2fe; color:var(--primary); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;">Filter Otomatis</span></td>
                     <td>
                         <div class="dropdown">
-                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('drop-${i}', event)">
+                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('drop-${startIndex+i}', event)">
                                 <i class="fa-solid fa-ellipsis-vertical"></i>
                             </button>
-                            <div id="drop-${i}" class="dropdown-content">
+                            <div id="drop-${startIndex+i}" class="dropdown-content">
                                 <div class="dropdown-item" onclick="openDetailModal(${g.monthIdx}, ${g.year}, ${g.quarter})">
                                     <i class="fa-solid fa-table-list" style="color:var(--primary);"></i> Lihat Detail
                                 </div>
@@ -1251,7 +2448,7 @@ function openLastLoginReportDetail(idx) {
 
             container.innerHTML = `
                 <div style="margin-bottom:15px; font-size:13px; font-weight:600; color:var(--danger);">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Ditemukan Total ${anomalousLogs.length} Pengguna Terindikasi Anomali
+                    <i class="fa-solid fa-triangle-exclamation"></i> Menampilkan ${totalItems} Grup Laporan Anomali
                 </div>
                 <table class="anomaly-table">
                     <thead>
@@ -1264,27 +2461,42 @@ function openLastLoginReportDetail(idx) {
                             <th style="width: 80px;">Action</th>
                         </tr>
                     </thead>
-                    <tbody>${rowsHtml}</tbody>
+                    <tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data yang sesuai filter.</td></tr>'}</tbody>
                 </table>
             `;
+
+            // RENDER PAGINATION BUTTONS
+            let pagHtml = '';
+            if (totalPages > 1) {
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === 1 ? 'disabled' : ''} onclick="changeAnomalyPage(${currentPage - 1})">Prev</button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    pagHtml += `<button class="btn ${i === currentPage ? 'btn-primary' : 'btn-outline'}" style="padding:4px 10px; font-size:11px;" onclick="changeAnomalyPage(${i})">${i}</button>`;
+                }
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === totalPages ? 'disabled' : ''} onclick="changeAnomalyPage(${currentPage + 1})">Next</button>`;
+            }
+            if(pagContainer) pagContainer.innerHTML = pagHtml;
         }
 
         function openDetailModal(monthIdx, year, quarter) {
             const thresholdMinutes = appState.anomalyThresholdSec / 60;
             const filteredLogs = appState.surveyLogs.filter(log => 
-                log.monthIdx === monthIdx && log.year === year && log.quarter === quarter && log.time < thresholdMinutes
+                log.monthIdx === monthIdx && log.year === year && log.quarter === quarter && (log.time < thresholdMinutes || (log.saran && String(log.saran).toLowerCase().includes('dummy')))
             );
             filteredLogs.sort((a, b) => a.time - b.time);
 
             const tbody = document.getElementById('modal-anomaly-tbody');
             tbody.innerHTML = filteredLogs.map((a, i) => {
                 let detik = (a.time * 60).toFixed(1);
+                let reason = "TERLALU CEPAT";
+                if (a.saran && String(a.saran).toLowerCase().includes('dummy')) {
+                    reason = (a.time < thresholdMinutes) ? "CEPAT & DUMMY" : "KATA DUMMY";
+                }
                 return `
                 <tr>
                     <td>${i + 1}</td>
                     <td style="font-weight:700; color:var(--primary);">${a.username}</td>
                     <td style="font-family:'Roboto Mono', monospace;">${a.time} Menit (${detik} Detik)</td>
-                    <td><span style="background:var(--danger); color:#fff; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800;">TERLALU CEPAT</span></td>
+                    <td><span style="background:var(--danger); color:#fff; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800;">${reason}</span></td>
                 </tr>
                 `;
             }).join('');
@@ -1298,17 +2510,99 @@ function openLastLoginReportDetail(idx) {
             document.getElementById('anomaly-modal').classList.remove('active');
         }
 
+        // ================= FUNGSI RESET SEMUA DATA NPS =================
+        function resetNPSData() {
+            const confirmReset = confirm("⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data NPS (NPS Report, Anomaly Report, dan User Report)?\n\nTindakan ini tidak dapat dibatalkan.");
+            
+            if (confirmReset) {
+                // Kosongkan riwayat laporan dan log survei (membersihkan NPS Report, Anomaly, User Report)
+                appState.npsReports = [];
+                appState.surveyLogs = [];
+                
+                // Reset angka input manual NPS di dashboard ke 0
+                appState.nps.forEach(m => {
+                    m.p = 0;
+                    m.v = 0;
+                    m.d = 0;
+                });
+
+                // Simpan state kosong ini ke LocalStorage
+                saveDataToLocal();
+                
+                // Render ulang semua tampilan tabel & dashboard
+                initNPS();
+                initAnomaly();
+                initNPSReportTable();
+                initUserReportTable();
+                initCompanyReportTable();
+                
+                alert("✔️ Berhasil! Seluruh data NPS telah di-reset ke kondisi awal.");
+            }
+        }
+
+        // ================= FUNGSI NPS REPORT =================
+        function filterNPSReport() {
+            if(!appState.npsReportFilter) appState.npsReportFilter = { page: 1, limit: 5, sort: 'desc', year: [], quarter: [], month: [] };
+            appState.npsReportFilter.sort = document.getElementById('nps-sort').value;
+            appState.npsReportFilter.year = getCheckedValues('nps-filter-year');
+            appState.npsReportFilter.quarter = getCheckedValues('nps-filter-quarter');
+            appState.npsReportFilter.month = getCheckedValues('nps-filter-month');
+            appState.npsReportFilter.page = 1; 
+            initNPSReportTable();
+        }
+
+        function changeNPSLimit() {
+            if(!appState.npsReportFilter) appState.npsReportFilter = { page: 1, limit: 5, sort: 'desc', year: [], quarter: [], month: [] };
+            appState.npsReportFilter.limit = parseInt(document.getElementById('nps-limit-select').value);
+            appState.npsReportFilter.page = 1;
+            initNPSReportTable();
+        }
+
+        function changeNPSPage(page) {
+            appState.npsReportFilter.page = page;
+            initNPSReportTable();
+        }
+
         function initNPSReportTable() {
             const container = document.getElementById('nps-report-table-container');
+            const pagContainer = document.getElementById('nps-report-pagination-container');
+            
             if (appState.npsReports.length === 0) {
                 container.innerHTML = `
                     <div style="text-align:center; padding:30px; color:var(--text-muted);">
                         Belum ada riwayat laporan. Silakan unggah file Excel di tab NPS Tracker terlebih dahulu.
                     </div>`;
+                if(pagContainer) pagContainer.innerHTML = '';
                 return;
             }
 
-            const rowsHtml = appState.npsReports.map((report, idx) => `
+            const state = appState.npsReportFilter || { page: 1, limit: 5, sort: 'desc', year: [], quarter: [], month: [] };
+            
+            // FILTER
+            let filteredReports = appState.npsReports;
+            if (state.year && state.year.length > 0) filteredReports = filteredReports.filter(l => state.year.includes(String(l.year)));
+            if (state.quarter && state.quarter.length > 0) filteredReports = filteredReports.filter(l => state.quarter.includes(String(l.quarter)));
+            if (state.month && state.month.length > 0) filteredReports = filteredReports.filter(l => state.month.includes(String(l.monthIdx)));
+
+            // SORTING
+            filteredReports.sort((a, b) => {
+                if (state.sort === 'desc') {
+                    if (b.year !== a.year) return b.year - a.year;
+                    return b.monthIdx - a.monthIdx;
+                } else {
+                    if (a.year !== b.year) return a.year - b.year;
+                    return a.monthIdx - b.monthIdx;
+                }
+            });
+
+            // PAGINATION
+            const totalItems = filteredReports.length;
+            const totalPages = Math.ceil(totalItems / state.limit) || 1;
+            const currentPage = Math.min(state.page, totalPages);
+            const startIndex = (currentPage - 1) * state.limit;
+            const paginatedItems = filteredReports.slice(startIndex, startIndex + state.limit);
+
+            const rowsHtml = paginatedItems.map((report, idx) => `
                 <tr>
                     <td style="font-weight:700;">${report.monthYear}</td>
                     <td>${report.quarter}</td>
@@ -1318,14 +2612,16 @@ function openLastLoginReportDetail(idx) {
                     <td style="color:var(--success); font-weight:700;">${report.promoterUser}</td>
                     <td style="color:var(--warning); font-weight:700;">${report.passiveUser}</td>
                     <td style="color:var(--danger); font-weight:700;">${report.detractorUser}</td>
-                    <td><span style="background:#e0f2fe; color:var(--primary); padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${report.npsAvg} / 10</span></td>
+                    <td><span style="font-weight:800; color:var(--dark);">${report.npsIndex !== undefined ? report.npsIndex : (report.npsAvg || 0)}</span></td>
+                    <td><span style="${getScoreBadgeStyle(report.avgScore !== undefined ? report.avgScore : (report.npsAvg || 0))} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${report.avgScore !== undefined ? report.avgScore : (report.npsAvg || 0)} / 10</span></td>
                     <td>
                         <div class="dropdown">
-                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('report-drop-${idx}', event)">
+                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('report-drop-${startIndex+idx}', event)">
                                 <i class="fa-solid fa-ellipsis-vertical"></i>
                             </button>
-                            <div id="report-drop-${idx}" class="dropdown-content">
-                                <div class="dropdown-item" onclick="openReportDetailModal(${idx})">
+                            <div id="report-drop-${startIndex+idx}" class="dropdown-content">
+                                <!-- Pass Original Index by finding it in original array -->
+                                <div class="dropdown-item" onclick="openReportDetailModal(${appState.npsReports.indexOf(report)})">
                                     <i class="fa-solid fa-table-list" style="color:var(--primary);"></i> Lihat Detail
                                 </div>
                             </div>
@@ -1346,13 +2642,25 @@ function openLastLoginReportDetail(idx) {
                             <th>Promoter User</th>
                             <th>Passive User</th>
                             <th>Detractor User</th>
-                            <th>NPS Avg</th>
+                            <th>NPS Index</th>
+                            <th>AVG Score</th>
                             <th style="width: 80px;">Detail</th>
                         </tr>
                     </thead>
-                    <tbody>${rowsHtml}</tbody>
+                    <tbody>${rowsHtml || '<tr><td colspan="11" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data yang sesuai filter.</td></tr>'}</tbody>
                 </table>
             `;
+
+            // RENDER PAGINATION BUTTONS
+            let pagHtml = '';
+            if (totalPages > 1) {
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === 1 ? 'disabled' : ''} onclick="changeNPSPage(${currentPage - 1})">Prev</button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    pagHtml += `<button class="btn ${i === currentPage ? 'btn-primary' : 'btn-outline'}" style="padding:4px 10px; font-size:11px;" onclick="changeNPSPage(${i})">${i}</button>`;
+                }
+                pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === totalPages ? 'disabled' : ''} onclick="changeNPSPage(${currentPage + 1})">Next</button>`;
+            }
+            if(pagContainer) pagContainer.innerHTML = pagHtml;
         }
 
         function openReportDetailModal(idx) {
@@ -1404,8 +2712,8 @@ function openLastLoginReportDetail(idx) {
                     <td style="font-weight:700; color:var(--dark);">${item.username}</td>
                     <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); background:#f1f5f9; padding:2px 6px; border-radius:4px;">${item.companyId}</span></td>
                     <td style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.saran}">${item.saran}</td>
-                    <td><span style="font-weight:800; color:var(--primary); font-family:'Roboto Mono', monospace;">${item.score}</span></td>
-                </tr>
+                    <td><span style="font-weight:800; ${getScoreTextStyle(item.score)} font-family:'Roboto Mono', monospace;">${item.score}</span></td>
+                    </tr>
             `).join('');
 
             container.innerHTML = `
@@ -1488,7 +2796,8 @@ function openLastLoginReportDetail(idx) {
                     promoterUser: 69,
                     passiveUser: 38,
                     detractorUser: 45,
-                    npsAvg: "8.4",
+                    npsIndex: "15.8",
+                    avgScore: "8.4",
                     details: {
                         p: Array(12).fill(null).map((_, i) => ({ username: `promoter_user_${i+1}`, companyId: `ID-${100+i}`, saran: "Sistem sangat membantu operational gudang kami!", score: 10 })),
                         v: Array(7).fill(null).map((_, i) => ({ username: `passive_user_${i+1}`, companyId: `ID-${200+i}`, saran: "Standard saja, performa stabil.", score: 8 })),
@@ -1498,6 +2807,7 @@ function openLastLoginReportDetail(idx) {
             ];
 
             initNPSReportTable();
+            initUserReportTable();
             initNPS();
             initRetention();
             initAnomaly();
@@ -1505,7 +2815,7 @@ function openLastLoginReportDetail(idx) {
 
         window.onload = () => {
             // Jalankan fungsi load dari Firebase saat halaman dibuka
-            loadDataFromFirebase();
+            loadDataFromLocal();
         };
 
         // --- PPTXGENJS & EXCEL PARSER ORIGINAL CODE (DI-OMIT UNTUK MENGHEMAT TEMPAT KARENA TIDAK ADA PERUBAHAN) ---
@@ -1597,220 +2907,250 @@ function openLastLoginReportDetail(idx) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
-                
                 const workbook = XLSX.read(data, {type: 'array', cellDates: true});
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
-                
-                let monthlyData = Array(12).fill(null).map(() => ({ p: 0, v: 0, d: 0 }));
-                let detectedYear = 2026;
-                let detectedQuarter = 2;
-                let hasValidData = false;
 
-                const headerRow = rows[0] || [];
-                let colCompanyId = -1;
-                let colSaran = -1;
-                
-                headerRow.forEach((col, idx) => {
-                    const colStr = String(col || '').trim().toLowerCase();
-                    if (colStr === 'company id') colCompanyId = idx;
-                    if (colStr.includes('berikan saran dan masukan anda')) colSaran = idx;
-                });
-
-                appState.surveyLogs = []; 
-
-                for(let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (!row || row.length === 0) continue;
-                    
-                    let cellDate = row[0]; 
-                    let mIdx = -1; 
-                    let year = 2026;
-
-                    if (cellDate instanceof Date && !isNaN(cellDate.getTime())) {
-                        mIdx = cellDate.getMonth();
-                        year = cellDate.getFullYear();
-                    } else if (typeof cellDate === 'string') {
-                        let datePart = cellDate.trim().split(' ')[0];
-                        let parts = datePart.split(/[\/\-]/);
-                        if (parts.length === 3) {
-                            if (parts[0].length === 4) { 
-                                mIdx = parseInt(parts[1], 10) - 1;
-                                year = parseInt(parts[0], 10);
-                            } else { 
-                                mIdx = parseInt(parts[1], 10) - 1;
-                                year = parseInt(parts[2], 10);
-                            }
-                        }
-                    }
-
-                    if (mIdx < 0 || mIdx > 11) continue;
-
-                    let quarter = Math.ceil((mIdx + 1) / 3);
-
-                    if (!hasValidData) {
-                        detectedYear = year;
-                        detectedQuarter = quarter; 
-                        hasValidData = true;
-                    }
-
-                    let score = -1;
-                    for (let j = row.length - 1; j >= Math.max(0, row.length - 3); j--) {
-                        const cellVal = parseInt(row[j]);
-                        if (!isNaN(cellVal) && cellVal >= 0 && cellVal <= 10) {
-                            score = cellVal;
-                            break;
-                        }
-                    }
-                    
-                    let category = '';
-                    if (score >= 9) {
-                        monthlyData[mIdx].p++;
-                        category = 'p';
-                    } else if (score >= 7 && score <= 8) {
-                        monthlyData[mIdx].v++;
-                        category = 'v';
-                    } else if (score >= 0 && score <= 6) {
-                        monthlyData[mIdx].d++;
-                        category = 'd';
-                    }
-
-                    const intervalTime = parseFloat(row[2]);
-                    const username = row[3] || 'Anonymous';
-                    const companyId = colCompanyId !== -1 ? (row[colCompanyId] || '-') : (row[1] || '-');
-                    const saran = colSaran !== -1 ? (row[colSaran] || '-') : (row[4] || '-');
-                    
-                    if (!isNaN(intervalTime) && username) {
-                        appState.surveyLogs.push({
-                            username: username,
-                            companyId: companyId,
-                            saran: saran,
-                            score: score,
-                            time: intervalTime,
-                            monthIdx: mIdx,
-                            year: year,
-                            quarter: quarter,
-                            category: category
-                        });
+                // 1. Cari baris mana yang merupakan REAL HEADER
+                let headerRowIdx = -1;
+                for (let i = 0; i < rows.length; i++) {
+                    if (rows[i] && rows[i].some(cell => cell && cell.toString().toLowerCase().includes('time'))) {
+                        headerRowIdx = i;
+                        break;
                     }
                 }
 
-                if (!hasValidData) {
-                    alert("Maaf, sistem tidak berhasil membaca kolom tanggal yang valid dari file Excel Anda.");
+                if (headerRowIdx === -1) {
+                    alert("⚠️ Format file tidak dikenali. Pastikan terdapat kolom bertuliskan 'Start Time' atau 'Created Time'.");
                     return;
                 }
 
-                const thresholdMinutes = appState.anomalyThresholdSec / 60;
-                const excelGroups = {};
-
-                appState.surveyLogs.forEach(log => {
-                    const groupKey = `${log.monthIdx}-${log.year}`;
-                    if (!excelGroups[groupKey]) {
-                        excelGroups[groupKey] = {
-                            monthIdx: log.monthIdx,
-                            monthName: monthNames[log.monthIdx],
-                            year: log.year,
-                            quarter: log.quarter,
-                            allUsers: []
-                        };
-                    }
-                    excelGroups[groupKey].allUsers.push(log);
+                const headers = rows[headerRowIdx];
+                
+                // 2. Deteksi indeks kolom secara dinamis dan spesifik
+                let colStartTime = headers.findIndex(h => h && h.toString().toLowerCase().includes('start time'));
+                let colInterval = headers.findIndex(h => h && h.toString().toLowerCase().includes('interval time'));
+                let colUsername = headers.findIndex(h => h && h.toString().toLowerCase().includes('username'));
+                let colCompanyId = headers.findIndex(h => h && h.toString().toLowerCase().includes('company id'));
+                let colSaran = headers.findIndex(h => h && h.toString().toLowerCase().includes('saran'));
+                
+                // PENCARIAN ABSOLUT KOLOM SKOR REKOMENDASI NPS
+                let colScore = headers.findIndex(h => {
+                    if (!h) return false;
+                    const hStr = h.toString().toLowerCase();
+                    return hStr.includes('merekomendasikan') || hStr.includes('rekomendasi kami ke kolega');
                 });
 
-                Object.values(excelGroups).forEach(group => {
-                    const totalUser = group.allUsers.length;
-                    const anomalies = group.allUsers.filter(u => u.time < thresholdMinutes);
-                    const totalAnomaly = anomalies.length;
-                    const totalValidUser = totalUser - totalAnomaly;
+                // Fallback aman jika pencarian kata kunci meleset
+                if (colStartTime === -1) colStartTime = 0;
+                if (colInterval === -1) colInterval = 3; 
+                if (colUsername === -1) colUsername = 4;
+                if (colCompanyId === -1) colCompanyId = 5;
+                if (colSaran === -1) colSaran = 6;
+                if (colScore === -1) colScore = headers.length - 1; // Jika gagal, ambil kolom paling kanan
 
-                    const validUsers = group.allUsers.filter(u => u.time >= thresholdMinutes);
-                    const promoterUser = validUsers.filter(u => u.category === 'p').length;
-                    const passiveUser = validUsers.filter(u => u.category === 'v').length;
-                    const detractorUser = validUsers.filter(u => u.category === 'd').length;
+                let detectedYear = new Date().getFullYear();
+                let hasValidData = false;
 
-                    let sumScore = 0;
-                    validUsers.forEach(u => { sumScore += u.score; });
-                    const npsAvg = totalValidUser ? (sumScore / totalValidUser).toFixed(1) : "0.0";
+                let newLogs = [];
 
-                    const reportObject = {
-                        monthYear: `${group.monthName} ${group.year}`,
-                        monthIdx: group.monthIdx,
-                        year: group.year,
-                        quarter: `Q${group.quarter}`,
-                        totalUser: totalUser,
-                        totalAnomaly: totalAnomaly,
-                        totalValidUser: totalValidUser,
-                        promoterUser: promoterUser,
-                        passiveUser: passiveUser,
-                        detractorUser: detractorUser,
-                        npsAvg: npsAvg,
-                        details: {
-                            p: validUsers.filter(u => u.category === 'p'),
-                            v: validUsers.filter(u => u.category === 'v'),
-                            d: validUsers.filter(u => u.category === 'd')
-                        }
-                    };
+                // 3. Looping data setelah baris Header asli ditemukan
+                for (let i = headerRowIdx + 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || row.length <= colStartTime || !row[colStartTime]) continue;
 
-                    const matchIdx = appState.npsReports.findIndex(r => r.monthIdx === group.monthIdx && r.year === group.year);
-                    if (matchIdx >= 0) {
-                        appState.npsReports[matchIdx] = reportObject;
+                    let rawDate = row[colStartTime];
+                    let mIdx = -1;
+                    let year = detectedYear;
+
+                    // Mengurai Tanggal dari Excel secara aman
+                    if (rawDate instanceof Date && !isNaN(rawDate)) {
+                        mIdx = rawDate.getMonth();
+                        year = rawDate.getFullYear();
                     } else {
-                        appState.npsReports.push(reportObject);
+                        // Jika format string (Contoh: "5/7/2026 17.35.53")
+                        const parts = rawDate.toString().split(' ')[0].split('/');
+                        if (parts.length >= 3) {
+                            mIdx = parseInt(parts[1]) - 1; // Ambil angka tengah (bulan)
+                            year = parseInt(parts[2]);
+                        }
                     }
+
+                    if (mIdx === -1 || isNaN(mIdx)) continue;
+
+                    detectedYear = year;
+                    hasValidData = true;
+
+                    // Tentukan Kuartal otomatis
+                    const quarter = Math.floor(mIdx / 3) + 1;
+
+                    // Ambil skor NPS, bersihkan spasi kosong, dan ubah menjadi Angka bulat dasar 10 secara mutlak
+                    let rawScore = row[colScore];
+                    if (rawScore !== undefined && rawScore !== null) {
+                        rawScore = rawScore.toString().trim();
+                    }
+                    
+                    const score = parseInt(rawScore, 10);
+                    if (isNaN(score)) continue;
+
+                    let category = 'p';
+                    if (score >= 9) category = 'p';
+                    else if (score >= 7) category = 'v';
+                    else category = 'd';
+
+                    const intervalTime = parseFloat(row[colInterval]) || 0;
+                    const username = row[colUsername] || 'Anonymous';
+                    const companyId = row[colCompanyId] || '-';
+                    const saran = row[colSaran] || '-';
+
+                    newLogs.push({
+                        username: username,
+                        companyId: companyId,
+                        saran: saran,
+                        score: score,
+                        time: intervalTime,
+                        monthIdx: mIdx,
+                        year: year,
+                        quarter: quarter,
+                        category: category
+                    });
+                }
+
+                if (!hasValidData) {
+                    alert("⚠️ Sistem tidak berhasil mendeteksi baris tanggal/bulan dari file ini.");
+                    return;
+                }
+
+                // 3.5 Gabungkan dengan data lama tanpa duplikasi bulan yang sama
+                let uploadedMonths = new Set(newLogs.map(l => `${l.year}-${l.monthIdx}`));
+                appState.surveyLogs = appState.surveyLogs.filter(log => !uploadedMonths.has(`${log.year}-${log.monthIdx}`));
+                appState.surveyLogs.push(...newLogs);
+
+                // AUTO-REGISTER KE MASTER DATA
+                newLogs.forEach(log => {
+                    registerCompanyToMaster(log.companyId);
                 });
 
-                initNPSReportTable();
+                // 4. Ambil Kuartal Dominan dari data yang masuk
+                let qCounts = {1:0, 2:0, 3:0, 4:0};
+                newLogs.forEach(log => qCounts[log.quarter]++);
+                
+                let bestQuarter = 1;
+                let maxCount = 0;
+                for (const [q, count] of Object.entries(qCounts)) {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        bestQuarter = parseInt(q);
+                    }
+                }
 
-                appState.currentQuarter = detectedQuarter;
+                appState.currentQuarter = bestQuarter;
                 appState.currentYear = detectedYear;
 
-                const qInfo = quarterMonths[detectedQuarter];
-                appState.nps = qInfo.months.map((mName, idx) => {
-                    const targetMonthIdx = (detectedQuarter - 1) * 3 + idx;
+                const qInfo = quarterMonths[bestQuarter];
+                const thresholdMinutes = appState.anomalyThresholdSec / 60;
+
+                // Tampilkan data NPS pada dashboard utama kuartal terpilih menggunakan SEMUA data di state
+                appState.nps = [0, 1, 2].map(idx => {
+                    const targetMonthIdx = (bestQuarter - 1) * 3 + idx;
+                    const monthLogs = appState.surveyLogs.filter(l => l.year === detectedYear && l.monthIdx === targetMonthIdx);
+                    
+                    let p = 0, v = 0, d = 0;
+                    monthLogs.forEach(l => {
+                        // Apply Anomaly filter dynamically
+                        if (!(l.time < thresholdMinutes || (l.saran && String(l.saran).toLowerCase().includes('dummy')))) {
+                           if (l.category === 'p') p++;
+                           else if (l.category === 'v') v++;
+                           else if (l.category === 'd') d++;
+                        }
+                    });
+
+                    // Add Anomaly count to "Data Awal" by providing raw inputs here? 
+                    // No, appState.nps historically stores RAW inputs. So we should NOT filter them here.
+                    let rp=0, rv=0, rd=0;
+                    monthLogs.forEach(l => {
+                       if (l.category === 'p') rp++;
+                       else if (l.category === 'v') rv++;
+                       else if (l.category === 'd') rd++;
+                    });
+                    
                     return {
-                        month: mName,
-                        p: monthlyData[targetMonthIdx].p,
-                        v: monthlyData[targetMonthIdx].v,
-                        d: monthlyData[targetMonthIdx].d
+                        month: qInfo.months[idx],
+                        p: rp,
+                        v: rv,
+                        d: rd
                     };
                 });
-                
-                saveDataToFirebase();
 
-                initNPS();
-                initAnomaly(); 
+                // 5. Dorong Rekap Bulanan ke dalam NPS Report Archive
+                appState.npsReports = appState.npsReports.filter(r => !uploadedMonths.has(`${r.year}-${r.monthIdx}`));
                 
-                alert(`🎯 Data NPS berhasil dimuat!\nKuartal: ${qInfo.name} ${detectedYear}\nLaporan Riwayat Arsip NPS Report otomatis terbentuk.`);
+                [0, 1, 2].forEach(idx => {
+                    const targetMonthIdx = (bestQuarter - 1) * 3 + idx;
+                    const mName = qInfo.months[idx];
+                    
+                    const mLogs = appState.surveyLogs.filter(l => l.year === detectedYear && l.monthIdx === targetMonthIdx);
+                    if (mLogs.length === 0) return;
+
+                    const anomalies = mLogs.filter(l => (l.time < thresholdMinutes || (l.saran && String(l.saran).toLowerCase().includes('dummy'))));
+                    const validLogs = mLogs.filter(l => !(l.time < thresholdMinutes || (l.saran && String(l.saran).toLowerCase().includes('dummy'))));
+
+                    const pCount = validLogs.filter(l => l.category === 'p').length;
+                    const vCount = validLogs.filter(l => l.category === 'v').length;
+                    const dCount = validLogs.filter(l => l.category === 'd').length;
+
+                    const totalVrg = validLogs.length;
+                    let npsIndexScore = 0;
+                    let avgScoreValue = 0;
+                    if (totalVrg > 0) {
+                        npsIndexScore = (((pCount - dCount) / totalVrg) * 100).toFixed(1);
+                        const totalScoreSum = validLogs.reduce((sum, log) => sum + log.score, 0);
+                        avgScoreValue = (totalScoreSum / totalVrg).toFixed(1);
+                    }
+
+                    // [BARIS TAMBAHAN] Hapus laporan lama untuk bulan & tahun yang sama sebelum menambah yang baru
+                    appState.npsReports = appState.npsReports.filter(r => !(r.year === detectedYear && r.monthIdx === targetMonthIdx));
+
+                    appState.npsReports.push({
+                        monthYear: `${mName} ${detectedYear}`,
+                        monthIdx: targetMonthIdx,
+                        year: detectedYear,
+                        quarter: qInfo.name,
+                        totalUser: mLogs.length,
+                        totalAnomaly: anomalies.length,
+                        totalValidUser: totalVrg,
+                        promoterUser: pCount,
+                        passiveUser: vCount,
+                        detractorUser: dCount,
+                        npsIndex: npsIndexScore,
+                        avgScore: avgScoreValue,
+                        details: {
+                            p: validLogs.filter(l => l.category === 'p'),
+                            v: validLogs.filter(l => l.category === 'v'),
+                            d: validLogs.filter(l => l.category === 'd')
+                        }
+                    });
+                });
+
+                appState.npsReports.sort((a, b) => b.monthIdx - a.monthIdx);
+
+                saveDataToLocal();
+                initNPS();
+                initAnomaly();
+                initNPSReportTable();
+                initUserReportTable(); 
+                initCompanyReportTable();
+                initUserCompanyTable(); // REFRESH TABEL MASTER DATA DI SINI
+                
+                alert(`🎯 Data NPS Berhasil Dimuat!\nKuartal Terdeteksi: ${qInfo.name} ${detectedYear}\nLaporan arsip otomatis masuk ke halaman NPS Report.`);
                 event.target.value = '';
             };
             
             reader.readAsArrayBuffer(file);
         }
+        
     </script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        // Tambahkan getDoc di sini
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-        // TODO: Ganti dengan konfigurasi Firebase milikmu
-        const firebaseConfig = {
-            apiKey: "AIzaSyXXXXXXXXXXXXX",
-            authDomain: "proyek-kamu.firebaseapp.com",
-            projectId: "proyek-kamu",
-            storageBucket: "proyek-kamu.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Samakan penamaannya dengan fungsi save/load di atas!
-        window.firebaseDb = db;
-        window.setDoc = setDoc;
-        window.getDoc = getDoc;
-        window.doc = doc;
-    </script>
+    
 </body>
 </html>
