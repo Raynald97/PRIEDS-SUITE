@@ -6,6 +6,11 @@
     <title>Prieds Executive Dashboard Suite</title>
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Tambahkan SDK Firebase versi 8 (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -951,38 +956,67 @@
             return 'color:var(--danger);';
         }
 
-        // --- FIREBASE SAVE & LOAD FUNCTIONS ---
+        // --- FIREBASE INITIALIZATION & FUNCTIONS ---
+        // GANTI NILAI DI BAWAH INI DENGAN CONFIG DARI PROJECT FIREBASE KAMU
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJA9ygiUbD81d3kXmH5Cn3w0ZmsxdvRKY",
+            authDomain: "prds-management.firebaseapp.com",
+            projectId: "prds-management",
+            storageBucket: "prds-management.firebasestorage.app",
+            messagingSenderId: "971549464000",
+            appId: "1:971549464000:web:d05730bd0f4fd2a250a425",
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
         function saveDataToLocal() {
             try {
-                localStorage.setItem('prieds_main_state', JSON.stringify(appState));
-                console.log("Data berhasil disimpan ke Local Storage otomatis.");
+                // Menyimpan data ke Realtime Database di path 'prieds_main_state'
+                db.ref('prieds_main_state').set(appState)
+                  .then(() => console.log("Data berhasil disinkronisasi ke Firebase."))
+                  .catch((error) => console.error("Gagal menyimpan ke Firebase:", error));
             } catch (e) {
-                console.error("Error saving to Local Storage: ", e);
+                console.error("Error trigger save Firebase: ", e);
             }
         }
 
         function loadDataFromLocal() {
             try {
-                const data = localStorage.getItem('prieds_main_state');
-                if (data) {
-                    Object.assign(appState, JSON.parse(data));
-                    console.log("Data berhasil dimuat dari Local Storage.");
-                } else {
-                    console.log("Belum ada data di Local Storage, menggunakan state awal.");
-                }
-                
-                // Panggil fungsi render setelah data selesai dimuat
-                renderLastLoginDashboard();
-                initNPS();
-                initRetention();
-                initAnomaly(); 
-                initNPSReportTable();
-                initUserReportTable();
-                initCompanyReportTable();
-                initLastLoginReportTable();
-                initUserCompanyTable(); // RENDER TABEL MASTER DATA
+                db.ref('prieds_main_state').once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        Object.assign(appState, data);
+                        
+                        // Fallback Firebase: Firebase otomatis menghapus Array yang kosong. 
+                        // Kita harus memastikan array tidak undefined agar aplikasi tidak error.
+                        const arrayKeys = ['lastLoginData', 'lastLoginReports', 'retention', 'surveyLogs', 'npsReports', 'masterCompany'];
+                        arrayKeys.forEach(key => {
+                            if (!appState[key]) appState[key] = [];
+                        });
+
+                        console.log("Data berhasil dimuat dari Firebase.");
+                    } else {
+                        console.log("Belum ada data di Firebase, menggunakan state awal.");
+                    }
+                    
+                    // Panggil fungsi render setelah data selesai dimuat
+                    renderLastLoginDashboard();
+                    initNPS();
+                    initRetention();
+                    initAnomaly(); 
+                    initNPSReportTable();
+                    initUserReportTable();
+                    initCompanyReportTable();
+                    initLastLoginReportTable();
+                    initUserCompanyTable();
+                }).catch((error) => {
+                    console.error("Gagal menarik data dari Firebase:", error);
+                });
             } catch (e) {
-                console.error("Error loading from Local Storage: ", e);
+                console.error("Error trigger load Firebase: ", e);
             }
         }
 
