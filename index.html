@@ -1091,9 +1091,16 @@
                 // 2. Data dari Last Login
                 const ll = (appState.lastLoginData || []).find(r => (r.company_id || r.id_perusahaan) === cid);
                 let lastLoginLabel = '-';
+                
+                // 👇 TAMBAHAN 1: Menyimpan angka mentah hari (rawDays) untuk dicek nanti
+                let rawDays = -1; 
+                
                 if (ll) {
                     let days = parseInt(ll.last_login_in_days || ll.hari_terakhir_login || ll.last_login || "0");
                     if(isNaN(days)) days = 0;
+                    
+                    rawDays = days; // Simpan nilai angka
+                    
                     lastLoginLabel = days <= 0 ? "Hari ini" : days + " Hari lalu";
                 }
 
@@ -1105,20 +1112,52 @@
                 }
 
                 return {
+                    // 👇 TAMBAHAN 2: Mendaftarkan rawDays ke dalam objek yang dikembalikan
                     companyId: cid, totalUser: uniqueUsers, package: pkgName,
-                    lastLogin: lastLoginLabel, avgNps, lastMonthAvg, subsDate: master.subsDate || '-'
+                    lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: master.subsDate || '-'
                 };
             });
 
-            // Filter & Pagination
+            // Filter Pencarian
             if(state.search) mergedData = mergedData.filter(d => d.companyId.toLowerCase().includes(state.search));
             
+            // 👇 TAMBAHAN 3: BLOK KALKULASI MINI DASHBOARD 👇
+            let tUser = 0, tActive = 0;
+            let cWMS = 0, cStarter = 0, cPrem = 0, cERP = 0, cRFID = 0;
+            const limitAtt = appState.lastLoginAttentionLimit || 7;
+
+            mergedData.forEach(d => {
+                tUser += d.totalUser;
+                // Active = punya history login dan kurang dari batas "Need Attention"
+                if (d.rawDays >= 0 && d.rawDays < limitAtt) tActive++;
+                
+                let p = d.package.toLowerCase();
+                if (p.includes('wms lite')) cWMS++;
+                if (p.includes('starterpack') || p.includes('starter pack')) cStarter++;
+                if (p.includes('premium')) cPrem++;
+                if (p.includes('erp')) cERP++;
+                if (p.includes('rfid')) cRFID++;
+            });
+
+            // Update DOM Dashboard menggunakan ID elemen
+            if (document.getElementById('uc-total-company')) {
+                document.getElementById('uc-total-company').innerText = mergedData.length;
+                document.getElementById('uc-total-user').innerText = tUser;
+                document.getElementById('uc-active-company').innerText = tActive;
+                document.getElementById('uc-pkg-wmslite').innerText = cWMS;
+                document.getElementById('uc-pkg-starterpack').innerText = cStarter;
+                document.getElementById('uc-pkg-premium').innerText = cPrem;
+                document.getElementById('uc-pkg-erp').innerText = cERP;
+                document.getElementById('uc-pkg-rfid').innerText = cRFID;
+            }
+
+            // Pagination Lanjutan
             const totalItems = mergedData.length;
             const totalPages = Math.ceil(totalItems / state.limit) || 1;
             const currentPage = Math.min(state.page, totalPages);
             const startIndex = (currentPage - 1) * state.limit;
             const paginatedData = mergedData.slice(startIndex, startIndex + state.limit);
-
+            
             const rowsHtml = paginatedData.map((d, idx) => `
                 <tr>
                     <td style="font-weight:700; color:var(--dark); font-family:'Roboto Mono', monospace;">${d.companyId}</td>
