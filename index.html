@@ -928,6 +928,11 @@
                 <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Company ID</label>
                 <input type="text" id="edit-company-id-display" disabled style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px; background:#f1f5f9; font-weight:700;">
 
+                <!-- 👇 TAMBAHAN INPUT COMPANY NAME 👇 -->
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Company Name</label>
+                <input type="text" id="edit-company-name" placeholder="Masukkan Nama Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+                <!-- 👆 AKHIR TAMBAHAN 👆 -->
+
                 <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Pilih Paket (Retention Tracker)</label>
                 <select id="edit-company-package" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
                     <!-- Diisi via JS -->
@@ -1074,7 +1079,8 @@
             
             const exists = appState.masterCompany.find(c => c.companyId === companyId);
             if(!exists) {
-                appState.masterCompany.push({ companyId: companyId, packageId: null, subsDate: '' });
+                // 👇 DITAMBAHKAN: companyName secara default mengambil dari companyId 👇
+                appState.masterCompany.push({ companyId: companyId, companyName: companyId, packageId: null, subsDate: '' });
                 saveDataToLocal();
             }
         }
@@ -1149,8 +1155,10 @@
                     if (pkg) pkgName = pkg.name;
                 }
 
+                const cName = master.companyName || cid;
+
                 return {
-                    companyId: cid, totalUser: uniqueUsers, package: pkgName,
+                    companyId: cid, companyName: cName, totalUser: uniqueUsers, package: pkgName,
                     lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: master.subsDate || '-'
                 };
             });
@@ -1198,7 +1206,9 @@
             const rowsHtml = paginatedData.map((d, idx) => `
                 <tr>
                     <td style="font-weight:700; color:var(--dark); font-family:'Roboto Mono', monospace;">${d.companyId}</td>
-                    <td><span style="font-weight:800; color:var(--primary);">${d.totalUser}</span></td>
+                    <!-- 👇 TAMBAHAN KOLOM NAMA PERUSAHAAN 👇 -->
+                    <td style="font-weight:700; color:var(--primary);">${d.companyName}</td>
+                    <td><span style="font-weight:800; color:var(--dark);">${d.totalUser}</span></td>
                     <td><span style="font-size:11px; background:var(--gray-light); padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.package}</span></td>
                     <td><span style="font-weight:700;">${d.lastLogin}</span></td>
                     <td><span style="${getScoreBadgeStyle(d.avgNps)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${d.avgNps}</span></td>
@@ -1224,6 +1234,7 @@
                     <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
                         <tr>
                             <th>Company ID</th>
+                            <th>Company Name</th> <!-- 👈 HEADER BARU -->
                             <th>Total User NPS</th>
                             <th>Package</th>
                             <th>Last Login</th>
@@ -1233,7 +1244,8 @@
                             <th style="width: 70px;">Action</th>
                         </tr>
                     </thead>
-                    <tbody>${rowsHtml || '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data.</td></tr>'}</tbody>
+                    <!-- 👇 Colspan diubah dari 8 menjadi 9 👇 -->
+                    <tbody>${rowsHtml || '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data.</td></tr>'}</tbody>
                 </table>
             `;
 
@@ -1256,6 +1268,9 @@
             
             const comp = appState.masterCompany.find(c => c.companyId === companyId);
             
+            // 👇 Set isi input field Company Name (Fallback ke ID jika belum ada) 👇
+            document.getElementById('edit-company-name').value = comp.companyName || comp.companyId;
+            
             // Populate dropdown package
             let selectHtml = '<option value="">-- Pilih Paket --</option>';
             if(appState.retention) {
@@ -1274,11 +1289,15 @@
 
         function saveCompanyEdit() {
             const cid = document.getElementById('edit-company-id').value;
+            const cName = document.getElementById('edit-company-name').value; // 👈 Tangkap inputan Company Name
             const pkgId = document.getElementById('edit-company-package').value;
             const sDate = document.getElementById('edit-company-subsdate').value;
             
             const comp = appState.masterCompany.find(c => c.companyId === cid);
             if(comp) {
+                // 👇 Simpan Company Name ke memori (Jika sengaja dikosongkan user, kembalikan ke ID) 👇
+                comp.companyName = cName.trim() !== '' ? cName : cid;
+                
                 comp.packageId = pkgId ? parseInt(pkgId) : null;
                 comp.subsDate = sDate;
                 saveDataToLocal();
