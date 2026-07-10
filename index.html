@@ -1074,13 +1074,16 @@
 
         // ================= LOGIC MASTER DATA COMPANY =================
         function registerCompanyToMaster(companyId) {
-            if(!companyId || companyId.trim() === '' || companyId === '-') return;
+            // 👇 TAMBAHAN: Paksa tipe data menjadi String (Teks) agar tidak error saat di-trim
+            const safeId = String(companyId); 
+
+            // Gunakan safeId untuk pengecekan
+            if(!safeId || safeId.trim() === '' || safeId === '-') return;
             if(!appState.masterCompany) appState.masterCompany = [];
             
-            const exists = appState.masterCompany.find(c => c.companyId === companyId);
+            const exists = appState.masterCompany.find(c => c.companyId === safeId);
             if(!exists) {
-                // 👇 DITAMBAHKAN: companyName secara default mengambil dari companyId 👇
-                appState.masterCompany.push({ companyId: companyId, companyName: companyId, packageId: null, subsDate: '' });
+                appState.masterCompany.push({ companyId: safeId, companyName: safeId, packageId: null, subsDate: '' });
                 saveDataToLocal();
             }
         }
