@@ -350,20 +350,61 @@
             </div>
 
             <div id="editor-company_report" class="editor-section">
-                    <div class="section-title">Laporan Perusahaan</div>
-                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
-                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Company ID</label>
-                        <input type="text" id="company-report-search" placeholder="Ketik ID Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterCompanyReport()">
-
-                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
-                        <select id="company-report-limit" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeCompanyLimit()">
-                            <option value="5">5 Data</option>
-                            <option value="10" selected>10 Data</option>
-                            <option value="25">25 Data</option>
-                            <option value="50">50 Data</option>
-                        </select>
+                <div class="section-title">Laporan Perusahaan</div>
+                <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
+                    
+                    <!-- --- TAMBAHAN: Filter Tahun, Quarter, Bulan --- -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                        <div>
+                            <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Tahun</label>
+                            <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2024" onchange="filterCompanyReport()"> 2024</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2025" onchange="filterCompanyReport()"> 2025</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2026" onchange="filterCompanyReport()"> 2026</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2027" onchange="filterCompanyReport()"> 2027</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Quarter</label>
+                            <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="1" onchange="filterCompanyReport()"> Q1</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="2" onchange="filterCompanyReport()"> Q2</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="3" onchange="filterCompanyReport()"> Q3</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="4" onchange="filterCompanyReport()"> Q4</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Bulan</label>
+                            <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="0" onchange="filterCompanyReport()"> Jan</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="1" onchange="filterCompanyReport()"> Feb</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="2" onchange="filterCompanyReport()"> Mar</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="3" onchange="filterCompanyReport()"> Apr</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="4" onchange="filterCompanyReport()"> Mei</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="5" onchange="filterCompanyReport()"> Jun</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="6" onchange="filterCompanyReport()"> Jul</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="7" onchange="filterCompanyReport()"> Agu</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="8" onchange="filterCompanyReport()"> Sep</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="9" onchange="filterCompanyReport()"> Okt</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="10" onchange="filterCompanyReport()"> Nov</label>
+                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="11" onchange="filterCompanyReport()"> Des</label>
+                            </div>
+                        </div>
                     </div>
+                    <p style="font-size:10px; color:var(--text-muted); margin-top:-6px; margin-bottom:12px; font-style:italic;">*Kosongkan centang untuk menampilkan semua data.</p>
+
+                    <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Company ID</label>
+                    <input type="text" id="company-report-search" placeholder="Ketik ID Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterCompanyReport()">
+
+                    <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
+                    <select id="company-report-limit" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeCompanyLimit()">
+                        <option value="5">5 Data</option>
+                        <option value="10" selected>10 Data</option>
+                        <option value="25">25 Data</option>
+                        <option value="50">50 Data</option>
+                    </select>
                 </div>
+            </div>
 
             <!-- Kolom Quarter -->
             <div>
@@ -1890,36 +1931,39 @@
         let processedCompanyData = []; // Menyimpan data sementara untuk modal
 
         function filterCompanyReport() {
-            if(!appState.companyReport) appState.companyReport = { page: 1, limit: 10, search: '' };
+            if(!appState.companyReport) appState.companyReport = { page: 1, limit: 10, search: '', sortColumn: null, sortDirection: null, year: [], quarter: [], month: [] };
             appState.companyReport.search = document.getElementById('company-report-search').value.toLowerCase();
+            
+            // Tarik nilai dari filter checkbox baru
+            appState.companyReport.year = getCheckedValues('comp-filter-year');
+            appState.companyReport.quarter = getCheckedValues('comp-filter-quarter');
+            appState.companyReport.month = getCheckedValues('comp-filter-month');
+            
             appState.companyReport.page = 1;
             initCompanyReportTable();
         }
 
         function changeCompanyLimit() {
-            if(!appState.companyReport) appState.companyReport = { page: 1, limit: 10, search: '' };
+            if(!appState.companyReport) appState.companyReport = { page: 1, limit: 10, search: '', sortColumn: null, sortDirection: null, year: [], quarter: [], month: [] };
             appState.companyReport.limit = parseInt(document.getElementById('company-report-limit').value);
             appState.companyReport.page = 1;
             initCompanyReportTable();
         }
 
         function changeCompanyPage(page) {
-            // BARIS TAMBAHAN: Buat penampung default jika belum ada
-            if(!appState.companyReport) appState.companyReport = { page: 1, limit: 10, search: '' };
-            
+            if(!appState.companyReport) appState.companyReport = { page: 1, limit: 10, search: '', sortColumn: null, sortDirection: null, year: [], quarter: [], month: [] };
             appState.companyReport.page = page;
             initCompanyReportTable();
         }
 
-        // Fungsi trigger saat panah atas/bawah ditekan pada header tabel Company Report
         function sortCompanyReport(column, direction) {
             if (!appState.companyReport) {
-                appState.companyReport = { page: 1, limit: 10, search: '', sortColumn: null, sortDirection: null };
+                appState.companyReport = { page: 1, limit: 10, search: '', sortColumn: null, sortDirection: null, year: [], quarter: [], month: [] };
             }
             appState.companyReport.sortColumn = column;
             appState.companyReport.sortDirection = direction;
-            appState.companyReport.page = 1; // Kembalikan ke halaman 1 setiap kali melakukan sorting
-            initCompanyReportTable(); // Render ulang tabel
+            appState.companyReport.page = 1;
+            initCompanyReportTable();
         }
 
         function initCompanyReportTable() {
@@ -1932,18 +1976,22 @@
                 return;
             }
 
-            // --- STATE BARU: Ditambahkan sortColumn dan sortDirection ---
-            const state = appState.companyReport || { page: 1, limit: 10, search: '', sortColumn: null, sortDirection: null };
+            const state = appState.companyReport || { page: 1, limit: 10, search: '', sortColumn: null, sortDirection: null, year: [], quarter: [], month: [] };
 
-            // 1. Tentukan Kuartal dan Tahun Saat Ini & Sebelumnya
             const thisQ = appState.currentQuarter;
             const thisY = appState.currentYear;
             const lastQ = thisQ === 1 ? 4 : thisQ - 1;
             const lastY = thisQ === 1 ? thisY - 1 : thisY;
 
-            // 2. Grouping Data by Company ID
+            // --- FILTER DATA LOG BERDASARKAN CHECKBOX ---
+            let logsToProcess = appState.surveyLogs;
+            if (state.year && state.year.length > 0) logsToProcess = logsToProcess.filter(l => state.year.includes(String(l.year)));
+            if (state.quarter && state.quarter.length > 0) logsToProcess = logsToProcess.filter(l => state.quarter.includes(String(l.quarter)));
+            if (state.month && state.month.length > 0) logsToProcess = logsToProcess.filter(l => state.month.includes(String(l.monthIdx)));
+
+            // Grouping Data by Company ID
             const compMap = {};
-            appState.surveyLogs.forEach(log => {
+            logsToProcess.forEach(log => {
                 const cid = log.companyId || 'Tidak Ada ID';
                 if (!compMap[cid]) {
                     compMap[cid] = { companyId: cid, logs: [], users: {} };
@@ -1955,7 +2003,6 @@
                 compMap[cid].users[un].push(log);
             });
 
-            // 3. Helper untuk menghitung metrik
             const calculateMetrics = (logsArray) => {
                 const thisQLogs = logsArray.filter(l => l.quarter === thisQ && l.year === thisY);
                 const lastQLogs = logsArray.filter(l => l.quarter === lastQ && l.year === lastY);
@@ -1963,7 +2010,6 @@
                 const thisQAvg = thisQLogs.length ? (thisQLogs.reduce((sum, l) => sum + l.score, 0) / thisQLogs.length).toFixed(1) : '-';
                 const lastQAvg = lastQLogs.length ? (lastQLogs.reduce((sum, l) => sum + l.score, 0) / lastQLogs.length).toFixed(1) : '-';
 
-                // Cari Bulan Terakhir (Last Month)
                 let maxTime = -1;
                 logsArray.forEach(l => {
                     const t = l.year * 12 + l.monthIdx;
@@ -1979,10 +2025,8 @@
                 return { thisQAvg, lastQAvg, lastMonthAvg };
             };
 
-            // 4. Proses kalkulasi ke dalam Array
             const compArray = Object.values(compMap).map(comp => {
                 const compMetrics = calculateMetrics(comp.logs);
-                
                 const userList = Object.keys(comp.users).map(username => {
                     const uMetrics = calculateMetrics(comp.users[username]);
                     return { username, ...uMetrics };
@@ -1991,6 +2035,7 @@
                 return {
                     companyId: comp.companyId,
                     totalUsers: Object.keys(comp.users).length,
+                    npsCount: comp.logs.length, // --- TAMBAHAN: Total berapa kali NPS diisi oleh company ---
                     ...compMetrics,
                     userList: userList
                 };
@@ -1998,55 +2043,55 @@
 
             processedCompanyData = compArray; 
 
-            // 5. Filter Pencarian
+            // Filter Pencarian Text
             let filteredComps = compArray.filter(c => c.companyId.toLowerCase().includes(state.search));
 
-            // --- 5.5 LOGIKA SORTING COMPANY ---
+            // --- LOGIKA SORTING COMPANY ---
             if (state.sortColumn) {
                 filteredComps.sort((a, b) => {
                     let valA, valB;
 
                     if (state.sortColumn === 'totalUsers') {
-                        valA = a.totalUsers;
-                        valB = b.totalUsers;
+                        valA = a.totalUsers; valB = b.totalUsers;
+                    } else if (state.sortColumn === 'npsCount') {
+                        valA = a.npsCount; valB = b.npsCount;
                     } else {
-                        // Untuk skor (thisQAvg, lastQAvg, lastMonthAvg), jika "-" kita anggap nilai terendah (-1)
                         valA = a[state.sortColumn] === '-' ? -1 : parseFloat(a[state.sortColumn]);
                         valB = b[state.sortColumn] === '-' ? -1 : parseFloat(b[state.sortColumn]);
                     }
 
-                    if (state.sortDirection === 'asc') {
-                        return valA - valB; // Terendah ke Tertinggi
-                    } else {
-                        return valB - valA; // Tertinggi ke Terendah
-                    }
+                    if (state.sortDirection === 'asc') return valA - valB;
+                    else return valB - valA; 
                 });
             }
 
-            // 6. Pagination
+            // Pagination
             const totalItems = filteredComps.length;
             const totalPages = Math.ceil(totalItems / state.limit) || 1;
             const currentPage = Math.min(state.page, totalPages);
             const startIndex = (currentPage - 1) * state.limit;
             const paginatedComps = filteredComps.slice(startIndex, startIndex + state.limit);
 
-            // 7. Render Baris Tabel
+            // Render Baris Tabel
             const rowsHtml = paginatedComps.map((c, idx) => `
                 <tr>
                     <td style="font-weight:700; color:var(--dark); font-family:'Roboto Mono', monospace;">${c.companyId}</td>
+                    
+                    <!-- Kolom Tambahan NPS Count -->
+                    <td><span style="background:var(--gray-light); border:1px solid var(--gray-border); color:var(--text-main); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800;">${c.npsCount} Kali</span></td>
+                    
                     <td><span style="font-weight:700; ${getScoreTextStyle(c.lastQAvg)}">${c.lastQAvg}</span></td>
                     <td><span style="${getScoreBadgeStyle(c.thisQAvg)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${c.thisQAvg}</span></td>
                     <td><span style="font-weight:700; ${getScoreTextStyle(c.lastMonthAvg)}">${c.lastMonthAvg}</span></td>
                     <td><span style="font-weight:800; color:var(--dark);">${c.totalUsers} User</span></td>
                     <td>
                         <button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" onclick="openCompanyDetailModal('${c.companyId}')">
-                            <i class="fa-solid fa-users-viewfinder"></i> Detail User
+                            <i class="fa-solid fa-users-viewfinder"></i> Detail
                         </button>
                     </td>
                 </tr>
             `).join('');
 
-            // --- HELPER UNTUK WARNA PANAH ---
             const getArrowStyle = (col, dir) => {
                 if (state.sortColumn === col && state.sortDirection === dir) {
                     return "color: var(--primary); cursor: pointer; transition: 0.2s;";
@@ -2060,21 +2105,28 @@
                         <tr>
                             <th>Company ID</th>
                             <th>
-                                Last Q Avg Score (Q${lastQ} ${lastY})
+                                NPS Count
+                                <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
+                                    <i class="fa-solid fa-arrow-up" style="${getArrowStyle('npsCount', 'asc')}" onclick="sortCompanyReport('npsCount', 'asc')" title="Paling Sedikit"></i>
+                                    <i class="fa-solid fa-arrow-down" style="${getArrowStyle('npsCount', 'desc')}" onclick="sortCompanyReport('npsCount', 'desc')" title="Paling Banyak"></i>
+                                </div>
+                            </th>
+                            <th>
+                                Last Q Avg (Q${lastQ} ${lastY})
                                 <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
                                     <i class="fa-solid fa-arrow-up" style="${getArrowStyle('lastQAvg', 'asc')}" onclick="sortCompanyReport('lastQAvg', 'asc')" title="Urutkan dari Terendah"></i>
                                     <i class="fa-solid fa-arrow-down" style="${getArrowStyle('lastQAvg', 'desc')}" onclick="sortCompanyReport('lastQAvg', 'desc')" title="Urutkan dari Tertinggi"></i>
                                 </div>
                             </th>
                             <th>
-                                This Q Avg Score (Q${thisQ} ${thisY})
+                                This Q Avg (Q${thisQ} ${thisY})
                                 <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
                                     <i class="fa-solid fa-arrow-up" style="${getArrowStyle('thisQAvg', 'asc')}" onclick="sortCompanyReport('thisQAvg', 'asc')" title="Urutkan dari Terendah"></i>
                                     <i class="fa-solid fa-arrow-down" style="${getArrowStyle('thisQAvg', 'desc')}" onclick="sortCompanyReport('thisQAvg', 'desc')" title="Urutkan dari Tertinggi"></i>
                                 </div>
                             </th>
                             <th>
-                                Last Month Score
+                                Last Mth Score
                                 <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
                                     <i class="fa-solid fa-arrow-up" style="${getArrowStyle('lastMonthAvg', 'asc')}" onclick="sortCompanyReport('lastMonthAvg', 'asc')" title="Urutkan dari Terendah"></i>
                                     <i class="fa-solid fa-arrow-down" style="${getArrowStyle('lastMonthAvg', 'desc')}" onclick="sortCompanyReport('lastMonthAvg', 'desc')" title="Urutkan dari Tertinggi"></i>
@@ -2087,14 +2139,14 @@
                                     <i class="fa-solid fa-arrow-down" style="${getArrowStyle('totalUsers', 'desc')}" onclick="sortCompanyReport('totalUsers', 'desc')" title="Paling Banyak"></i>
                                 </div>
                             </th>
-                            <th style="width: 100px;">Detail</th>
+                            <th style="width: 80px;">Detail</th>
                         </tr>
                     </thead>
-                    <tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data perusahaan.</td></tr>'}</tbody>
+                    <tbody>${rowsHtml || '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data perusahaan yang sesuai filter.</td></tr>'}</tbody>
                 </table>
             `;
 
-            // 8. Render Pagination Buttons
+            // Render Pagination Buttons
             let pagHtml = '';
             if (totalPages > 1) {
                 pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === 1 ? 'disabled' : ''} onclick="changeCompanyPage(${currentPage - 1})">Prev</button>`;
