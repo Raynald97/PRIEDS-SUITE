@@ -1911,6 +1911,17 @@
             initCompanyReportTable();
         }
 
+        // Fungsi trigger saat panah atas/bawah ditekan pada header tabel Company Report
+        function sortCompanyReport(column, direction) {
+            if (!appState.companyReport) {
+                appState.companyReport = { page: 1, limit: 10, search: '', sortColumn: null, sortDirection: null };
+            }
+            appState.companyReport.sortColumn = column;
+            appState.companyReport.sortDirection = direction;
+            appState.companyReport.page = 1; // Kembalikan ke halaman 1 setiap kali melakukan sorting
+            initCompanyReportTable(); // Render ulang tabel
+        }
+
         function initCompanyReportTable() {
             const container = document.getElementById('company-report-table-container');
             const pagContainer = document.getElementById('company-pagination-container');
@@ -1921,7 +1932,8 @@
                 return;
             }
 
-            const state = appState.companyReport || { page: 1, limit: 10, search: '' };
+            // --- STATE BARU: Ditambahkan sortColumn dan sortDirection ---
+            const state = appState.companyReport || { page: 1, limit: 10, search: '', sortColumn: null, sortDirection: null };
 
             // 1. Tentukan Kuartal dan Tahun Saat Ini & Sebelumnya
             const thisQ = appState.currentQuarter;
@@ -1943,7 +1955,7 @@
                 compMap[cid].users[un].push(log);
             });
 
-            // 3. Helper untuk menghitung metrik (Bisa dipakai untuk Company & User)
+            // 3. Helper untuk menghitung metrik
             const calculateMetrics = (logsArray) => {
                 const thisQLogs = logsArray.filter(l => l.quarter === thisQ && l.year === thisY);
                 const lastQLogs = logsArray.filter(l => l.quarter === lastQ && l.year === lastY);
@@ -1971,7 +1983,6 @@
             const compArray = Object.values(compMap).map(comp => {
                 const compMetrics = calculateMetrics(comp.logs);
                 
-                // Proses juga detail masing-masing user di dalam company
                 const userList = Object.keys(comp.users).map(username => {
                     const uMetrics = calculateMetrics(comp.users[username]);
                     return { username, ...uMetrics };
@@ -1985,11 +1996,32 @@
                 };
             });
 
-            // Simpan ke variabel global agar bisa diakses oleh Modal
             processedCompanyData = compArray; 
 
             // 5. Filter Pencarian
             let filteredComps = compArray.filter(c => c.companyId.toLowerCase().includes(state.search));
+
+            // --- 5.5 LOGIKA SORTING COMPANY ---
+            if (state.sortColumn) {
+                filteredComps.sort((a, b) => {
+                    let valA, valB;
+
+                    if (state.sortColumn === 'totalUsers') {
+                        valA = a.totalUsers;
+                        valB = b.totalUsers;
+                    } else {
+                        // Untuk skor (thisQAvg, lastQAvg, lastMonthAvg), jika "-" kita anggap nilai terendah (-1)
+                        valA = a[state.sortColumn] === '-' ? -1 : parseFloat(a[state.sortColumn]);
+                        valB = b[state.sortColumn] === '-' ? -1 : parseFloat(b[state.sortColumn]);
+                    }
+
+                    if (state.sortDirection === 'asc') {
+                        return valA - valB; // Terendah ke Tertinggi
+                    } else {
+                        return valB - valA; // Tertinggi ke Terendah
+                    }
+                });
+            }
 
             // 6. Pagination
             const totalItems = filteredComps.length;
@@ -2014,15 +2046,47 @@
                 </tr>
             `).join('');
 
+            // --- HELPER UNTUK WARNA PANAH ---
+            const getArrowStyle = (col, dir) => {
+                if (state.sortColumn === col && state.sortDirection === dir) {
+                    return "color: var(--primary); cursor: pointer; transition: 0.2s;";
+                }
+                return "color: #cbd5e1; cursor: pointer; transition: 0.2s;";
+            };
+
             container.innerHTML = `
                 <table class="anomaly-table">
                     <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
                         <tr>
                             <th>Company ID</th>
-                            <th>Last Q Avg Score (Q${lastQ} ${lastY})</th>
-                            <th>This Q Avg Score (Q${thisQ} ${thisY})</th>
-                            <th>Last Month Score</th>
-                            <th>Total User</th>
+                            <th>
+                                Last Q Avg Score (Q${lastQ} ${lastY})
+                                <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
+                                    <i class="fa-solid fa-arrow-up" style="${getArrowStyle('lastQAvg', 'asc')}" onclick="sortCompanyReport('lastQAvg', 'asc')" title="Urutkan dari Terendah"></i>
+                                    <i class="fa-solid fa-arrow-down" style="${getArrowStyle('lastQAvg', 'desc')}" onclick="sortCompanyReport('lastQAvg', 'desc')" title="Urutkan dari Tertinggi"></i>
+                                </div>
+                            </th>
+                            <th>
+                                This Q Avg Score (Q${thisQ} ${thisY})
+                                <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
+                                    <i class="fa-solid fa-arrow-up" style="${getArrowStyle('thisQAvg', 'asc')}" onclick="sortCompanyReport('thisQAvg', 'asc')" title="Urutkan dari Terendah"></i>
+                                    <i class="fa-solid fa-arrow-down" style="${getArrowStyle('thisQAvg', 'desc')}" onclick="sortCompanyReport('thisQAvg', 'desc')" title="Urutkan dari Tertinggi"></i>
+                                </div>
+                            </th>
+                            <th>
+                                Last Month Score
+                                <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
+                                    <i class="fa-solid fa-arrow-up" style="${getArrowStyle('lastMonthAvg', 'asc')}" onclick="sortCompanyReport('lastMonthAvg', 'asc')" title="Urutkan dari Terendah"></i>
+                                    <i class="fa-solid fa-arrow-down" style="${getArrowStyle('lastMonthAvg', 'desc')}" onclick="sortCompanyReport('lastMonthAvg', 'desc')" title="Urutkan dari Tertinggi"></i>
+                                </div>
+                            </th>
+                            <th>
+                                Total User
+                                <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
+                                    <i class="fa-solid fa-arrow-up" style="${getArrowStyle('totalUsers', 'asc')}" onclick="sortCompanyReport('totalUsers', 'asc')" title="Paling Sedikit"></i>
+                                    <i class="fa-solid fa-arrow-down" style="${getArrowStyle('totalUsers', 'desc')}" onclick="sortCompanyReport('totalUsers', 'desc')" title="Paling Banyak"></i>
+                                </div>
+                            </th>
                             <th style="width: 100px;">Detail</th>
                         </tr>
                     </thead>
