@@ -337,74 +337,124 @@
                     <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px; margin-bottom:15px;">
                         
                         <!-- BARIS TAMBAHAN: Filter Tahun, Quarter & Bulan (Checkbox) -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
-            <!-- Kolom Tahun -->
-            <div>
-                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Tahun</label>
-                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
-                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2024" onchange="filterUserReport()"> 2024</label>
-                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2025" onchange="filterUserReport()"> 2025</label>
-                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2026" onchange="filterUserReport()"> 2026</label>
-                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2027" onchange="filterUserReport()"> 2027</label>
-                </div>
-            </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                            <!-- Kolom Tahun -->
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Tahun</label>
+                                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2024" onchange="filterUserReport()"> 2024</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2025" onchange="filterUserReport()"> 2025</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2026" onchange="filterUserReport()"> 2026</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-year" value="2027" onchange="filterUserReport()"> 2027</label>
+                                </div>
+                            </div>
 
-            <div id="editor-company_report" class="editor-section">
-                <div class="section-title">Laporan Perusahaan</div>
-                <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
-                    
-                    <!-- --- TAMBAHAN: Filter Tahun, Quarter, Bulan --- -->
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
-                        <div>
-                            <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Tahun</label>
-                            <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2024" onchange="filterCompanyReport()"> 2024</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2025" onchange="filterCompanyReport()"> 2025</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2026" onchange="filterCompanyReport()"> 2026</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2027" onchange="filterCompanyReport()"> 2027</label>
+                            <!-- Kolom Quarter -->
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Quarter</label>
+                                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-quarter" value="1" onchange="filterUserReport()"> Q1</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-quarter" value="2" onchange="filterUserReport()"> Q2</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-quarter" value="3" onchange="filterUserReport()"> Q3</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-quarter" value="4" onchange="filterUserReport()"> Q4</label>
+                                </div>
+                            </div>
+
+                            <!-- Kolom Bulan -->
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Bulan</label>
+                                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="0" onchange="filterUserReport()"> Jan</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="1" onchange="filterUserReport()"> Feb</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="2" onchange="filterUserReport()"> Mar</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="3" onchange="filterUserReport()"> Apr</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="4" onchange="filterUserReport()"> Mei</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="5" onchange="filterUserReport()"> Jun</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="6" onchange="filterUserReport()"> Jul</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="7" onchange="filterUserReport()"> Agu</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="8" onchange="filterUserReport()"> Sep</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="9" onchange="filterUserReport()"> Okt</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="10" onchange="filterUserReport()"> Nov</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="filter-month" value="11" onchange="filterUserReport()"> Des</label>
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Quarter</label>
-                            <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="1" onchange="filterCompanyReport()"> Q1</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="2" onchange="filterCompanyReport()"> Q2</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="3" onchange="filterCompanyReport()"> Q3</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="4" onchange="filterCompanyReport()"> Q4</label>
-                            </div>
-                        </div>
-                        <div>
-                            <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Bulan</label>
-                            <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="0" onchange="filterCompanyReport()"> Jan</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="1" onchange="filterCompanyReport()"> Feb</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="2" onchange="filterCompanyReport()"> Mar</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="3" onchange="filterCompanyReport()"> Apr</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="4" onchange="filterCompanyReport()"> Mei</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="5" onchange="filterCompanyReport()"> Jun</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="6" onchange="filterCompanyReport()"> Jul</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="7" onchange="filterCompanyReport()"> Agu</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="8" onchange="filterCompanyReport()"> Sep</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="9" onchange="filterCompanyReport()"> Okt</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="10" onchange="filterCompanyReport()"> Nov</label>
-                                <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="11" onchange="filterCompanyReport()"> Des</label>
-                            </div>
-                        </div>
+                        <p style="font-size:10px; color:var(--text-muted); margin-top:-6px; margin-bottom:12px; font-style:italic;">*Kosongkan centang untuk menampilkan semua data pada kategori tersebut.</p>
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Username</label>
+                        <input type="text" id="user-search-input" placeholder="Ketik username..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterUserReport()">
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Filter Company ID</label>
+                        <input list="company-list" id="company-filter-input" placeholder="Ketik atau pilih Company ID..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterUserReport()">
+                        <datalist id="company-list"></datalist>
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
+                        <select id="user-limit-select" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeUserReportLimit()">
+                            <option value="5">5 Data</option>
+                            <option value="10" selected>10 Data</option>
+                            <option value="25">25 Data</option>
+                            <option value="50">50 Data</option>
+                        </select>
                     </div>
-                    <p style="font-size:10px; color:var(--text-muted); margin-top:-6px; margin-bottom:12px; font-style:italic;">*Kosongkan centang untuk menampilkan semua data.</p>
-
-                    <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Company ID</label>
-                    <input type="text" id="company-report-search" placeholder="Ketik ID Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterCompanyReport()">
-
-                    <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
-                    <select id="company-report-limit" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeCompanyLimit()">
-                        <option value="5">5 Data</option>
-                        <option value="10" selected>10 Data</option>
-                        <option value="25">25 Data</option>
-                        <option value="50">50 Data</option>
-                    </select>
                 </div>
-            </div>
+
+                <!-- DIPISAHKAN DARI USER REPORT -->
+                <div id="editor-company_report" class="editor-section">
+                    <div class="section-title">Laporan Perusahaan</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
+                        
+                        <!-- --- TAMBAHAN: Filter Tahun, Quarter, Bulan --- -->
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Tahun</label>
+                                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2024" onchange="filterCompanyReport()"> 2024</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2025" onchange="filterCompanyReport()"> 2025</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2026" onchange="filterCompanyReport()"> 2026</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-year" value="2027" onchange="filterCompanyReport()"> 2027</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Quarter</label>
+                                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="1" onchange="filterCompanyReport()"> Q1</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="2" onchange="filterCompanyReport()"> Q2</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="3" onchange="filterCompanyReport()"> Q3</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-quarter" value="4" onchange="filterCompanyReport()"> Q4</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Bulan</label>
+                                <div style="max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid var(--gray-border); border-radius: 6px; padding: 8px; font-size: 11px;">
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="0" onchange="filterCompanyReport()"> Jan</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="1" onchange="filterCompanyReport()"> Feb</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="2" onchange="filterCompanyReport()"> Mar</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="3" onchange="filterCompanyReport()"> Apr</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="4" onchange="filterCompanyReport()"> Mei</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="5" onchange="filterCompanyReport()"> Jun</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="6" onchange="filterCompanyReport()"> Jul</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="7" onchange="filterCompanyReport()"> Agu</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="8" onchange="filterCompanyReport()"> Sep</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="9" onchange="filterCompanyReport()"> Okt</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="10" onchange="filterCompanyReport()"> Nov</label>
+                                    <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; cursor:pointer;"><input type="checkbox" class="comp-filter-month" value="11" onchange="filterCompanyReport()"> Des</label>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="font-size:10px; color:var(--text-muted); margin-top:-6px; margin-bottom:12px; font-style:italic;">*Kosongkan centang untuk menampilkan semua data.</p>
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Company ID</label>
+                        <input type="text" id="company-report-search" placeholder="Ketik ID Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterCompanyReport()">
+
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
+                        <select id="company-report-limit" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeCompanyLimit()">
+                            <option value="5">5 Data</option>
+                            <option value="10" selected>10 Data</option>
+                            <option value="25">25 Data</option>
+                            <option value="50">50 Data</option>
+                        </select>
+                    </div>
+                </div>
 
             <!-- Kolom Quarter -->
             <div>
