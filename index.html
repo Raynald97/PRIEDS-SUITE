@@ -1630,6 +1630,17 @@
             initUserReportTable();
         }
 
+        // Fungsi trigger saat panah atas/bawah ditekan pada header tabel
+        function sortUserReport(column, direction) {
+            if (!appState.userReport) {
+                appState.userReport = { page: 1, limit: 10, search: '', company: '', month: [], quarter: [], year: [] };
+            }
+            appState.userReport.sortColumn = column;
+            appState.userReport.sortDirection = direction;
+            appState.userReport.page = 1; // Kembalikan ke halaman 1 setiap kali melakukan sorting
+            initUserReportTable(); // Render ulang tabel
+        }
+
         // ================= FUNGSI UTAMA GENERATE TABLE =================
         function initUserReportTable() {
             const container = document.getElementById('user-report-table-container');
@@ -1642,7 +1653,7 @@
                 return;
             }
 
-            const state = appState.userReport || { search: '', company: '', limit: 10, page: 1, month: [], quarter: [], year: [] };
+            const state = appState.userReport || { search: '', company: '', limit: 10, page: 1, month: [], quarter: [], year: [], sortColumn: null, sortDirection: null };
 
             // 1. FILTER BERDASARKAN CHECKBOX (TAHUN, QUARTER, BULAN)
             let logsToProcess = appState.surveyLogs;
@@ -1702,6 +1713,20 @@
                 let matchCompany = state.company === '' || u.companyId === state.company;
                 return matchSearch && matchCompany;
             });
+
+            // --- LOGIC SORTING (DITAMBAHKAN DI SINI) ---
+            if (state.sortColumn) {
+                filteredUsers.sort((a, b) => {
+                    let valA = state.sortColumn === 'avgScore' ? a.avgScoreNum : a.latestScore;
+                    let valB = state.sortColumn === 'avgScore' ? b.avgScoreNum : b.latestScore;
+                    
+                    if (state.sortDirection === 'asc') {
+                        return valA - valB; // Terendah ke Tertinggi
+                    } else {
+                        return valB - valA; // Tertinggi ke Terendah
+                    }
+                });
+            }
 
             // 4. Kalkulasi Mini Dashboard
             const totalUser = filteredUsers.length;
@@ -1777,14 +1802,35 @@
                 </tr>
             `).join('');
 
+            // --- HELPER UNTUK WARNA PANAH (DITAMBAHKAN DI SINI) ---
+            const getArrowStyle = (col, dir) => {
+                if (state.sortColumn === col && state.sortDirection === dir) {
+                    return "color: var(--primary); cursor: pointer; transition: 0.2s;";
+                }
+                return "color: #cbd5e1; cursor: pointer; transition: 0.2s;";
+            };
+
+            // HEADER TABEL BARU (Ditambahkan ikon panah atas & bawah)
             container.innerHTML = `
                 <table class="anomaly-table">
                     <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
                         <tr>
                             <th>Username</th>
                             <th>Company ID</th>
-                            <th>Average Score</th>
-                            <th>Latest Score</th>
+                            <th>
+                                Average Score
+                                <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
+                                    <i class="fa-solid fa-arrow-up" style="${getArrowStyle('avgScore', 'asc')}" onclick="sortUserReport('avgScore', 'asc')" title="Urutkan dari Terendah"></i>
+                                    <i class="fa-solid fa-arrow-down" style="${getArrowStyle('avgScore', 'desc')}" onclick="sortUserReport('avgScore', 'desc')" title="Urutkan dari Tertinggi"></i>
+                                </div>
+                            </th>
+                            <th>
+                                Latest Score
+                                <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
+                                    <i class="fa-solid fa-arrow-up" style="${getArrowStyle('latestScore', 'asc')}" onclick="sortUserReport('latestScore', 'asc')" title="Urutkan dari Terendah"></i>
+                                    <i class="fa-solid fa-arrow-down" style="${getArrowStyle('latestScore', 'desc')}" onclick="sortUserReport('latestScore', 'desc')" title="Urutkan dari Tertinggi"></i>
+                                </div>
+                            </th>
                             <th>Latest Remark</th>
                             <th style="width: 80px;">Detail</th>
                         </tr>
