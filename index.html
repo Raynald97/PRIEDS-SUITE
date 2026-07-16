@@ -1668,7 +1668,7 @@
 
             if (!appState.surveyLogs || appState.surveyLogs.length === 0) {
                 container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada data. Silakan unggah file Excel di tab NPS Tracker terlebih dahulu.</div>`;
-                pagContainer.innerHTML = '';
+                if(pagContainer) pagContainer.innerHTML = '';
                 return;
             }
 
@@ -1677,18 +1677,9 @@
             // 1. FILTER BERDASARKAN CHECKBOX (TAHUN, QUARTER, BULAN)
             let logsToProcess = appState.surveyLogs;
             
-            // Jika ada tahun yang dicentang, lakukan filter
-            if (state.year && state.year.length > 0) {
-                logsToProcess = logsToProcess.filter(l => state.year.includes(String(l.year)));
-            }
-            // Jika ada quarter yang dicentang, lakukan filter
-            if (state.quarter && state.quarter.length > 0) {
-                logsToProcess = logsToProcess.filter(l => state.quarter.includes(String(l.quarter)));
-            }
-            // Jika ada bulan yang dicentang, lakukan filter
-            if (state.month && state.month.length > 0) {
-                logsToProcess = logsToProcess.filter(l => state.month.includes(String(l.monthIdx)));
-            }
+            if (state.year && state.year.length > 0) logsToProcess = logsToProcess.filter(l => state.year.includes(String(l.year)));
+            if (state.quarter && state.quarter.length > 0) logsToProcess = logsToProcess.filter(l => state.quarter.includes(String(l.quarter)));
+            if (state.month && state.month.length > 0) logsToProcess = logsToProcess.filter(l => state.month.includes(String(l.monthIdx)));
 
             // 2. Grouping Data User & Koleksi Company ID
             const userMap = {};
@@ -1724,6 +1715,9 @@
                 const totalScore = u.logs.reduce((sum, l) => sum + l.score, 0);
                 u.avgScoreNum = totalScore / u.logs.length;
                 u.avgScore = u.avgScoreNum.toFixed(1);
+                
+                // --- TAMBAHAN: Menyimpan total berapa kali user mengisi NPS ---
+                u.npsCount = u.logs.length; 
             });
 
             // 3. Terapkan Filter Search & Company
@@ -1733,11 +1727,11 @@
                 return matchSearch && matchCompany;
             });
 
-            // --- LOGIC SORTING (DITAMBAHKAN DI SINI) ---
+            // --- LOGIC SORTING (Diperbarui dengan opsi npsCount) ---
             if (state.sortColumn) {
                 filteredUsers.sort((a, b) => {
-                    let valA = state.sortColumn === 'avgScore' ? a.avgScoreNum : a.latestScore;
-                    let valB = state.sortColumn === 'avgScore' ? b.avgScoreNum : b.latestScore;
+                    let valA = state.sortColumn === 'avgScore' ? a.avgScoreNum : (state.sortColumn === 'npsCount' ? a.npsCount : a.latestScore);
+                    let valB = state.sortColumn === 'avgScore' ? b.avgScoreNum : (state.sortColumn === 'npsCount' ? b.npsCount : b.latestScore);
                     
                     if (state.sortDirection === 'asc') {
                         return valA - valB; // Terendah ke Tertinggi
@@ -1783,13 +1777,13 @@
                     trendColor = 'var(--warning)';
                 }
             } else if (totalUser > 0) {
-                 trendHtml = `Baru`;
-                 trendColor = 'var(--primary)';
+                trendHtml = `Baru`;
+                trendColor = 'var(--primary)';
             }
 
             document.getElementById('mini-total-user').innerText = totalUser;
             document.getElementById('mini-avg-score').innerText = overallAvg;
-            document.getElementById('mini-avg-score').style = getScoreTextStyle(overallAvg) + " font-size:28px; font-weight:800; margin:0;"; // Baris Tambahan
+            document.getElementById('mini-avg-score').style = getScoreTextStyle(overallAvg) + " font-size:28px; font-weight:800; margin:0;";
             document.getElementById('mini-score-trend').innerHTML = trendHtml;
 
             // 5. Pagination System
@@ -1798,13 +1792,21 @@
             const startIndex = (currentPage - 1) * state.limit;
             const paginatedUsers = filteredUsers.slice(startIndex, startIndex + state.limit);
 
-            // 6. Render Tabel HTML
+            // 6. Render Tabel HTML (Diperbarui dengan kolom npsCount)
             const rowsHtml = paginatedUsers.map((u, idx) => `
                 <tr>
                     <td style="font-weight:700; color:var(--dark);">${u.username}</td>
                     <td><span style="font-size:11px; font-weight:600; color:var(--text-muted); font-family:'Roboto Mono', monospace;">${u.companyId}</span></td>
+                    
+                    <!-- Kolom Average Score -->
                     <td><span style="${getScoreBadgeStyle(u.avgScore)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${u.avgScore}</span></td>
+                    
+                    <!-- --- TAMBAHAN: Kolom NPS Count --- -->
+                    <td><span style="background:var(--gray-light); border:1px solid var(--gray-border); color:var(--text-main); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800;">${u.npsCount} Kali</span></td>
+                    
+                    <!-- Kolom Latest Score -->
                     <td><span style="${getScoreTextStyle(u.latestScore)} font-weight:800;">${u.latestScore}</span></td>
+                    
                     <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${u.latestRemark}">${u.latestRemark}</td>
                     <td>
                         <div class="dropdown">
@@ -1821,7 +1823,7 @@
                 </tr>
             `).join('');
 
-            // --- HELPER UNTUK WARNA PANAH (DITAMBAHKAN DI SINI) ---
+            // Helper untuk warna panah
             const getArrowStyle = (col, dir) => {
                 if (state.sortColumn === col && state.sortDirection === dir) {
                     return "color: var(--primary); cursor: pointer; transition: 0.2s;";
@@ -1829,7 +1831,7 @@
                 return "color: #cbd5e1; cursor: pointer; transition: 0.2s;";
             };
 
-            // HEADER TABEL BARU (Ditambahkan ikon panah atas & bawah)
+            // HEADER TABEL (Ditambahkan th untuk NPS Count dengan icon sorting)
             container.innerHTML = `
                 <table class="anomaly-table">
                     <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
@@ -1843,6 +1845,14 @@
                                     <i class="fa-solid fa-arrow-down" style="${getArrowStyle('avgScore', 'desc')}" onclick="sortUserReport('avgScore', 'desc')" title="Urutkan dari Tertinggi"></i>
                                 </div>
                             </th>
+                            <!-- --- TAMBAHAN: Header NPS Count --- -->
+                            <th>
+                                NPS Count
+                                <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
+                                    <i class="fa-solid fa-arrow-up" style="${getArrowStyle('npsCount', 'asc')}" onclick="sortUserReport('npsCount', 'asc')" title="Paling Sedikit Mengisi"></i>
+                                    <i class="fa-solid fa-arrow-down" style="${getArrowStyle('npsCount', 'desc')}" onclick="sortUserReport('npsCount', 'desc')" title="Paling Sering Mengisi"></i>
+                                </div>
+                            </th>
                             <th>
                                 Latest Score
                                 <div style="display: inline-flex; flex-direction: column; font-size: 10px; margin-left: 6px; vertical-align: middle;">
@@ -1854,7 +1864,7 @@
                             <th style="width: 80px;">Detail</th>
                         </tr>
                     </thead>
-                    <tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data yang sesuai filter.</td></tr>'}</tbody>
+                    <tbody>${rowsHtml || '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data yang sesuai filter.</td></tr>'}</tbody>
                 </table>
             `;
 
@@ -1873,7 +1883,7 @@
                 
                 pagHtml += `<button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" ${currentPage === totalPages ? 'disabled' : ''} onclick="changeUserReportPage(${currentPage + 1})">Next</button>`;
             }
-            pagContainer.innerHTML = pagHtml;
+            if(pagContainer) pagContainer.innerHTML = pagHtml;
         }
 
         // ================= FUNGSI COMPANY REPORT =================
