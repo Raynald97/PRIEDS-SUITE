@@ -903,13 +903,32 @@
         <div class="modal-content" style="width: 800px; max-height: 85vh;">
             <div class="modal-header">
                 <h3 style="font-size:16px; font-weight:800; color:var(--dark);" id="user-modal-title-text">Riwayat NPS</h3>
-                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeUserDetailModal()">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <!-- Dropdown Sorting yang dicari oleh Javascript -->
+                    <select id="user-history-sort" style="padding:4px 8px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" onchange="renderUserHistory()">
+                        <option value="desc">Terbaru ke Terlama</option>
+                        <option value="asc">Terlama ke Terbaru</option>
+                    </select>
+                    <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeUserDetailModal()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
             </div>
             <div class="modal-body">
-                <table class="anomaly-table">
-                    <!-- ... isi tabel user detail ... -->
+                <table class="anomaly-table" style="margin-top:0;">
+                    <thead style="position: sticky; top: 0; background: var(--gray-light); z-index: 1;">
+                        <tr>
+                            <th>Quarter</th>
+                            <th>Month & Year</th>
+                            <th>NPS Score</th>
+                            <th>Remark</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <!-- Body tabel yang dicari oleh Javascript -->
+                    <tbody id="user-detail-tbody">
+                    </tbody>
                 </table>
             </div>
         </div>
