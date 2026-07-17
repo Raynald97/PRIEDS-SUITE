@@ -524,8 +524,11 @@
 
                 <!-- MASTER DATA EDITOR DITAMBAHKAN DI SINI -->
                 <div id="editor-user_company" class="editor-section">
-                    <div class="section-title">Master Data Perusahaan</div>
-                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
+                <div class="section-title">
+                    <span>Master Data Perusahaan</span>
+                    <button class="btn btn-primary" style="padding:4px 8px; font-size:11px;" onclick="openAddCompanyModal()">+ Tambah Data</button>
+                </div>
+                <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
                         <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Company ID</label>
                         <input type="text" id="master-company-search" placeholder="Ketik ID Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterUserCompany()">
                         
@@ -1048,6 +1051,35 @@
         </div>
     </div>
 
+    <!-- TAMBAHAN: MODAL CREATE COMPANY BARU -->
+    <div id="add-company-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 450px;">
+            <div class="modal-header">
+                <h3 style="font-size:16px; font-weight:800; color:var(--dark);">Tambah Perusahaan Baru</h3>
+                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeAddCompanyModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Company ID <span style="color:var(--danger);">*</span></label>
+                <input type="text" id="add-company-id" placeholder="Masukkan ID Unik Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px; font-weight:700;">
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Company Name</label>
+                <input type="text" id="add-company-name" placeholder="Masukkan Nama Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Kategori Perusahaan</label>
+                <input type="text" id="add-company-category" list="add-category-list" placeholder="Ketik atau pilih kategori..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+                <datalist id="add-category-list"></datalist>
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Implementor</label>
+                <input type="text" id="add-company-implementor" list="add-implementor-list" placeholder="Ketik atau pilih implementor..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:20px; font-size:12px;">
+                <datalist id="add-implementor-list"></datalist>
+
+                <button class="btn btn-primary" style="width:100%;" onclick="saveNewCompany()">Simpan Perusahaan</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- MASTER DATA SET ---
         const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -1477,7 +1509,10 @@
             const limitAtt = appState.lastLoginAttentionLimit || 7;
             mergedData.forEach(d => {
                 tUser += d.totalUser;
-                if (d.rawDays >= 0 && d.rawDays < limitAtt) tActive++;
+                
+                // Sesudah:
+                if (d.rawDays < limitAtt) tActive++;
+                
                 let p = d.package.toLowerCase();
                 if (p.includes('wms lite')) cWMS++;
                 if (p.includes('starterpack') || p.includes('starter pack')) cStarter++;
@@ -1598,6 +1633,69 @@
         }
 
         function closeEditCompanyModal() { document.getElementById('edit-company-modal').classList.remove('active'); }
+
+        // ================= FUNGSI CREATE COMPANY MANUAL =================
+        function openAddCompanyModal() {
+            // Isi otomatis Datalist (Opsi Dropdown Kategori & Implementor) dari data yang sudah ada
+            const uniqueCategories = [...new Set(appState.masterCompany.map(c => c.category).filter(c => c && c.trim() !== ''))];
+            document.getElementById('add-category-list').innerHTML = uniqueCategories.map(c => `<option value="${c}">`).join('');
+
+            const defaultImplementors = ['Prieds', 'Synectic', 'Vulcan', 'SAC'];
+            const existingImplementors = appState.masterCompany.map(c => c.implementor).filter(c => c && c.trim() !== '');
+            const allImplementors = [...new Set([...defaultImplementors, ...existingImplementors])];
+            document.getElementById('add-implementor-list').innerHTML = allImplementors.map(i => `<option value="${i}">`).join('');
+
+            // Bersihkan field inputan
+            document.getElementById('add-company-id').value = '';
+            document.getElementById('add-company-name').value = '';
+            document.getElementById('add-company-category').value = '';
+            document.getElementById('add-company-implementor').value = '';
+
+            // Tutup dropdown yang mungkin terbuka dan tampilkan modal
+            document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            document.getElementById('add-company-modal').classList.add('active');
+        }
+
+        function closeAddCompanyModal() {
+            document.getElementById('add-company-modal').classList.remove('active');
+        }
+
+        function saveNewCompany() {
+            const cid = document.getElementById('add-company-id').value.trim();
+            const cName = document.getElementById('add-company-name').value.trim();
+            const cat = document.getElementById('add-company-category').value.trim();
+            const impl = document.getElementById('add-company-implementor').value.trim();
+
+            // Validasi Input
+            if (!cid) {
+                alert("⚠️ Company ID wajib diisi!");
+                return;
+            }
+
+            // Cek duplikasi Company ID (Tidak boleh ada Company ID ganda)
+            const exists = appState.masterCompany.find(c => String(c.companyId).toLowerCase() === cid.toLowerCase());
+            if (exists) {
+                alert("⚠️ Company ID ini sudah terdaftar di Master Data! Silakan gunakan ID lain.");
+                return;
+            }
+
+            // Tambahkan ke State Master Company
+            appState.masterCompany.push({
+                companyId: cid,
+                companyName: cName !== '' ? cName : cid, // Jika nama kosong, gunakan ID sebagai default
+                category: cat,
+                implementor: impl,
+                packageId: null, // Default kosong (belum berlangganan retention tracker)
+                subsDate: ''
+            });
+
+            // Simpan ke Firebase & Render ulang tabel
+            saveDataToLocal();
+            initUserCompanyTable();
+            closeAddCompanyModal();
+            
+            alert(`✔️ Berhasil! Perusahaan '${cid}' telah ditambahkan ke Master Data.`);
+        }
 
         function saveCompanyEdit() {
             const cid = document.getElementById('edit-company-id').value;
@@ -2454,6 +2552,9 @@
                 closeReportModal();
                 closeUserDetailModal();
                 closeLastLoginReportModal();
+                closeCompanyDetailModal();
+                closeEditCompanyModal(); // Pastikan Edit modal juga tertutup
+                closeAddCompanyModal();  // <-- Tutup modal Create Company
             }
         }
 
