@@ -1350,6 +1350,7 @@
                     <div>
                         <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Quarter</label>
                         <select id="feat-quarter" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                            <option value="Unassigned">Unassigned</option>
                             <option value="Q1 2026">Q1 2026</option>
                             <option value="Q2 2026">Q2 2026</option>
                             <option value="Q3 2026">Q3 2026</option>
@@ -4939,6 +4940,10 @@ function openLastLoginReportDetail(idx) {
             document.getElementById('feat-name').value = '';
             document.getElementById('feature-modal-title').innerText = 'Add feature';
             
+            // Set default value ke Unassigned atau sesuai kebutuhan awal
+            document.getElementById('feat-quarter').value = 'Unassigned'; 
+            updateDueDateBasedOnQuarter(); // <--- TAMBAHKAN BARIS INI
+            
             // Reset modal agar selalu kembali ke tab '1. Planning' saat dibuka
             switchFeatureTab('planning', document.querySelector('.modal-tabs .modal-tab:first-child'));
             
@@ -5300,6 +5305,39 @@ function openLastLoginReportDetail(idx) {
                 }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        // ================= AUTOMATION DUE DATE =================
+        function updateDueDateBasedOnQuarter() {
+            const quarterSelect = document.getElementById('feat-quarter').value;
+            const dueDateInput = document.getElementById('feat-duedate');
+
+            // Kosongkan due date jika memilih "Unassigned"
+            if (quarterSelect === 'Unassigned') {
+                dueDateInput.value = '';
+                return;
+            }
+
+            // Memecah teks "Q1 2027" menjadi ["Q1", "2027"]
+            const parts = quarterSelect.split(' ');
+            if (parts.length === 2) {
+                const q = parts[0];
+                const year = parts[1];
+                let lastDay = '';
+
+                // Tentukan tanggal terakhir berdasarkan format YYYY-MM-DD
+                switch (q) {
+                    case 'Q1': lastDay = `${year}-03-31`; break;
+                    case 'Q2': lastDay = `${year}-06-30`; break;
+                    case 'Q3': lastDay = `${year}-09-30`; break;
+                    case 'Q4': lastDay = `${year}-12-31`; break;
+                }
+
+                // Set otomatis nilai input due date
+                if (lastDay) {
+                    dueDateInput.value = lastDay;
+                }
+            }
         }
     </script>
     
