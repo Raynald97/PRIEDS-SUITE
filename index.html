@@ -169,10 +169,101 @@
         .modal-content { background: #fff; width: 700px; max-height: 85vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .modal-header { padding: 20px 25px; border-bottom: 1px solid var(--gray-border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
         .modal-body { padding: 20px 25px; overflow-y: auto; flex: 1; }
+
+        /* ================= LOGIN PAGE STYLES ================= */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #f1f5f9; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .login-card {
+            background: #ffffff; width: 400px; padding: 40px;
+            border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .login-card h2 {
+            font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 800;
+            color: var(--primary); margin-bottom: 8px;
+        }
+        .login-card p {
+            font-size: 13px; color: var(--text-muted); margin-bottom: 30px;
+        }
+        .login-input-group {
+            text-align: left; margin-bottom: 20px;
+        }
+        .login-input-group label {
+            display: block; font-size: 12px; font-weight: 700; color: var(--dark); margin-bottom: 8px;
+        }
+        .login-input-group input {
+            width: 100%; padding: 12px; border: 1px solid var(--gray-border);
+            border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;
+            transition: 0.2s;
+        }
+        .login-input-group input:focus {
+            outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+        .login-error {
+            color: var(--danger); font-size: 12px; font-weight: 700; margin-bottom: 15px;
+            background: #fee2e2; padding: 10px; border-radius: 8px; border: 1px solid #f87171;
+            display: none;
+        }
+        #app-container {
+            display: none;
+            width: 100%; height: 100%; flex: 1;
+        }
+        /* ================= TOGGLE PASSWORD STYLES ================= */
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-toggle { position: absolute; right: 12px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
+        .password-toggle:hover { color: var(--primary); }
+
+        /* ================= ROADMAP PLANNER STYLES ================= */
+        .pipeline-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 25px; }
+        .pipeline-card { background: #fff; border: 1px solid var(--gray-border); border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .pipeline-card-header { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
+        .pipeline-stats { font-size: 20px; font-weight: 800; color: var(--dark); margin-bottom: 5px; }
+        .pipeline-sub { font-size: 10px; color: var(--text-muted); }
+        .progress-bar { height: 4px; background: var(--gray-light); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 2px; }
+
+        .modal-tabs { display: flex; border-bottom: 1px solid var(--gray-border); margin-bottom: 20px; gap: 10px; }
+        .modal-tab { padding: 10px 15px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .modal-tab:hover { color: var(--primary); }
+        .modal-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .modal-tab-content { display: none; }
+        .modal-tab-content.active { display: block; }
     </style>
 </head>
 <body>
 
+    <!-- OVERLAY HALAMAN LOGIN -->
+    <div id="login-overlay">
+        <div class="login-card">
+            <i class="fa-solid fa-cube" id="logo-bypass" style="font-size: 40px; color: var(--primary); margin-bottom: 15px; cursor: pointer;" onclick="handleBypassClick()"></i>
+            <h2>PRIEDS SUITE</h2>
+            <p>Silakan login untuk mengakses Executive Dashboard</p>
+            
+            <div class="login-error" id="login-error-msg">Email atau password salah!</div>
+            
+            <div class="login-input-group">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="email prieds.com" autocomplete="off">
+            </div>
+            <div class="login-input-group">
+                <label>Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="login-password" placeholder="Masukkan password...">
+                    <i class="fa-solid fa-eye password-toggle" id="toggle-password-icon" onclick="togglePasswordVisibility()"></i>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px; margin-top: 10px;" onclick="handleLogin()">
+                <i class="fa-solid fa-right-to-bracket"></i> Masuk Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- PEMBUKA BUNGKUSAN DASHBOARD -->
+    <div id="app-container">
     <div class="sidebar">
         <div class="logo"><i class="fa-solid fa-cube"></i> PRIEDS SUITE</div>
         <div class="nav-menu">
@@ -202,11 +293,31 @@
                 <div class="nav-item header-group" onclick="toggleGroup(this)"><i class="fa-solid fa-database"></i> Master Data <i class="fa-solid fa-chevron-down arrow-icon"></i></div>
                 <div class="sub-menu">
                     <div class="nav-item" onclick="switchTab('user_company', this)"><i class="fa-solid fa-building-user"></i> User Company Master</div>
+                    <div class="nav-item" onclick="switchTab('account_master', this)"><i class="fa-solid fa-users-gear"></i> Account Master</div>
+                </div>
+            </div>
+            <div class="nav-group">
+                <div class="nav-item header-group" onclick="toggleGroup(this)">
+                    <i class="fa-solid fa-map-location-dot"></i> PM Hub <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                </div>
+                <div class="sub-menu">
+                    <div class="nav-item" onclick="switchTab('roadmap', this)">
+                        <i class="fa-solid fa-route"></i> Roadmap Planner
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="sidebar-footer">
-            <button class="btn btn-success" style="width:100%;" onclick="exportPPT()"><i class="fa-solid fa-file-powerpoint"></i> EXPORT TO PPT</button>
+        <div class="sidebar-footer" style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn btn-outline" style="width:100%; border-color:var(--danger); color:var(--danger);" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> LOG OUT
+            </button>
+            <button class="btn btn-success" style="width:100%;" onclick="exportPPT()">
+                <i class="fa-solid fa-file-powerpoint"></i> EXPORT TO PPT
+            </button>
+            
+            <button class="btn btn-primary" style="width:100%; background:#0088cc; border-color:#0088cc;" onclick="sendTelegramReport()">
+                <i class="fa-brands fa-telegram"></i> KIRIM REPORT TELEGRAM
+            </button>
         </div>
     </div>
 
@@ -524,52 +635,48 @@
 
                 <!-- MASTER DATA EDITOR DITAMBAHKAN DI SINI -->
                 <div id="editor-user_company" class="editor-section">
-                <div class="section-title">
-                    <span>Master Data Perusahaan</span>
-                    <button class="btn btn-primary" style="padding:4px 8px; font-size:11px;" onclick="openAddCompanyModal()">+ Tambah Data</button>
+                    <!-- Dikosongkan: Filter dipindah ke Dashboard agar tabel menjadi Full Width -->
                 </div>
-                <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
-                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Company ID</label>
-                        <input type="text" id="master-company-search" placeholder="Ketik ID Perusahaan..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterUserCompany()">
+
+                <!-- ACCOUNT MASTER EDITOR DITAMBAHKAN DI SINI -->
+                <div id="editor-account_master" class="editor-section">
+                    <div class="section-title">Tambah Akun Baru</div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px;">
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Email</label>
+                        <input type="email" id="new-account-email" placeholder="Masukkan email..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px; font-size:12px;">
                         
-                        <!-- 👇 TAMBAHAN FILTER KATEGORI DAN SORTING 👇 -->
-                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Filter Kategori</label>
-                        <select id="master-company-category" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" onchange="filterUserCompany()">
-                            <option value="all">Semua Kategori</option>
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Password</label>
+                        <input type="text" id="new-account-password" placeholder="Buat password login..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px; font-size:12px;">
+                        
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Role Akses</label>
+                        <select id="new-account-role" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+                            <option value="Super Admin">Super Admin</option>
+                            <option value="Admin">Admin</option>
                         </select>
 
-                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Urutkan Last Login</label>
-                        <select id="master-company-sort-login" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" onchange="filterUserCompany()">
-                            <option value="none">Default</option>
-                            <option value="asc">Terbaru ke Terlama</option>
-                            <option value="desc">Terlama ke Terbaru</option>
-                        </select>
-                        <!-- 👆 AKHIR TAMBAHAN 👆 -->
-
-                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Data per Halaman</label>
-                        <select id="master-company-limit" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px;" onchange="changeUserCompanyLimit()">
-                            <option value="5">5 Data</option>
-                            <option value="10" selected>10 Data</option>
-                            <option value="25">25 Data</option>
-                            <option value="50">50 Data</option>
-                        </select>
-
-                        <button class="btn btn-outline" style="width:100%; margin-top:12px; font-weight:700;" onclick="syncAllCompaniesToMaster(false)">
-                            <i class="fa-solid fa-rotate"></i> Sync Ulang Master Data
-                        </button>
-                        <p style="font-size:10.5px; color:var(--text-muted); margin-top:6px; margin-bottom:0;">Menarik Company ID dari seluruh data NPS & Last Login yang sudah tersimpan, dan menambahkan yang belum ada ke Master.</p>
-
-                        <!-- 👇 TOMBOL RESET DINONAKTIFKAN SEMENTARA 👇 -->
-                        <!--
-                        <hr style="border:0; border-top:1px solid var(--gray-border); margin:15px 0;">
-                        <button class="btn btn-outline" style="width:100%; border-color:var(--danger); color:var(--danger); font-weight:700;" onclick="resetMasterCompanyData()">
-                            <i class="fa-solid fa-trash-can"></i> Reset Master Data
-                        </button>
-                        -->
-                        <!-- 👆 AKHIR TOMBOL RESET 👆 -->
+                        <button class="btn btn-primary" style="width:100%;" onclick="addAccount()">+ Simpan Akun</button>
                     </div>
                 </div>
-
+                <div id="editor-roadmap" class="editor-section">
+                    <div class="section-title">
+                        <span>Manajemen Roadmap</span>
+                        <button class="btn btn-primary" style="padding:4px 8px; font-size:11px;" onclick="openAddFeatureModal()">+ Add Feature</button>
+                    </div>
+                    <div style="padding:15px; background:var(--gray-light); border:1px solid var(--gray-border); border-radius:8px; font-size:12px;">
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Cari Fitur</label>
+                        <input type="text" id="roadmap-search" placeholder="Ketik nama fitur..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" oninput="filterRoadmap()">
+                        
+                        <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">Filter Quarter</label>
+                        <select id="roadmap-filter-quarter" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:12px;" onchange="filterRoadmap()">
+                            <option value="all">Semua Quarter</option>
+                            <option value="Q1 2026">Q1 2026</option>
+                            <option value="Q2 2026">Q2 2026</option>
+                            <option value="Q3 2026">Q3 2026</option>
+                            <option value="Q4 2026">Q4 2026</option>
+                            <option value="Q1 2027">Q1 2027</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <div class="dashboard-panel">
@@ -592,9 +699,13 @@
                                 <h2 id="login-count-attention" style="font-size:36px; font-weight:800; margin:0;">0</h2>
                             </div>
                             
-                            <div style="background:var(--danger); color:white; padding:20px; border-radius:12px; text-align:center; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);">
+                            <div style="background:var(--danger); color:white; padding:20px; border-radius:12px; text-align:center; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2); display:flex; flex-direction:column; justify-content:center;">
                                 <h5 id="title-inactive-range" style="font-size:13px; margin-bottom:8px; text-transform:uppercase;">Inactive (>15 Hari)</h5>
                                 <h2 id="login-count-inactive" style="font-size:36px; font-weight:800; margin:0;">0</h2>
+                                <div style="margin-top: 10px; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 6px;">
+                                    <span style="font-size:10px; text-transform:uppercase; display:block; margin-bottom: 2px;">MRR At Risk</span>
+                                    <span id="mrr-at-risk-display" style="font-size:14px; font-weight:800;">Rp 0</span>
+                                </div>
                             </div>
                         </div>
 
@@ -835,15 +946,115 @@
                         </div>
                         <!-- 👆 AKHIR KODE MINI DASHBOARD 👆 -->
 
+                        <!-- 👇 FILTER TOOLBAR (DIPINDAH DARI KIRI KE ATAS TABEL) 👇 -->
+                        <div style="background:#f8fafc; border:1px solid var(--gray-border); border-radius:12px; padding:15px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:15px; align-items:flex-end;">
+                            
+                            <!-- Search -->
+                            <div style="flex:1; min-width:200px;">
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase;">Cari Perusahaan</label>
+                                <div style="position:relative;">
+                                    <i class="fa-solid fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:12px;"></i>
+                                    <input type="text" id="master-company-search" placeholder="Ketik ID atau Nama..." style="width:100%; padding:8px 10px 8px 32px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" oninput="filterUserCompany()">
+                                </div>
+                            </div>
+                            
+                            <!-- Kategori -->
+                            <div style="width:170px;">
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase;">Kategori</label>
+                                <select id="master-company-category" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" onchange="filterUserCompany()">
+                                    <option value="all">Semua Kategori</option>
+                                </select>
+                            </div>
+
+                            <!-- 👇 TAMBAHAN FILTER STATUS 👇 -->
+                            <div style="width:130px;">
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase;">Status</label>
+                                <select id="master-company-status" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" onchange="filterUserCompany()">
+                                    <option value="all">Semua</option>
+                                    <option value="active" selected>Active</option>
+                                    <option value="deactive">Deactive</option>
+                                </select>
+                            </div>
+                            <!-- 👆 AKHIR TAMBAHAN 👆 -->
+
+                            <!-- Sort Login -->
+                            <div style="width:160px;">
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase;">Urutkan Login</label>
+                                <select id="master-company-sort-login" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" onchange="filterUserCompany()">
+                                    <option value="none">Default</option>
+                                    <option value="asc">Terbaru - Terlama</option>
+                                    <option value="desc">Terlama - Terbaru</option>
+                                </select>
+                            </div>
+
+                            <!-- Limit -->
+                            <div style="width:100px;">
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase;">Tampilkan</label>
+                                <select id="master-company-limit" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" onchange="changeUserCompanyLimit()">
+                                    <option value="5">5 Data</option>
+                                    <option value="10" selected>10 Data</option>
+                                    <option value="25">25 Data</option>
+                                    <option value="50">50 Data</option>
+                                </select>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div style="display:flex; gap:10px;">
+                                <input type="file" id="master-company-excel-upload" accept=".xlsx, .xls, .csv" style="display: none;" onchange="processMasterCompanyExcel(event)">
+                                <button class="btn btn-success" style="padding:8px 15px; font-size:12px; font-weight:700; height:36px; background:#16a34a; color:#fff; border:none;" onclick="document.getElementById('master-company-excel-upload').click()">
+                                    <i class="fa-solid fa-file-excel"></i> Import Amount
+                                </button>
+                                <button class="btn btn-outline" style="padding:8px 12px; font-size:12px; font-weight:700; height:36px; border-color:var(--gray-border);" onclick="syncAllCompaniesToMaster(false)" title="Sync Ulang Master Data">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </button>
+                                <button class="btn btn-primary" style="padding:8px 15px; font-size:12px; font-weight:700; height:36px;" onclick="openAddCompanyModal()">
+                                    <i class="fa-solid fa-plus"></i> Tambah Data
+                                </button>
+                            </div>
+                        </div>
+                        <!-- 👆 AKHIR FILTER TOOLBAR 👆 -->
+
                         <div id="user-company-table-container">
                             <div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada data master perusahaan.</div>
                         </div>
                         <div id="user-company-pagination-container" style="display:flex; justify-content:flex-end; gap:5px; margin-top:15px;"></div>
                     </div>
                 </div>
+
+                <!-- ACCOUNT MASTER VIEW DITAMBAHKAN DI SINI -->
+                <div id="view-account_master" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header" style="margin-bottom:20px;">
+                            <h2>Account Master Management</h2>
+                            <p>Daftar akun admin yang diizinkan untuk login dan mengelola Prieds Suite</p>
+                        </div>
+                        <div id="account-master-table-container">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat data akun...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-roadmap" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header" style="margin-bottom:20px;">
+                            <h2>Roadmap Dashboard</h2>
+                            <p>Pantau pipeline pengembangan fitur (Product Command Center)</p>
+                        </div>
+
+                        <div class="pipeline-grid" id="roadmap-pipeline-container">
+                            <!-- Pipeline cards diisi melalui JS -->
+                        </div>
+
+                        <div id="roadmap-table-container">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat data roadmap...</div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
+</div>
 
     <div id="lastlogin-detail-modal" class="modal-overlay">
     <div class="modal-content" style="width: 850px; max-height: 85vh;">
@@ -1038,13 +1249,33 @@
                 <datalist id="edit-implementor-list"></datalist>
                 <!-- 👆 AKHIR TAMBAHAN 👆 -->
 
+                <!-- 👇 TAMBAHAN INPUT AMOUNT 👇 -->
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Initial Amount (Rp)</label>
+                <input type="number" id="edit-company-initial" placeholder="0" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Subs Amount (Rp)</label>
+                <input type="number" id="edit-company-subs" placeholder="0" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+                <!-- 👆 AKHIR TAMBAHAN AMOUNT 👆 -->
+
                 <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Pilih Paket (Retention Tracker)</label>
                 <select id="edit-company-package" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
                     <!-- Diisi via JS -->
                 </select>
 
                 <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Subs Date (Tanggal Langganan)</label>
-                <input type="date" id="edit-company-subsdate" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:20px; font-size:12px;">
+                <input type="date" id="edit-company-subsdate" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+
+                <!-- 👇 TAMBAHAN INPUT PAYMENT TYPE & MONTH 👇 -->
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Payment Type</label>
+                <select id="edit-company-payment-type" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+                    <option value="Monthly Subs">Monthly Subs</option>
+                    <option value="Yearly Subs" selected>Yearly Subs</option>
+                    <option value="One Time Payment">One Time Payment</option>
+                </select>
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Payment Month (Akhir Subs)</label>
+                <input type="date" id="edit-company-payment-month" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:20px; font-size:12px;">
+                <!-- 👆 AKHIR TAMBAHAN 👇 -->
 
                 <button class="btn btn-primary" style="width:100%;" onclick="saveCompanyEdit()">Simpan Perubahan</button>
             </div>
@@ -1072,15 +1303,282 @@
                 <datalist id="add-category-list"></datalist>
 
                 <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Implementor</label>
-                <input type="text" id="add-company-implementor" list="add-implementor-list" placeholder="Ketik atau pilih implementor..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:20px; font-size:12px;">
+                <input type="text" id="add-company-implementor" list="add-implementor-list" placeholder="Ketik atau pilih implementor..." style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
                 <datalist id="add-implementor-list"></datalist>
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Initial Amount (Rp)</label>
+                <input type="number" id="add-company-initial" placeholder="0" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Subs Amount (Rp)</label>
+                <input type="number" id="add-company-subs" placeholder="0" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+
+                <!-- 👇 TAMBAHAN INPUT PAYMENT TYPE & MONTH 👇 -->
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Payment Type</label>
+                <select id="add-company-payment-type" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:15px; font-size:12px;">
+                    <option value="Monthly Subs">Monthly Subs</option>
+                    <option value="Yearly Subs" selected>Yearly Subs</option>
+                    <option value="One Time Payment">One Time Payment</option>
+                </select>
+
+                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:4px; font-size:12px;">Payment Month (Akhir Subs)</label>
+                <input type="date" id="add-company-payment-month" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; margin-bottom:20px; font-size:12px;">
+                <!-- 👆 AKHIR TAMBAHAN 👇 -->
 
                 <button class="btn btn-primary" style="width:100%;" onclick="saveNewCompany()">Simpan Perusahaan</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL ADD FEATURE ROADMAP -->
+    <div id="add-feature-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 750px; background: #1a1a1a; color: #fff; border: 1px solid #333;">
+            <div class="modal-header" style="border-bottom: 1px solid #333; background: #222;">
+                <h3 style="font-size:16px; font-weight:800; color:#fff;" id="feature-modal-title">Add feature</h3>
+                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:#888; padding:5px;" onclick="closeAddFeatureModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <input type="hidden" id="feat-id">
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Feature name *</label>
+                    <input type="text" id="feat-name" placeholder="e.g. Onboarding redesign" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Quarter</label>
+                        <select id="feat-quarter" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                            <option value="Q1 2026">Q1 2026</option>
+                            <option value="Q2 2026">Q2 2026</option>
+                            <option value="Q3 2026">Q3 2026</option>
+                            <option value="Q4 2026">Q4 2026</option>
+                            <option value="Q1 2027" selected>Q1 2027</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Priority</label>
+                        <select id="feat-priority" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Due date</label>
+                        <input type="date" id="feat-duedate" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; color-scheme: dark;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Overall status</label>
+                        <select id="feat-status" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                            <option value="Planned">Planned</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Done">Done</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TABS -->
+                <div class="modal-tabs" style="border-bottom: 1px solid #444; gap:0;">
+                    <div class="modal-tab active" onclick="switchFeatureTab('planning', this)"><i class="fa-solid fa-circle" style="font-size:6px; margin-right:4px;"></i> 1. Planning</div>
+                    <div class="modal-tab" onclick="switchFeatureTab('prd', this)"><i class="fa-solid fa-circle" style="font-size:6px; margin-right:4px;"></i> 2. PRD & UI/UX</div>
+                    <div class="modal-tab" onclick="switchFeatureTab('dev', this)"><i class="fa-solid fa-circle" style="font-size:6px; margin-right:4px;"></i> 3. Development</div>
+                    <div class="modal-tab" onclick="switchFeatureTab('qa', this)"><i class="fa-solid fa-circle" style="font-size:6px; margin-right:4px;"></i> 4. QA</div>
+                    <div class="modal-tab" onclick="switchFeatureTab('deploy', this)"><i class="fa-solid fa-circle" style="font-size:6px; margin-right:4px;"></i> 5. Deployment</div>
+                </div>
+
+                <!-- TAB CONTENT: PLANNING -->
+                <div id="tab-planning" class="modal-tab-content active">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Planning status</label>
+                            <select id="feat-plan-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Squad</label>
+                            <select style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option></select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Reference / idea source URL</label>
+                        <input type="text" placeholder="Google Slides, Notion, any URL..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Notes</label>
+                        <textarea placeholder="Brainstorm notes, context, goals..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 60px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT: PRD -->
+                <div id="tab-prd" class="modal-tab-content">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">PRD & Design status</label>
+                            <select id="feat-prd-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">PRD document (Google Docs URL)</label>
+                        <input type="text" placeholder="https://docs.google.com/..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Figma design URL</label>
+                        <input type="text" placeholder="https://www.figma.com/file/..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Notes</label>
+                        <textarea placeholder="Design decisions, open questions..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 60px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT: DEV -->
+                <div id="tab-dev" class="modal-tab-content">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Dev status</label>
+                            <select id="feat-dev-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="In Progress">In Progress</option><option value="Done">Done</option></select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Dev remark (filled by Dev team)</label>
+                        <textarea placeholder="Technical notes, blockers, implementation details..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 80px;"></textarea>
+                    </div>
+                </div>
+                
+                <!-- TAB CONTENT: QA -->
+                <div id="tab-qa" class="modal-tab-content">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">QA status</label>
+                            <select id="feat-qa-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">QA checking result / remarks</label>
+                        <textarea placeholder="Test results, bugs found, pass/fail notes..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 80px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT: DEPLOYMENT -->
+                <div id="tab-deploy" class="modal-tab-content">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Deployment status</label>
+                            <select id="feat-deploy-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Deployment remark</label>
+                        <textarea placeholder="Deployment notes, environment, rollback plan..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 80px;"></textarea>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+                    <button class="btn" style="background:transparent; color:#fff; border:1px solid #666;" onclick="closeAddFeatureModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveFeature()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
+
+        // ================= LOGIN & LOGOUT LOGIC =================
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('login-password');
+            const pwdIcon = document.getElementById('toggle-password-icon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                pwdIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                pwdInput.type = 'password';
+                pwdIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-password').value;
+            const errorMsg = document.getElementById('login-error-msg');
+
+            // Fallback (jika Database kosong, gunakan default ini)
+            let validAccounts = appState.accounts && appState.accounts.length > 0 
+                ? appState.accounts 
+                : [{ email: 'reyraynaldi@prieds.com', password: 'Prieds1234', role: 'Super Admin' }];
+
+            // Cek apakah email dan password cocok dengan data di Account Master
+            const isValidUser = validAccounts.find(acc => acc.email.toLowerCase() === email.toLowerCase() && acc.password === pass);
+
+            if (isValidUser) {
+                errorMsg.style.display = 'none';
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('app-container').style.display = 'flex';
+                initAccountMasterTable(); // Render tabel master ketika berhasil masuk
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // ================= BYPASS LOGIN UNTUK TESTING =================
+        let bypassClickCount = 0;
+        let bypassTimer;
+
+        function handleBypassClick() {
+            bypassClickCount++;
+            
+            // Reset hitungan jika user tidak mengklik lagi dalam 2 detik
+            clearTimeout(bypassTimer);
+            bypassTimer = setTimeout(() => {
+                bypassClickCount = 0;
+            }, 2000);
+
+            // Jika sudah diklik 5 kali beruntun, langsung bypass login
+            if (bypassClickCount >= 5) {
+                document.getElementById('login-error-msg').style.display = 'none';
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('app-container').style.display = 'flex';
+                
+                // Render data sama seperti login normal
+                initAccountMasterTable(); 
+                
+                // Reset hitungan
+                bypassClickCount = 0;
+                console.log("Bypass login aktif!");
+            }
+        }
+
+        function handleLogout() {
+            // Kosongkan form input
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            
+            // Sembunyikan dashboard, tampilkan halaman login kembali
+            document.getElementById('app-container').style.display = 'none';
+            document.getElementById('login-overlay').style.display = 'flex';
+            
+            // Pastikan input kembali menjadi mode tersembunyi (password)
+            document.getElementById('login-password').type = 'password';
+            document.getElementById('toggle-password-icon').classList.replace('fa-eye-slash', 'fa-eye');
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("login-password").addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleLogin();
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("login-password").addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleLogin();
+                }
+            });
+        });
+
         // --- MASTER DATA SET ---
         const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const quarterMonths = {
@@ -1098,6 +1596,12 @@
             lastLoginInactiveLimit: 15,
             lastLoginFilter: 'inactive',
             lastLoginReports: [],
+
+            // STATE TAMBAHAN UNTUK ACCOUNT MASTER:
+            accounts: [
+                { id: 1, email: 'reyraynaldi@prieds.com', password: 'Prieds1234', role: 'Super Admin' }
+            ],
+            masterCompany: [],
 
             // STATE ORIGINAL LAINNYA
             currentQuarter: 2,
@@ -1171,33 +1675,40 @@
                         const data = snapshot.val();
                         Object.assign(appState, data);
                         
-                        // PERBAIKAN BUG FIREBASE: Pastikan data tidak berubah menjadi Object
-                        const arrayKeys = ['lastLoginData', 'lastLoginReports', 'retention', 'surveyLogs', 'npsReports', 'masterCompany'];
+                        const arrayKeys = ['lastLoginData', 'lastLoginReports', 'retention', 'surveyLogs', 'npsReports', 'masterCompany', 'accounts'];
                         arrayKeys.forEach(key => {
                             if (!appState[key]) {
                                 appState[key] = [];
                             } else if (!Array.isArray(appState[key])) {
-                                // Jika Firebase mengubahnya menjadi Object, kembalikan ke Array
                                 appState[key] = Object.values(appState[key]);
                             }
-                            
-                            // Bersihkan elemen null/undefined yang bisa menyebabkan error
                             if (Array.isArray(appState[key])) {
                                 appState[key] = appState[key].filter(item => item !== null && item !== undefined);
                             }
                         });
 
-                        appState.retention.forEach(pkg => {
-                            if (!pkg.users) pkg.users = [];
-                        });
-
-                        // 👇 PERBAIKAN BUG FILTER NYANGKUT 👇
+                        // Bug fix Search & Status
                         if (appState.masterCompanyState) {
                             appState.masterCompanyState.search = '';
                         }
                         const searchInput = document.getElementById('master-company-search');
                         if (searchInput) searchInput.value = '';
-                        // 👆 AKHIR PERBAIKAN 👆
+
+                        // Skrip Migrasi Default Active & Yearly Subs
+                        if (appState.masterCompany && appState.masterCompany.length > 0) {
+                            let dataUpdated = false;
+                            appState.masterCompany.forEach(comp => {
+                                if (!comp.paymentType || comp.paymentType === 'Monthly Subs' || comp.paymentType === '-') {
+                                    comp.paymentType = 'Yearly Subs';
+                                    dataUpdated = true;
+                                }
+                                if (!comp.status) {
+                                    comp.status = 'active';
+                                    dataUpdated = true;
+                                }
+                            });
+                            if (dataUpdated) saveDataToLocal(); 
+                        }
 
                         console.log("Data berhasil dimuat dari Firebase.");
                     } else {
@@ -1221,6 +1732,39 @@
                 console.error("Error trigger load Firebase: ", e);
             }
         }
+
+        // 👇 PERBAIKAN BUG FILTER NYANGKUT 👇
+        if (appState.masterCompanyState) {
+            appState.masterCompanyState.search = '';
+        }
+        const searchInput = document.getElementById('master-company-search');
+        if (searchInput) searchInput.value = '';
+        // 👆 AKHIR PERBAIKAN 👆
+
+        // 👇 SCRIPT MIGRASI MASSAL: UBAH DATA LAMA MENJADI YEARLY & ACTIVE 👇
+        if (appState.masterCompany && appState.masterCompany.length > 0) {
+            let dataUpdated = false;
+            appState.masterCompany.forEach(comp => {
+                 // Migrasi Payment Type
+                if (!comp.paymentType || comp.paymentType === 'Monthly Subs' || comp.paymentType === '-') {
+                    comp.paymentType = 'Yearly Subs';
+                    dataUpdated = true;
+                }
+                // Migrasi Status (Default Active)
+                    if (!comp.status) {
+                        comp.status = 'active';
+                        dataUpdated = true;
+                    }
+                });
+            // Jika ada yang di-update, langsung simpan secara otomatis ke Firebase
+            if (dataUpdated) {
+                saveDataToLocal();
+                console.log("Migrasi berhasil: Semua data Monthly telah diubah menjadi Yearly.");
+            }
+        }
+        // 👆 AKHIR SCRIPT MIGRASI MASSAL 👆
+
+        console.log("Data berhasil dimuat dari Firebase.");
 
         // ================= LOGIC MASTER DATA COMPANY =================
         // Helper: cari nilai Company ID dari sebuah objek row secara fleksibel.
@@ -1279,7 +1823,9 @@
                     companyId: safeId, 
                     companyName: safeId, // Setel default Company Name sama dengan Company ID
                     packageId: null, 
-                    subsDate: '' 
+                    subsDate: '',
+                    paymentType: 'Yearly Subs', // <-- Tambahkan default ini
+                    status: 'active'
                 });
             }
         }
@@ -1353,15 +1899,24 @@
         // 👆 AKHIR FUNGSI RESET MASTER DATA 👆
 
         function filterUserCompany() {
-            if(!appState.masterCompanyState) appState.masterCompanyState = { page: 1, limit: 10, search: '', category: 'all', sortLogin: 'none' };
+            if(!appState.masterCompanyState) appState.masterCompanyState = { page: 1, limit: 10, search: '', category: 'all', sortLogin: 'none', status: 'active' };
             appState.masterCompanyState.search = document.getElementById('master-company-search').value.toLowerCase();
             
-            // Tangkap nilai dari filter baru
             appState.masterCompanyState.category = document.getElementById('master-company-category').value;
             appState.masterCompanyState.sortLogin = document.getElementById('master-company-sort-login').value;
             
+            // Tangkap nilai Status
+            const statEl = document.getElementById('master-company-status');
+            if (statEl) appState.masterCompanyState.status = statEl.value;
+            
             appState.masterCompanyState.page = 1;
             initUserCompanyTable();
+        }
+
+        // FUNGSI HELPER FORMAT RUPIAH
+        function formatIDR(amount) {
+            if (amount === undefined || amount === null || isNaN(amount)) return 'Rp 0';
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
         }
 
         // FUNGSI HELPER UNTUK MENGHITUNG USE DATE
@@ -1415,12 +1970,24 @@
             if (!appState.masterCompany || appState.masterCompany.length === 0) {
                 container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada master data perusahaan terdaftar.</div>`;
                 if(pagContainer) pagContainer.innerHTML = '';
+                
+                if (document.getElementById('uc-total-company')) {
+                    document.getElementById('uc-total-company').innerText = 0;
+                    document.getElementById('uc-total-user').innerText = 0;
+                    document.getElementById('uc-active-company').innerText = 0;
+                }
                 return;
             }
 
-            const state = appState.masterCompanyState || { page: 1, limit: 10, search: '', category: 'all', sortLogin: 'none' };
+            if (!appState.masterCompanyState) {
+                appState.masterCompanyState = { page: 1, limit: 10, search: '', category: 'all', sortLogin: 'none', status: 'active' };
+            }
+            // Jika cache data lama tidak punya variabel status, paksa jadi 'active'
+            if (!appState.masterCompanyState.status) {
+                appState.masterCompanyState.status = 'active';
+            }
+            const state = appState.masterCompanyState;
 
-            // Ambil daftar Kategori Unik untuk dropdown filter
             const uniqueCategories = [...new Set(appState.masterCompany.map(c => c.category).filter(c => c && c.trim() !== ''))];
             const catSelect = document.getElementById('master-company-category');
             if (catSelect) {
@@ -1432,13 +1999,17 @@
                 if (catSelect.innerHTML !== catOptions) catSelect.innerHTML = catOptions;
             }
 
+            // Atur Dropdown Status agar sesuai state
+            const statusSelect = document.getElementById('master-company-status');
+            if (statusSelect && statusSelect.value !== state.status) {
+                statusSelect.value = state.status || 'active';
+            }
+
             let mergedData = appState.masterCompany.map(master => {
                 if (!master || !master.companyId) return null;
                 const cid = String(master.companyId).trim();
                 const cName = master.companyName ? String(master.companyName).trim() : cid;
                 const category = master.category && master.category.trim() !== '' ? master.category : '-';
-                
-                // 👇 Ambil nilai Implementor 👇
                 const implementor = master.implementor && master.implementor.trim() !== '' ? master.implementor : '-';
 
                 const logs = (appState.surveyLogs || []).filter(l => l && l.companyId && String(l.companyId).trim() === cid);
@@ -1460,7 +2031,6 @@
                 const ll = (appState.lastLoginData || []).find(r => r && String(getCompanyIdField(r) || '').trim() === cid);
                 let lastLoginLabel = '-';
                 let rawDays = 9999; 
-                
                 if (ll) {
                     let days = parseInt(ll.last_login_in_days || ll.hari_terakhir_login || ll.last_login || "0");
                     if(isNaN(days)) days = 0;
@@ -1477,24 +2047,107 @@
                 const subsDateStr = master.subsDate || '-';
                 const useDateLabel = calculateUseDate(subsDateStr, rawDays);
 
+                let monthsUsed = 0;
+                if (subsDateStr !== '-' && rawDays !== 9999) {
+                    let start = new Date(subsDateStr);
+                    let end = new Date();
+                    end.setDate(end.getDate() - rawDays);
+                    if (end >= start && !isNaN(start.getTime())) {
+                        monthsUsed = (end.getFullYear() - start.getFullYear()) * 12;
+                        monthsUsed += end.getMonth() - start.getMonth();
+                        if (monthsUsed < 0) monthsUsed = 0;
+                    }
+                }
+
+                let payTypeStr = (master.paymentType && master.paymentType !== '-') ? master.paymentType : 'Yearly Subs';
+                let payMonthStr = master.paymentMonth || master.subsDate || '-';
+
+                const initialAmt = parseFloat(master.initialAmount) || 0;
+                const subsAmt = parseFloat(master.subsAmount) || 0;
+                
+                let totalPay = initialAmt;
+                if (payTypeStr === 'Yearly Subs') {
+                    let yearsUsed = Math.floor(monthsUsed / 12);
+                    totalPay += (subsAmt * yearsUsed);
+                } else if (payTypeStr === 'One Time Payment') {
+                    totalPay += subsAmt; 
+                } else {
+                    totalPay += (subsAmt * monthsUsed);
+                }
+
+                let calculatedSubsLeft = '-';
+                let displayPaymentMonth = '-'; 
+
+                if (payTypeStr === 'One Time Payment') {
+                    calculatedSubsLeft = 'Lifetime';
+                    if (payMonthStr !== '-') {
+                        let d = new Date(payMonthStr);
+                        if (!isNaN(d.getTime())) displayPaymentMonth = monthNames[d.getMonth()];
+                    }
+                } else if (payMonthStr !== '-') {
+                    let today = new Date();
+                    today.setHours(0,0,0,0); 
+                    let anchorDate = new Date(payMonthStr);
+                    anchorDate.setHours(0,0,0,0);
+
+                    if (!isNaN(anchorDate.getTime())) {
+                        displayPaymentMonth = monthNames[anchorDate.getMonth()];
+                        let nextDueDate = new Date(anchorDate);
+                        
+                        if (payTypeStr === 'Yearly Subs') {
+                            while (nextDueDate <= today) {
+                                nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+                            }
+                        } else if (payTypeStr === 'Monthly Subs') {
+                            while (nextDueDate <= today) {
+                                nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+                            }
+                        }
+
+                        let diffTime = nextDueDate.getTime() - today.getTime();
+                        if (diffTime > 0) {
+                            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            let y = Math.floor(diffDays / 365);
+                            let m = Math.floor((diffDays % 365) / 30);
+                            let d = (diffDays % 365) % 30;
+                            let leftArr = [];
+                            if (y > 0) leftArr.push(y + ' Y');
+                            if (m > 0) leftArr.push(m + ' M');
+                            if (d > 0) leftArr.push(d + ' D');
+                            calculatedSubsLeft = leftArr.length > 0 ? leftArr.join(' ') : 'Hari ini';
+                        } else {
+                            calculatedSubsLeft = 'Expired'; 
+                        }
+                    }
+                }
+
+                const compStatus = master.status || 'active';
+
                 return {
                     companyId: cid, companyName: cName, category: category, implementor: implementor, totalUser: uniqueUsers, package: String(pkgName),
-                    lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: subsDateStr, useDate: useDateLabel
+                    lastLogin: lastLoginLabel, rawDays: rawDays, avgNps, lastMonthAvg, subsDate: subsDateStr, useDate: useDateLabel,
+                    initialAmount: initialAmt, subsAmount: subsAmt, totalPayment: totalPay,
+                    paymentType: payTypeStr,
+                    paymentMonth: displayPaymentMonth,
+                    subsLeft: calculatedSubsLeft,
+                    status: compStatus
                 };
             }).filter(item => item !== null);
 
             // Filter Search
             if(state.search) {
                 const keyword = state.search.toLowerCase();
-                mergedData = mergedData.filter(d => 
-                    String(d.companyId).toLowerCase().includes(keyword) || 
-                    String(d.companyName).toLowerCase().includes(keyword)
-                );
+                mergedData = mergedData.filter(d => String(d.companyId).toLowerCase().includes(keyword) || String(d.companyName).toLowerCase().includes(keyword));
             }
 
             // Filter Kategori
             if(state.category && state.category !== 'all') {
                 mergedData = mergedData.filter(d => d.category === state.category);
+            }
+
+            // Filter Status Aktif/Deaktif
+            if(state.status && state.status !== 'all') {
+                mergedData = mergedData.filter(d => d.status === state.status);
             }
 
             // Sorting Last Login
@@ -1509,10 +2162,7 @@
             const limitAtt = appState.lastLoginAttentionLimit || 7;
             mergedData.forEach(d => {
                 tUser += d.totalUser;
-                
-                // Sesudah:
                 if (d.rawDays < limitAtt) tActive++;
-                
                 let p = d.package.toLowerCase();
                 if (p.includes('wms lite')) cWMS++;
                 if (p.includes('starterpack') || p.includes('starter pack')) cStarter++;
@@ -1538,11 +2188,11 @@
             const startIndex = (currentPage - 1) * state.limit;
             const paginatedData = mergedData.slice(startIndex, startIndex + state.limit);
             
-            // 👇 TAMBAHKAN KOLOM IMPLEMENTOR DI BARIS TABEL 👇
             const rowsHtml = paginatedData.map((d, idx) => `
                 <tr>
                     <td style="font-weight:700; color:var(--dark); font-family:'Roboto Mono', monospace;">${d.companyId}</td>
                     <td style="font-weight:700; color:var(--primary);">${d.companyName}</td>
+                    <td><span style="font-size:10px; font-weight:800; color:${d.status === 'active' ? 'var(--success)' : 'var(--danger)'}; background:${d.status === 'active' ? '#dcfce7' : '#fee2e2'}; padding:3px 8px; border-radius:6px; text-transform:uppercase;">${d.status}</span></td>
                     <td><span style="font-size:11px; font-weight:700; color:var(--text-muted); background:#f8fafc; padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.category}</span></td>
                     <td><span style="font-size:11px; font-weight:700; color:var(--dark); background:#f1f5f9; padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.implementor}</span></td>
                     <td><span style="font-size:11px; background:var(--gray-light); padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${d.package}</span></td>
@@ -1550,6 +2200,12 @@
                     <td><span style="${getScoreBadgeStyle(d.avgNps)} padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800;">${d.avgNps}</span></td>
                     <td style="font-size:11px;">${d.subsDate}</td>
                     <td style="font-size:11px; font-weight:700; color:var(--success);">${d.useDate}</td>
+                    <td style="font-size:11px; font-weight:700;">${formatIDR(d.initialAmount)}</td>
+                    <td style="font-size:11px; font-weight:700;">${formatIDR(d.subsAmount)}</td>
+                    <td style="font-size:11px; font-weight:800; color:var(--primary);">${formatIDR(d.totalPayment)}</td>
+                    <td style="font-size:11px; font-weight:700;">${d.paymentType}</td>
+                    <td style="font-size:11px;">${d.paymentMonth}</td>
+                    <td style="font-size:11px; font-weight:700; color:${d.subsLeft === 'Expired' ? 'var(--danger)' : 'var(--warning)'};">${d.subsLeft}</td>
                     <td>
                         <div class="dropdown">
                             <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('master-drop-${startIndex + idx}', event)">
@@ -1558,6 +2214,10 @@
                             <div id="master-drop-${startIndex + idx}" class="dropdown-content">
                                 <div class="dropdown-item" onclick="openEditCompanyModal('${d.companyId}')">
                                     <i class="fa-solid fa-pen" style="color:var(--warning);"></i> Edit Data
+                                </div>
+                                <div class="dropdown-item" onclick="toggleCompanyStatus('${d.companyId}')">
+                                    <i class="fa-solid fa-power-off" style="color:${d.status === 'active' ? 'var(--danger)' : 'var(--success)'};"></i> 
+                                    ${d.status === 'active' ? 'Deactivate' : 'Activate'}
                                 </div>
                             </div>
                         </div>
@@ -1571,6 +2231,7 @@
                         <tr>
                             <th>Company ID</th>
                             <th>Company Name</th>
+                            <th>Status</th>
                             <th>Category</th>
                             <th>Implementor</th>
                             <th>Package</th>
@@ -1578,10 +2239,16 @@
                             <th>Avg Score</th>
                             <th>Subs Date</th>
                             <th>Use Date</th>
+                            <th>Initial Amount</th>
+                            <th>Subs Amount</th>
+                            <th>Total Payment</th>
+                            <th>Payment Type</th>
+                            <th>Payment Month</th>
+                            <th>Subs Left</th>
                             <th style="width: 70px;">Action</th>
                         </tr>
-                    </thead>
-                    <tbody>${rowsHtml || '<tr><td colspan="10" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data.</td></tr>'}</tbody>
+                    </thead> 
+                    <tbody>${rowsHtml || '<tr><td colspan="17" style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada data yang sesuai filter.</td></tr>'}</tbody>
                 </table>
             `;
 
@@ -1618,6 +2285,10 @@
             
             document.getElementById('edit-implementor-list').innerHTML = allImplementors.map(i => `<option value="${i}">`).join('');
             // 👆 AKHIR TAMBAHAN 👆
+            
+            // 👇 TAMBAHAN ISI FORM UANG 👇
+            document.getElementById('edit-company-initial').value = comp.initialAmount || 0;
+            document.getElementById('edit-company-subs').value = comp.subsAmount || 0;
 
             let selectHtml = '<option value="">-- Pilih Paket --</option>';
             if(appState.retention) {
@@ -1628,11 +2299,33 @@
             document.getElementById('edit-company-package').innerHTML = selectHtml;
             document.getElementById('edit-company-subsdate').value = comp.subsDate || '';
             
+            // 👇 TAMBAHAN NILAI MODAL EDIT 👇
+            document.getElementById('edit-company-payment-type').value = comp.paymentType || 'Yearly Subs';
+            document.getElementById('edit-company-payment-month').value = comp.paymentMonth || comp.subsDate || ''; // Default ke subsDate jika kosong
+            // 👆 AKHIR TAMBAHAN 👇
+            
             document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
             document.getElementById('edit-company-modal').classList.add('active');
         }
 
         function closeEditCompanyModal() { document.getElementById('edit-company-modal').classList.remove('active'); }
+
+        // ================= FUNGSI TOGGLE STATUS (ACTIVE/DEACTIVE) =================
+        function toggleCompanyStatus(companyId) {
+            const comp = appState.masterCompany.find(c => c.companyId === companyId);
+            if (comp) {
+                const currentStatus = comp.status || 'active';
+                const newStatus = currentStatus === 'active' ? 'deactive' : 'active';
+                const actionWord = newStatus === 'active' ? 'mengaktifkan kembali' : 'menonaktifkan';
+                
+                if (confirm(`⚠️ Apakah Anda yakin ingin ${actionWord} perusahaan ${comp.companyName || comp.companyId}?`)) {
+                    comp.status = newStatus;
+                    saveDataToLocal();
+                    initUserCompanyTable();
+                    document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+                }
+            }
+        }
 
         // ================= FUNGSI CREATE COMPANY MANUAL =================
         function openAddCompanyModal() {
@@ -1665,6 +2358,10 @@
             const cName = document.getElementById('add-company-name').value.trim();
             const cat = document.getElementById('add-company-category').value.trim();
             const impl = document.getElementById('add-company-implementor').value.trim();
+            const initialAmt = parseFloat(document.getElementById('add-company-initial').value) || 0; // 🔥 BARU
+            const subsAmt = parseFloat(document.getElementById('add-company-subs').value) || 0; // 🔥 BARU
+            const payType = document.getElementById('add-company-payment-type').value; // 🔥 TAMBAHAN
+            const payMonth = document.getElementById('add-company-payment-month').value; // 🔥 TAMBAHAN
 
             // Validasi Input
             if (!cid) {
@@ -1682,11 +2379,16 @@
             // Tambahkan ke State Master Company
             appState.masterCompany.push({
                 companyId: cid,
-                companyName: cName !== '' ? cName : cid, // Jika nama kosong, gunakan ID sebagai default
+                companyName: cName !== '' ? cName : cid, 
                 category: cat,
                 implementor: impl,
-                packageId: null, // Default kosong (belum berlangganan retention tracker)
-                subsDate: ''
+                initialAmount: initialAmt, // 🔥 BARU
+                subsAmount: subsAmt, // 🔥 BARU
+                paymentType: payType, // 🔥 TAMBAHAN
+                paymentMonth: payMonth, // 🔥 TAMBAHAN
+                packageId: null, 
+                subsDate: '',
+                status: 'active'
             });
 
             // Simpan ke Firebase & Render ulang tabel
@@ -1704,12 +2406,20 @@
             const impl = document.getElementById('edit-company-implementor').value; 
             const pkgId = document.getElementById('edit-company-package').value;
             const sDate = document.getElementById('edit-company-subsdate').value;
+            const initialAmt = parseFloat(document.getElementById('edit-company-initial').value) || 0; // 🔥 BARU
+            const subsAmt = parseFloat(document.getElementById('edit-company-subs').value) || 0; // 🔥 BARU
+            const payType = document.getElementById('edit-company-payment-type').value; // 🔥 TAMBAHAN
+            const payMonth = document.getElementById('edit-company-payment-month').value; // 🔥 TAMBAHAN
             
             const comp = appState.masterCompany.find(c => c.companyId === cid);
             if(comp) {
                 comp.companyName = cName.trim() !== '' ? cName : cid;
                 comp.category = cat.trim(); 
                 comp.implementor = impl.trim(); 
+                comp.initialAmount = initialAmt; // 🔥 BARU
+                comp.subsAmount = subsAmt; // 🔥 BARU
+                comp.paymentType = payType; // 🔥 TAMBAHAN
+                comp.paymentMonth = payMonth; // 🔥 TAMBAHAN
 
                 const newPkgId = pkgId ? parseInt(pkgId) : null;
                 comp.packageId = newPkgId;
@@ -2577,7 +3287,17 @@
             document.getElementById(`view-${tab}`).classList.add('active');
 
             document.querySelectorAll('.editor-section').forEach(e => e.classList.remove('active'));
-            document.getElementById(`editor-${tab}`).classList.add('active');
+            
+            // 👇 LOGIKA BARU: SEMBUNYIKAN PANEL KIRI AGAR TABEL FULL WIDTH 👇
+            const editorPanel = document.querySelector('.editor-panel');
+            if (tab === 'user_company') {
+                editorPanel.style.display = 'none'; // Hilangkan panel kiri khusus di tab ini
+            } else {
+                editorPanel.style.display = 'block'; // Tampilkan kembali di tab lain
+                const targetEditor = document.getElementById(`editor-${tab}`);
+                if (targetEditor) targetEditor.classList.add('active');
+            }
+            // 👆 AKHIR LOGIKA 👆
 
             const titles = {
                 'lastlogin': 'Last Login Tracker Dashboard', 
@@ -2588,7 +3308,9 @@
                 'user_report': 'User Behavior & Feedback Report',
                 'company_report': 'Company Performance Report',
                 'nps_report': 'NPS History Report Archive',
-                'user_company': 'User Company Master Data' // TAB BARU
+                'user_company': 'User Company Master Data', // TAB BARU
+                'account_master': 'Account Master Management',
+                'roadmap': 'PM Hub - Feature Roadmap Planner'
             };
             document.getElementById('page-header-title').innerText = titles[tab];
         }
@@ -2700,6 +3422,7 @@
             document.getElementById('title-inactive-range').innerText = `Inactive (>${limitInact} Hari)`;
             
             let countActive = 0, countAttention = 0, countInactive = 0;
+            let mrrAtRisk = 0; // 👇 TAMBAHAN VARIABEL MRR 👇
 
             appState.lastLoginData.forEach(row => {
                 let daysStr = row['last_login_in_days'] || row['hari_terakhir_login'] || row['last_login'] || "0";
@@ -2719,12 +3442,27 @@
                     countInactive++;
                     row.status = 'Inactive';
                     row.statusColor = 'var(--danger)';
+                    
+                    // 👇 TAMBAHAN LOGIKA KALKULASI MRR AT RISK 👇
+                    const cid = getCompanyIdField(row);
+                    if (appState.masterCompany) {
+                        const comp = appState.masterCompany.find(c => String(c.companyId).trim().toLowerCase() === String(cid).trim().toLowerCase());
+                        if (comp && comp.subsAmount) {
+                            mrrAtRisk += parseFloat(comp.subsAmount) || 0;
+                        }
+                    }
+                    // 👆 AKHIR TAMBAHAN LOGIKA 👆
                 }
             });
 
             document.getElementById('login-count-active').innerText = countActive;
             document.getElementById('login-count-attention').innerText = countAttention;
             document.getElementById('login-count-inactive').innerText = countInactive;
+            
+            // 👇 TAMBAHAN UPDATE UI MRR AT RISK MENGGUNAKAN FUNGSI FORMAT RUPIAH BAWAAN 👇
+            if (document.getElementById('mrr-at-risk-display')) {
+                document.getElementById('mrr-at-risk-display').innerText = formatIDR(mrrAtRisk);
+            }
 
             let displayData = appState.lastLoginData;
             if (appState.lastLoginFilter === 'attention') {
@@ -3238,7 +3976,7 @@ function openLastLoginReportDetail(idx) {
 
             appState.retention.forEach(pkg => {
                 // Saring user agar yang memiliki status isHidden = true tidak dihitung
-                const visibleUsers = pkg.users.filter(u => !u.isHidden);
+                const visibleUsers = (pkg.users || []).filter(u => !u.isHidden);
 
                 const actives = visibleUsers.filter(u => u.status === 'active');
                 const nonActives = visibleUsers.filter(u => u.status !== 'active');
@@ -3262,7 +4000,7 @@ function openLastLoginReportDetail(idx) {
                         
                         <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">INACTIVE / CHURN (${nonActives.length})</div>
                         <ul class="r-list ${isDouble}">
-                            ${nonActives.map(u => `<li class="r-item"><i class="fa-solid fa-circle" style="color:${u.status==='cancel'?'var(--danger)':'var(--warning)'}; font-size:5px;"></i> <span style="color:var(--text-muted); text-decoration:line-through;">${getCompanyNameFromMaster(u.name)}</span></li>`).join('') || '<li style="color:#cbd5e1">Tidak ada</li>'}
+                            ${nonActives.map(u => `<li class="r-item"><i class="fa-solid fa-circle" style="color:${u.status==='cancel'?'var(--danger)':'var(--warning)'}; font-size:5px;"></i> <span style="text-decoration:line-through; ${u.isNew ? 'color:var(--primary); font-weight:700;' : 'color:var(--text-muted);'}">${getCompanyNameFromMaster(u.name)}</span> ${u.isNew ? '<span class="badge-new">NEW</span>' : ''}</li>`).join('') || '<li style="color:#cbd5e1">Tidak ada</li>'}
                         </ul>
                     </div>
                 `;
@@ -3756,6 +4494,96 @@ function openLastLoginReportDetail(idx) {
             initAnomaly();
         }
 
+        // ================= FUNGSI ACCOUNT MASTER =================
+        function initAccountMasterTable() {
+            const container = document.getElementById('account-master-table-container');
+            
+            // Proteksi jika data kosong
+            if (!appState.accounts || appState.accounts.length === 0) {
+                appState.accounts = [{ id: Date.now(), email: 'reyraynaldi@prieds.com', password: 'Prieds1234', role: 'Super Admin' }];
+            }
+
+            const rowsHtml = appState.accounts.map((acc, idx) => `
+                <tr>
+                    <td style="font-weight:700; color:var(--dark);">${idx + 1}</td>
+                    <td><span style="font-weight:700; color:var(--primary);">${acc.email}</span></td>
+                    <td><span style="font-family:'Roboto Mono', monospace; font-size:12px; background:var(--gray-light); padding:4px 8px; border:1px solid var(--gray-border); border-radius:4px;">${acc.password}</span></td>
+                    <td><span style="font-size:11px; font-weight:700; color:var(--dark); background:#e0f2fe; padding:4px 8px; border-radius:6px; border:1px solid #bae6fd;">${acc.role}</span></td>
+                    <td>
+                        <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; color:var(--danger); border-color:var(--danger);" onclick="deleteAccount(${acc.id})" title="Hapus Akun">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <table class="anomaly-table">
+                    <thead style="background: var(--gray-light);">
+                        <tr>
+                            <th style="width:50px;">No</th>
+                            <th>Email Login</th>
+                            <th>Password Akses</th>
+                            <th>Role Akses</th>
+                            <th style="width:80px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `;
+        }
+
+        function addAccount() {
+            const email = document.getElementById('new-account-email').value.trim();
+            const pass = document.getElementById('new-account-password').value.trim();
+            const role = document.getElementById('new-account-role').value;
+
+            if (!email || !pass) {
+                alert("⚠️ Email dan Password tidak boleh kosong!");
+                return;
+            }
+
+            if (!appState.accounts) appState.accounts = [];
+            
+            // Cek duplikasi email
+            const exists = appState.accounts.find(a => a.email.toLowerCase() === email.toLowerCase());
+            if (exists) {
+                alert("⚠️ Akun dengan email ini sudah terdaftar di sistem!");
+                return;
+            }
+
+            appState.accounts.push({
+                id: Date.now(),
+                email: email,
+                password: pass,
+                role: role
+            });
+
+            saveDataToLocal();
+            initAccountMasterTable();
+            
+            // Bersihkan field setelah sukses
+            document.getElementById('new-account-email').value = '';
+            document.getElementById('new-account-password').value = '';
+            
+            alert(`✔️ Berhasil! Akun ${email} telah ditambahkan.`);
+        }
+
+        function deleteAccount(id) {
+            if (!appState.accounts) return;
+            
+            if (appState.accounts.length <= 1) {
+                alert("❌ Tidak dapat menghapus akun. Harus tersisa minimal 1 akun untuk dapat login!");
+                return;
+            }
+
+            if (confirm("⚠️ Yakin ingin menghapus akses login untuk akun ini?")) {
+                appState.accounts = appState.accounts.filter(a => a.id !== id);
+                saveDataToLocal();
+                initAccountMasterTable();
+            }
+        }
+
         window.onload = () => {
             // Jalankan fungsi load dari Firebase saat halaman dibuka
             loadDataFromLocal();
@@ -4086,6 +4914,393 @@ function openLastLoginReportDetail(idx) {
             reader.readAsArrayBuffer(file);
         }
         
+        // ================= ROADMAP PLANNER LOGIC =================
+        
+        // 1. Inisialisasi State Roadmap (Mencegah error jika data kosong)
+        appState.roadmapFeatures = appState.roadmapFeatures || [];
+
+        // 2. Fungsi untuk berpindah tab di dalam Modal Add Feature
+        function switchFeatureTab(tabId, element) {
+            // Hapus class 'active' dari semua tombol tab
+            document.querySelectorAll('.modal-tabs .modal-tab').forEach(el => el.classList.remove('active'));
+            // Tambahkan class 'active' ke tombol yang diklik
+            element.classList.add('active');
+            
+            // Sembunyikan semua konten tab
+            document.querySelectorAll('.modal-tab-content').forEach(el => el.classList.remove('active'));
+            // Tampilkan konten tab yang sesuai
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        }
+
+        // 3. Fungsi untuk membuka Modal Add Feature
+        function openAddFeatureModal() {
+            // Kosongkan form input dasar
+            document.getElementById('feat-id').value = '';
+            document.getElementById('feat-name').value = '';
+            document.getElementById('feature-modal-title').innerText = 'Add feature';
+            
+            // Reset modal agar selalu kembali ke tab '1. Planning' saat dibuka
+            switchFeatureTab('planning', document.querySelector('.modal-tabs .modal-tab:first-child'));
+            
+            // Tampilkan modal
+            document.getElementById('add-feature-modal').classList.add('active');
+        }
+
+        // 4. Fungsi untuk menutup Modal Add Feature
+        function closeAddFeatureModal() {
+            document.getElementById('add-feature-modal').classList.remove('active');
+        }
+
+        // 5. Fungsi untuk menyimpan data fitur baru ke dalam sistem
+        function saveFeature() {
+            const name = document.getElementById('feat-name').value;
+            if (!name) {
+                alert('Feature name is required!');
+                return;
+            }
+            
+            const newFeature = {
+                id: document.getElementById('feat-id').value || Date.now(),
+                name: name,
+                quarter: document.getElementById('feat-quarter').value,
+                priority: document.getElementById('feat-priority').value,
+                dueDate: document.getElementById('feat-duedate').value,
+                overallStatus: document.getElementById('feat-status').value,
+                stages: {
+                    planning: document.getElementById('feat-plan-stat').value === 'Done',
+                    prd: document.getElementById('feat-prd-stat').value === 'Done',
+                    dev: document.getElementById('feat-dev-stat').value === 'Done',
+                    qa: document.getElementById('feat-qa-stat').value === 'Done',
+                    deploy: document.getElementById('feat-deploy-stat').value === 'Done'
+                }
+            };
+            
+            appState.roadmapFeatures.push(newFeature);
+            saveDataToLocal(); // Simpan ke Firebase / LocalStorage
+            initRoadmapView(); // Render ulang tampilan tabel dan pipeline
+            closeAddFeatureModal();
+        }
+
+        // 6. Fungsi trigger saat user mengetik di kolom pencarian atau filter quarter
+        function filterRoadmap() {
+            initRoadmapView();
+        }
+
+        // 7. Fungsi Utama untuk me-render Dashboard Roadmap (Pipeline Card & Tabel)
+        function initRoadmapView() {
+            const container = document.getElementById('roadmap-table-container');
+            const pipelineCont = document.getElementById('roadmap-pipeline-container');
+            
+            const search = (document.getElementById('roadmap-search')?.value || '').toLowerCase();
+            const qtr = document.getElementById('roadmap-filter-quarter')?.value || 'all';
+
+            // Filter data berdasarkan inputan user
+            let data = appState.roadmapFeatures.filter(f => {
+                const mSearch = f.name.toLowerCase().includes(search);
+                const mQtr = qtr === 'all' || f.quarter === qtr;
+                return mSearch && mQtr;
+            });
+
+            // Kalkulasi Data Pipeline (Berapa banyak yang sudah 'Done' di tiap fase)
+            const total = data.length;
+            const cntPlan = data.filter(f => f.stages.planning).length;
+            const cntPRD = data.filter(f => f.stages.prd).length;
+            const cntDev = data.filter(f => f.stages.dev).length;
+            const cntQA = data.filter(f => f.stages.qa).length;
+            const cntDep = data.filter(f => f.stages.deploy).length;
+
+            // Render 5 Pipeline Cards (Progress Bar)
+            pipelineCont.innerHTML = `
+                <div class="pipeline-card">
+                    <div class="pipeline-card-header"><i class="fa-solid fa-lightbulb" style="color:var(--warning)"></i> Planning</div>
+                    <div class="pipeline-stats">${cntPlan} <span style="font-size:12px; color:var(--text-muted)">/ ${total}</span></div>
+                    <div class="pipeline-sub">done ${total ? Math.round((cntPlan/total)*100) : 0}%</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${total ? (cntPlan/total)*100 : 0}%; background:var(--warning);"></div></div>
+                </div>
+                <div class="pipeline-card">
+                    <div class="pipeline-card-header"><i class="fa-solid fa-pen-ruler" style="color:var(--primary)"></i> PRD & UI/UX</div>
+                    <div class="pipeline-stats">${cntPRD} <span style="font-size:12px; color:var(--text-muted)">/ ${total}</span></div>
+                    <div class="pipeline-sub">done ${total ? Math.round((cntPRD/total)*100) : 0}%</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${total ? (cntPRD/total)*100 : 0}%; background:var(--primary);"></div></div>
+                </div>
+                <div class="pipeline-card">
+                    <div class="pipeline-card-header"><i class="fa-solid fa-gear" style="color:#8b5cf6"></i> Development</div>
+                    <div class="pipeline-stats">${cntDev} <span style="font-size:12px; color:var(--text-muted)">/ ${total}</span></div>
+                    <div class="pipeline-sub">done ${total ? Math.round((cntDev/total)*100) : 0}%</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${total ? (cntDev/total)*100 : 0}%; background:#8b5cf6;"></div></div>
+                </div>
+                <div class="pipeline-card">
+                    <div class="pipeline-card-header"><i class="fa-solid fa-magnifying-glass" style="color:var(--danger)"></i> QA</div>
+                    <div class="pipeline-stats">${cntQA} <span style="font-size:12px; color:var(--text-muted)">/ ${total}</span></div>
+                    <div class="pipeline-sub">done ${total ? Math.round((cntQA/total)*100) : 0}%</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${total ? (cntQA/total)*100 : 0}%; background:var(--danger);"></div></div>
+                </div>
+                <div class="pipeline-card">
+                    <div class="pipeline-card-header"><i class="fa-solid fa-rocket" style="color:var(--success)"></i> Deployment</div>
+                    <div class="pipeline-stats">${cntDep} <span style="font-size:12px; color:var(--text-muted)">/ ${total}</span></div>
+                    <div class="pipeline-sub">done ${total ? Math.round((cntDep/total)*100) : 0}%</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${total ? (cntDep/total)*100 : 0}%; background:var(--success);"></div></div>
+                </div>
+            `;
+
+            // Jika tidak ada data, tampilkan status kosong
+            if (data.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Tidak ada fitur ditemukan. Silakan tambah fitur baru.</div>`;
+                return;
+            }
+
+            // Render baris tabel untuk setiap fitur
+            const rowsHtml = data.map(f => {
+                let badgeColor = f.overallStatus === 'Done' ? 'var(--success)' : f.overallStatus === 'In Progress' ? 'var(--primary)' : 'var(--text-muted)';
+                return `
+                <tr>
+                    <td style="font-weight:700; color:var(--dark);">${f.name}</td>
+                    <td><span style="font-size:11px; background:var(--gray-light); padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${f.quarter}</span></td>
+                    <td>${f.priority}</td>
+                    <td><span style="font-size:11px; font-weight:700; color:${badgeColor}; border:1px solid ${badgeColor}; padding:2px 6px; border-radius:4px;">${f.overallStatus}</span></td>
+                    <td style="font-size:11px;">${f.dueDate || '-'}</td>
+                </tr>
+            `}).join('');
+
+            // Cetak struktur tabel
+            container.innerHTML = `
+                <table class="anomaly-table">
+                    <thead>
+                        <tr>
+                            <th>Feature Name</th>
+                            <th>Quarter</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `;
+        }
+
+        // 8. Trigger inisialisasi saat file diload pertama kali
+        setTimeout(() => { 
+            if (typeof initRoadmapView === "function") initRoadmapView(); 
+        }, 1000);
+
+        // ================= FUNGSI KIRIM TELEGRAM MANUAL =================
+        async function sendTelegramReport() {
+            // ⚠️ TOKEN DAN CHAT ID SUDAH SESUAI DENGAN MILIKMU ⚠️
+            const BOT_TOKEN = "8648645009:AAFeaYJopvfjwU94BBYgBSydFxSAFIguX0c";
+            const CHAT_ID = "8966620674";
+
+            // Ubah tampilan tombol jadi loading
+            const btn = document.querySelector('button[onclick="sendTelegramReport()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+            btn.disabled = true;
+
+            try {
+                const limitInact = appState.lastLoginInactiveLimit || 15;
+                let inactiveList = [];
+                
+                // Variabel untuk menampung pembagian 2 section
+                let expiringSection1 = []; // 31 - 90 Hari (1 sampai 3 bulan)
+                let expiringSection2 = []; // 1 - 30 Hari (Kurang dari 1 bulan)
+
+                // 1. Kumpulkan Data Inactive
+                if (appState.lastLoginData && appState.lastLoginData.length > 0) {
+                    appState.lastLoginData.forEach(row => {
+                        let days = parseInt(row.last_login_in_days || row.hari_terakhir_login || row.last_login || "0");
+                        if (days > limitInact) {
+                            let cid = getCompanyIdField(row);
+                            let isDeactive = false;
+
+                            // Cek status perusahaan di Master Data
+                            if (cid && appState.masterCompany) {
+                                let comp = appState.masterCompany.find(c => String(c.companyId).trim().toLowerCase() === String(cid).trim().toLowerCase());
+                                if (comp && comp.status === 'deactive') {
+                                    isDeactive = true;
+                                }
+                            }
+
+                            // Jika perusahaan tidak berstatus 'deactive', baru masukkan ke laporan
+                            if (!isDeactive) {
+                                let companyName = row.company_name || row.nama_perusahaan || cid || 'Unknown';
+                                inactiveList.push(`• ${companyName} (${days} Hari)`);
+                            }
+                        }
+                    });
+                }
+
+                // 2. Kumpulkan Data Subscription 
+                if (appState.masterCompany && appState.masterCompany.length > 0) {
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+
+                    appState.masterCompany.forEach(comp => {
+                        let payTypeStr = comp.paymentType || 'Yearly Subs';
+                        
+                        // Abaikan yang statusnya sudah deactive atau menggunakan pembayaran satu kali
+                        if (comp.status === 'deactive' || payTypeStr === 'One Time Payment') return; 
+
+                        if (comp.paymentMonth && comp.paymentMonth !== '-') {
+                            let anchorDate = new Date(comp.paymentMonth);
+                            anchorDate.setHours(0,0,0,0);
+                            
+                            if (!isNaN(anchorDate.getTime())) {
+                                let nextDueDate = new Date(anchorDate);
+                                
+                                // Logika penyesuaian siklus jatuh tempo yang sama persis dengan UI Dashboard
+                                if (payTypeStr === 'Yearly Subs') {
+                                    while (nextDueDate <= today) {
+                                        nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+                                    }
+                                } else if (payTypeStr === 'Monthly Subs') {
+                                    while (nextDueDate <= today) {
+                                        nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+                                    }
+                                }
+                                
+                                // Hitung selisih hari
+                                let diffTime = nextDueDate.getTime() - today.getTime();
+                                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                let cName = comp.companyName || comp.companyId || 'Unknown';
+
+                                // Memasukkan ke masing-masing section sesuai batasan hari
+                                if (diffDays > 30 && diffDays <= 90) {
+                                    expiringSection1.push(`• ${cName} (Sisa ${diffDays} Hari)`);
+                                } else if (diffDays > 0 && diffDays <= 30) {
+                                    expiringSection2.push(`• ${cName} (Sisa ${diffDays} Hari)`);
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // 3. Rangkai Pesan (Format Markdown)
+                let message = `📊 *Notifikasi Manual Prieds Suite* 📊\n\n`;
+                
+                message += `🚨 *Company Inactive (> ${limitInact} Hari):*\n`;
+                message += inactiveList.length > 0 ? inactiveList.join("\n") : "_Tidak ada perusahaan inactive_";
+                
+                message += `\n\n🟡 *Subs Expiring (1 - 3 Bulan):*\n`;
+                message += expiringSection1.length > 0 ? expiringSection1.join("\n") : "_Tidak ada yang jatuh tempo dalam rentang ini_";
+
+                message += `\n\n🔴 *Subs Expiring (< 1 Bulan):*\n`;
+                message += expiringSection2.length > 0 ? expiringSection2.join("\n") : "_Tidak ada yang jatuh tempo dalam rentang ini_";
+
+                // 4. Hit API Telegram dengan Fetch
+                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'Markdown'
+                    })
+                });
+
+                const result = await response.json();
+                if (result.ok) {
+                    alert("✅ Laporan berhasil dikirim ke Telegram!");
+                } else {
+                    alert("❌ Gagal mengirim: " + result.description);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("❌ Terjadi kesalahan jaringan saat mencoba mengirim ke Telegram.");
+            } finally {
+                // Kembalikan tombol ke kondisi semula
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // ================= FUNGSI IMPORT MASTER COMPANY EXCEL =================
+        function processMasterCompanyExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Membaca file menggunakan FileReader dan library XLSX bawaan
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // Konversi sheet ke JSON
+                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                    
+                    let updatedCount = 0;
+                    let addedCount = 0;
+
+                    json.forEach(row => {
+                        // 1. Cari Company ID menggunakan fungsi fleksibel yang sudah ada di sistem
+                        let cid = getCompanyIdField(row);
+                        if (!cid || String(cid).trim() === '') return; 
+                        cid = String(cid).trim();
+
+                        // 2. Deteksi nilai uang dari kolom (mengantisipasi nama header yang bervariasi)
+                        let initialAmtRaw = 0;
+                        let subsAmtRaw = 0;
+
+                        for (const key in row) {
+                            const cleanKey = key.toLowerCase().replace(/[\s_]+/g, '');
+                            
+                            // 👇 PERBAIKAN: Menambahkan kondisi "amount" persis agar terbaca sebagai Initial Amount 👇
+                            if (cleanKey.includes('initialamount') || cleanKey.includes('initial') || cleanKey === 'amount') {
+                                initialAmtRaw = row[key];
+                            }
+                            if (cleanKey.includes('subsamount') || cleanKey.includes('subs') || cleanKey.includes('subscription')) {
+                                subsAmtRaw = row[key];
+                            }
+                        }
+
+                        // 3. Ekstrak angka saja (buang 'Rp', titik, atau koma)
+                        let initialAmt = parseFloat(String(initialAmtRaw).replace(/[^\d.-]/g, '')) || 0;
+                        let subsAmt = parseFloat(String(subsAmtRaw).replace(/[^\d.-]/g, '')) || 0;
+
+                        // 4. Update atau Tambah Data ke Array
+                        let existingComp = appState.masterCompany.find(c => String(c.companyId).toLowerCase() === cid.toLowerCase());
+
+                        if (existingComp) {
+                            // Update uang jika perusahaan sudah ada
+                            existingComp.initialAmount = initialAmt;
+                            existingComp.subsAmount = subsAmt;
+                            updatedCount++;
+                        } else {
+                            // Daftarkan perusahaan baru jika belum ada di database
+                            appState.masterCompany.push({
+                                companyId: cid,
+                                companyName: cid,
+                                category: '-',
+                                implementor: '-',
+                                initialAmount: initialAmt,
+                                subsAmount: subsAmt,
+                                paymentType: 'Yearly Subs', // Setel default
+                                paymentMonth: '-',
+                                packageId: null,
+                                subsDate: '',
+                                status: 'active'
+                            });
+                            addedCount++;
+                        }
+                    });
+
+                    // 5. Simpan dan Refresh UI
+                    saveDataToLocal();
+                    initUserCompanyTable();
+                    
+                    alert(`✅ Import Excel Berhasil!\n\n- ${updatedCount} Perusahaan diperbarui nominalnya.\n- ${addedCount} Perusahaan baru terdaftar.`);
+                    
+                } catch (error) {
+                    console.error("Gagal memproses file Excel:", error);
+                    alert("❌ Terjadi kesalahan saat membaca file Excel. Pastikan menggunakan format file yang valid.");
+                } finally {
+                    event.target.value = ''; // Reset input
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
     </script>
     
 </body>
