@@ -5186,15 +5186,30 @@ function openLastLoginReportDetail(idx) {
         // 3. Fungsi untuk membuka Modal Add Feature
         function openAddFeatureModal() {
             resetFeatureModalState();
-            // Kosongkan form input dasar
+
+            // 1. Bersihkan SEMUA input text, date, dan textarea di dalam modal secara otomatis
+            const modal = document.getElementById('add-feature-modal');
+            modal.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(el => el.value = '');
+
+            // 2. Set default value untuk ID dan Dropdown dasar
             document.getElementById('feat-id').value = '';
-            document.getElementById('feat-name').value = '';
             document.getElementById('feat-year').value = 'Unassigned';
-            document.getElementById('feat-quarter-only').value = 'Unassigned';            
+            document.getElementById('feat-quarter-only').value = 'Unassigned';
+            document.getElementById('feat-priority').value = 'Medium';
+            document.getElementById('feat-status').value = 'Planned';
+            
             document.getElementById('feat-impact-module').value = '-';
-            updateImpactedPages(); // Memaksa dropdown pages mereset diri dan terkunci
+            updateImpactedPages(); 
             
             document.getElementById('feat-is-integration').value = 'No';
+            
+            // 3. Kosongkan semua Dropdown Status di dalam Tabs
+            document.getElementById('feat-plan-stat').value = '';
+            document.getElementById('feat-prd-stat').value = '';
+            document.getElementById('feat-dev-stat').value = '';
+            document.getElementById('feat-qa-stat').value = '';
+            document.getElementById('feat-deploy-stat').value = '';
+
             document.getElementById('feature-modal-title').innerText = 'Add feature';
             
             updateDueDateBasedOnQuarter(); 
