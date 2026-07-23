@@ -1463,8 +1463,8 @@
                     </div>
                 </div>
 
-                <!-- Input Impact, Module & Integration -->
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-bottom:20px;">
+                <!-- Input Impact, Module, Integration & Package -->
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:20px;">
                     <!-- 1. MODULE PINDAH KE KIRI -->
                     <div>
                         <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Impacted Module</label>
@@ -1499,6 +1499,17 @@
                         <select id="feat-is-integration" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                             <option value="No">No</option>
                             <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <!-- 👇 4. TAMBAHAN OPSI PACKAGE 👇 -->
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Package</label>
+                        <select id="feat-package" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
+                            <option value="All">All</option>
+                            <option value="ERP">ERP</option>
+                            <option value="FIFO">FIFO</option>
+                            <option value="FEFO">FEFO</option>
+                            <option value="RFID">RFID</option>                            
                         </select>
                     </div>
                 </div>
@@ -5202,6 +5213,7 @@ function openLastLoginReportDetail(idx) {
             updateImpactedPages(); 
             
             document.getElementById('feat-is-integration').value = 'No';
+            document.getElementById('feat-package').value = 'All'; // <--- TAMBAHAN RESET PACKAGE
             
             // 3. Kosongkan semua Dropdown Status di dalam Tabs
             document.getElementById('feat-plan-stat').value = '';
@@ -5262,10 +5274,13 @@ function openLastLoginReportDetail(idx) {
             document.getElementById('feat-priority').value = f.priority || 'Medium';
             document.getElementById('feat-duedate').value = f.dueDate || '';
             document.getElementById('feat-status').value = f.overallStatus || 'Planned';
+            // 👇 BAGIAN INI DIRUBAH 👇
             document.getElementById('feat-impact-module').value = f.impactedModule || '-';
             updateImpactedPages(); // 1. Load dulu pilihan pages-nya berdasarkan module tersimpan
-            document.getElementById('feat-impact').value = f.impactedPages || '-'; // 2. Baru assign page spesifik-nya            
+            document.getElementById('feat-impact').value = f.impactedPages || '-'; // 2. Baru assign page spesifik-nya
+            
             document.getElementById('feat-is-integration').value = f.isIntegration ? 'Yes' : 'No';
+            document.getElementById('feat-package').value = f.package || 'All'; // <--- TAMBAHAN LOAD PACKAGE
 
             // Set Status Tabs
             document.getElementById('feat-plan-stat').value = f.stages?.planning ? 'Done' : '';
@@ -5357,6 +5372,7 @@ function openLastLoginReportDetail(idx) {
             const impactedPages = document.getElementById('feat-impact').value;
             const impactedModule = document.getElementById('feat-impact-module').value; 
             const isIntegration = document.getElementById('feat-is-integration').value === 'Yes';
+            const packageVal = document.getElementById('feat-package').value; // <--- TAMBAHAN TARIK DATA PACKAGE
             // 👆 ================================= 👆
 
             const stages = {
@@ -5406,6 +5422,7 @@ function openLastLoginReportDetail(idx) {
                     existing.impactedPages = impactedPages;
                     existing.impactedModule = impactedModule;
                     existing.isIntegration = isIntegration;
+                    existing.package = packageVal; // <--- UPDATE PACKAGE KE OBJEK
                     
                     existing.stages = stages;
                     existing.tabDetails = tabDetails; // <--- UPDATE DATA DETAIL KE OBJEK
@@ -5428,6 +5445,7 @@ function openLastLoginReportDetail(idx) {
                     impactedPages: impactedPages,
                     impactedModule: impactedModule,
                     isIntegration: isIntegration,
+                    package: packageVal, // <--- MASUKKAN PACKAGE KE OBJEK BARU
                     
                     stages: stages,
                     tabDetails: tabDetails, // <--- MASUKKAN DATA DETAIL KE OBJEK BARU
