@@ -1507,7 +1507,7 @@
                         <select id="feat-package" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                             <option value="All">All</option>
                             <option value="ERP">ERP</option>
-                            <option value="FIFO">FIFO</option>
+                            <option value="WMS">WMS</option>
                             <option value="FEFO">FEFO</option>
                             <option value="RFID">RFID</option>                            
                         </select>
@@ -5664,6 +5664,10 @@ function openLastLoginReportDetail(idx) {
                     <td>${f.isIntegration 
                         ? '<span style="font-size:10px; background:#fef3c7; color:var(--warning); padding:3px 8px; border-radius:6px; font-weight:800;"><i class="fa-solid fa-link"></i> Integrasi</span>' 
                         : '<span style="font-size:10px; background:#f1f5f9; color:var(--text-muted); padding:3px 8px; border-radius:6px; font-weight:700;">Internal</span>'}</td>
+                    
+                    <!-- 👇 TAMBAHAN KOLOM PACKAGE 👇 -->
+                    <td><span style="font-size:11px; font-weight:700; color:var(--dark); background:#e0f2fe; border:1px solid #bae6fd; padding:2px 6px; border-radius:4px;">${f.package || 'All'}</span></td>
+                    
                     <td style="font-size:11px;">${f.dueDate || '-'}</td>
                     <td><span style="font-size:11px; font-weight:700; color:var(--success);"><i class="fa-solid fa-check-circle"></i> Shipped</span></td>
                     <td>
@@ -5694,6 +5698,10 @@ function openLastLoginReportDetail(idx) {
                             <th>Modul Terdampak</th>
                             <th>Halaman Target</th>
                             <th>Tipe Fitur</th>
+                            
+                            <!-- 👇 TAMBAHAN HEADER PACKAGE 👇 -->
+                            <th>Package</th>
+                            
                             <th>Tanggal Rilis</th>
                             <th>Status</th>
                             <th style="width:80px;">Action</th>
