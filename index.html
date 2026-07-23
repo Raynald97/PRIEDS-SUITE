@@ -1520,11 +1520,11 @@
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Reference / idea source URL</label>
-                        <input type="text" placeholder="Google Slides, Notion, any URL..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
+                        <input type="text" id="feat-plan-url" placeholder="Google Slides, Notion, any URL..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Notes</label>
-                        <textarea placeholder="Brainstorm notes, context, goals..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 60px;"></textarea>
+                        <textarea id="feat-plan-notes" placeholder="Brainstorm notes, context, goals..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 60px;"></textarea>
                     </div>
                 </div>
 
@@ -1538,15 +1538,15 @@
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">PRD document (Google Docs URL)</label>
-                        <input type="text" placeholder="https://docs.google.com/..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
+                        <input type="text" id="feat-prd-url" placeholder="https://docs.google.com/..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Figma design URL</label>
-                        <input type="text" placeholder="https://www.figma.com/file/..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
+                        <input type="text" id="feat-figma-url" placeholder="https://www.figma.com/file/..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Notes</label>
-                        <textarea placeholder="Design decisions, open questions..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 60px;"></textarea>
+                        <textarea id="feat-prd-notes" placeholder="Design decisions, open questions..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 60px;"></textarea>
                     </div>
                 </div>
 
@@ -1560,7 +1560,7 @@
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Dev remark (filled by Dev team)</label>
-                        <textarea placeholder="Technical notes, blockers, implementation details..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 80px;"></textarea>
+                        <textarea id="feat-dev-notes" placeholder="Technical notes, blockers, implementation details..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 80px;"></textarea>
                     </div>
                 </div>
                 
@@ -1574,7 +1574,7 @@
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">QA checking result / remarks</label>
-                        <textarea placeholder="Test results, bugs found, pass/fail notes..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 80px;"></textarea>
+                        <textarea id="feat-qa-notes" placeholder="Test results, bugs found, pass/fail notes..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 80px;"></textarea>
                     </div>
                 </div>
 
@@ -1588,7 +1588,7 @@
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Deployment remark</label>
-                        <textarea placeholder="Deployment notes, environment, rollback plan..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 80px;"></textarea>
+                        <textarea id="feat-deploy-notes" placeholder="Deployment notes, environment, rollback plan..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 80px;"></textarea>
                     </div>
                 </div>
 
@@ -5274,6 +5274,17 @@ function openLastLoginReportDetail(idx) {
             document.getElementById('feat-qa-stat').value = f.stages?.qa ? 'Done' : '';
             document.getElementById('feat-deploy-stat').value = f.stages?.deploy ? 'Done' : '';
 
+            // 👇 MENAMPILKAN DATA DETAIL TABS (READ) 👇
+            const td = f.tabDetails || {}; // Menghindari error untuk data lama
+            document.getElementById('feat-plan-url').value = td.planUrl || '';
+            document.getElementById('feat-plan-notes').value = td.planNotes || '';
+            document.getElementById('feat-prd-url').value = td.prdUrl || '';
+            document.getElementById('feat-figma-url').value = td.figmaUrl || '';
+            document.getElementById('feat-prd-notes').value = td.prdNotes || '';
+            document.getElementById('feat-dev-notes').value = td.devNotes || '';
+            document.getElementById('feat-qa-notes').value = td.qaNotes || '';
+            document.getElementById('feat-deploy-notes').value = td.deployNotes || '';
+
             document.getElementById('feature-modal-title').innerText = `Edit Feature - ${f.featureId}`;
             
             switchFeatureTab('planning', document.querySelector('.modal-tabs .modal-tab:first-child'));
@@ -5356,6 +5367,18 @@ function openLastLoginReportDetail(idx) {
                 deploy: document.getElementById('feat-deploy-stat').value === 'Done'
             };
 
+            // 👇 MENARIK DATA DETAIL TAB DARI HTML 👇
+            const tabDetails = {
+                planUrl: document.getElementById('feat-plan-url').value,
+                planNotes: document.getElementById('feat-plan-notes').value,
+                prdUrl: document.getElementById('feat-prd-url').value,
+                figmaUrl: document.getElementById('feat-figma-url').value,
+                prdNotes: document.getElementById('feat-prd-notes').value,
+                devNotes: document.getElementById('feat-dev-notes').value,
+                qaNotes: document.getElementById('feat-qa-notes').value,
+                deployNotes: document.getElementById('feat-deploy-notes').value
+            };
+
             if (isEditing) {
                 // LOGIC EDIT & LOGGING
                 const existing = appState.roadmapFeatures.find(f => String(f.id) === String(featureInternalId));
@@ -5385,6 +5408,7 @@ function openLastLoginReportDetail(idx) {
                     existing.isIntegration = isIntegration;
                     
                     existing.stages = stages;
+                    existing.tabDetails = tabDetails; // <--- UPDATE DATA DETAIL KE OBJEK
                     
                     if(!existing.editLogs) existing.editLogs = [];
                     existing.editLogs.unshift(logEntry); // Tambahkan log terbaru di atas
@@ -5406,6 +5430,7 @@ function openLastLoginReportDetail(idx) {
                     isIntegration: isIntegration,
                     
                     stages: stages,
+                    tabDetails: tabDetails, // <--- MASUKKAN DATA DETAIL KE OBJEK BARU
                     editLogs: [{ timestamp: new Date().toLocaleString('id-ID'), changes: ["Feature berhasil dibuat"] }]
                 };
                 appState.roadmapFeatures.push(newFeature);
