@@ -304,6 +304,9 @@
                     <div class="nav-item" onclick="switchTab('roadmap', this)">
                         <i class="fa-solid fa-route"></i> Roadmap Planner
                     </div>
+                    <div class="nav-item" onclick="switchTab('feature_history', this)">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Feature History
+                    </div>
                 </div>
             </div>
         </div>
@@ -676,6 +679,9 @@
                             <option value="Q1 2027">Q1 2027</option>
                         </select>
                     </div>
+                </div>
+                <div id="editor-feature_history" class="editor-section">
+                    <!-- Dikosongkan karena filter dipindah ke atas tabel agar Full Width -->
                 </div>
             </div>
 
@@ -1051,6 +1057,74 @@
                     </div>
                 </div>
 
+                <div id="view-feature_history" class="tab-view">
+                    <div class="presentation-slide">
+                        <div class="slide-header" style="margin-bottom:20px;">
+                            <h2>Historical Feature Tracker</h2>
+                            <p>Rekapitulasi fitur yang telah berhasil dirilis (*shipped*) beserta dampaknya</p>
+                        </div>
+                        
+                        <!-- Mini Dashboard Rekap Tahun -->
+                        <div class="chart-row" style="grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;" id="history-summary-cards">
+                            <!-- Cards akan di-generate oleh JS -->
+                        </div>
+
+                        <!-- 👇 FILTER TOOLBAR DIPINDAH KE SINI (DITAMBAH MODULE & PAGES) 👇 -->
+                        <div style="background:#f8fafc; border:1px solid var(--gray-border); border-radius:12px; padding:15px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:15px; align-items:flex-end;">
+                            <div style="width:130px;">
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase;">Tahun</label>
+                                <select id="hist-filter-year" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" onchange="filterHistory()">
+                                    <option value="all">Semua Tahun</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2026">2026</option>
+                                    <option value="2027">2027</option>
+                                </select>
+                            </div>
+                            <div style="width:150px;">
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase;">Tipe Fitur</label>
+                                <select id="hist-filter-type" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" onchange="filterHistory()">
+                                    <option value="all">Semua Tipe</option>
+                                    <option value="integration">Integrasi (Yes)</option>
+                                    <option value="non-integration">Internal (No)</option>
+                                </select>
+                            </div>
+                            <div style="width:180px;">
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase;">Modul</label>
+                                <select id="hist-filter-module" style="width:100%; padding:8px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" onchange="filterHistory()">
+                                    <option value="all">Semua Modul</option>
+                                    <option value="Purchasing">Purchasing</option>
+                                    <option value="Inbound">Inbound</option>
+                                    <option value="Sales">Sales</option>
+                                    <option value="Outbound">Outbound</option>
+                                    <option value="Stock Movement">Stock Movement</option>
+                                    <option value="Inventory Management">Inventory Management</option>
+                                    <option value="Approval Documents">Approval Documents</option>
+                                    <option value="Production">Production</option>
+                                    <option value="Warehouse Dashboard">Warehouse Dashboard</option>
+                                    <option value="Master">Master</option>
+                                    <option value="Accounting">Accounting</option>
+                                    <option value="Integration & Tools">Integration & Tools</option>
+                                    <option value="Ticketing Support">Ticketing Support</option>
+                                    <option value="RFID OPERATIONAL">RFID OPERATIONAL</option>
+                                </select>
+                            </div>
+                            <div style="flex:1; min-width:200px;">
+                                <label style="font-weight:700; color:var(--dark); display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase;">Cari Halaman (Pages)</label>
+                                <div style="position:relative;">
+                                    <i class="fa-solid fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:12px;"></i>
+                                    <input type="text" id="hist-filter-page" placeholder="Ketik nama halaman..." style="width:100%; padding:8px 10px 8px 32px; border:1px solid var(--gray-border); border-radius:6px; font-size:12px;" oninput="filterHistory()">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 👆 AKHIR FILTER TOOLBAR 👆 -->
+
+                        <div id="feature-history-table-container">
+                            <div style="text-align:center; padding:30px; color:var(--text-muted);">Memuat data history...</div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -1331,10 +1405,11 @@
 
     <!-- MODAL ADD FEATURE ROADMAP -->
     <div id="add-feature-modal" class="modal-overlay">
-        <div class="modal-content" style="width: 750px; background: #1a1a1a; color: #fff; border: 1px solid #333;">
-            <div class="modal-header" style="border-bottom: 1px solid #333; background: #222;">
-                <h3 style="font-size:16px; font-weight:800; color:#fff;" id="feature-modal-title">Add feature</h3>
-                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:#888; padding:5px;" onclick="closeAddFeatureModal()">
+        <!-- Background dan Border diubah menyesuaikan Light Mode -->
+        <div class="modal-content" style="width: 750px;">
+            <div class="modal-header">
+                <h3 style="font-size:16px; font-weight:800; color:var(--dark);" id="feature-modal-title">Add feature</h3>
+                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeAddFeatureModal()">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -1342,37 +1417,45 @@
                 <input type="hidden" id="feat-id">
                 
                 <div style="margin-bottom: 15px;">
-                    <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Feature name *</label>
-                    <input type="text" id="feat-name" placeholder="e.g. Onboarding redesign" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                    <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Feature name *</label>
+                    <input type="text" id="feat-name" placeholder="e.g. Onboarding redesign" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
                     <div>
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Quarter</label>
-                        <select id="feat-quarter" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;" onchange="updateDueDateBasedOnQuarter()">
-                            <option value="Unassigned">Unassigned</option>
-                            <option value="Q1 2026">Q1 2026</option>
-                            <option value="Q2 2026">Q2 2026</option>
-                            <option value="Q3 2026">Q3 2026</option>
-                            <option value="Q4 2026">Q4 2026</option>
-                            <option value="Q1 2027" selected>Q1 2027</option>
-                        </select>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Target Rilis (Tahun & Quarter)</label>
+                        <div style="display:flex; gap:10px;">
+                            <select id="feat-year" style="flex:1; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;" onchange="updateDueDateBasedOnQuarter()">
+                                <option value="Unassigned">Tahun</option>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                                <option value="2026">2027</option>                                
+                            </select>
+                            <select id="feat-quarter-only" style="flex:1; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;" onchange="updateDueDateBasedOnQuarter()">
+                                <option value="Unassigned">Quarter</option>
+                                <option value="Q1">Q1</option>
+                                <option value="Q2">Q2</option>
+                                <option value="Q3">Q3</option>
+                                <option value="Q4">Q4</option>
+                            </select>
+                        </div>
                     </div>
                     <div>
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Priority</label>
-                        <select id="feat-priority" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Priority</label>
+                        <select id="feat-priority" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                             <option value="Low">Low</option>
                             <option value="Medium" selected>Medium</option>
                             <option value="High">High</option>
                         </select>
                     </div>
                     <div>
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Due date</label>
-                        <input type="date" id="feat-duedate" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; color-scheme: dark;">
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Due date</label>
+                        <input type="date" id="feat-duedate" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                     </div>
                     <div>
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Overall status</label>
-                        <select id="feat-status" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Overall status</label>
+                        <select id="feat-status" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                             <option value="Planned">Planned</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Done">Done</option>
@@ -1380,8 +1463,48 @@
                     </div>
                 </div>
 
+                <!-- Input Impact, Module & Integration -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-bottom:20px;">
+                    <!-- 1. MODULE PINDAH KE KIRI -->
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Impacted Module</label>
+                        <select id="feat-impact-module" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;" onchange="updateImpactedPages()">
+                            <option value="-">-- Pilih Modul --</option>
+                            <option value="Purchasing">Purchasing</option>
+                            <option value="Inbound">Inbound</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Outbound">Outbound</option>
+                            <option value="Stock Movement">Stock Movement</option>
+                            <option value="Inventory Management">Inventory Management</option>
+                            <option value="Approval Documents">Approval Documents</option>
+                            <option value="Production">Production</option>
+                            <option value="Warehouse Dashboard">Warehouse Dashboard</option>
+                            <option value="Master">Master</option>
+                            <option value="Accounting">Accounting</option>
+                            <option value="Integration & Tools">Integration & Tools</option>
+                            <option value="Ticketing Support">Ticketing Support</option>
+                            <option value="RFID OPERATIONAL">RFID OPERATIONAL</option>
+                        </select>
+                    </div>
+                    <!-- 2. PAGES PINDAH KE TENGAH (Sekarang jadi Select/Dropdown) -->
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Impacted Pages</label>
+                        <select id="feat-impact" disabled style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; background-color: var(--gray-light);">
+                            <option value="-">-- Pilih Modul Terlebih Dahulu --</option>
+                        </select>
+                    </div>
+                    <!-- 3. INTEGRATION TETAP DI KANAN -->
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Integration Feature?</label>
+                        <select id="feat-is-integration" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- TABS -->
-                <div class="modal-tabs" style="border-bottom: 1px solid #444; gap:0;">
+                <div class="modal-tabs" style="border-bottom: 1px solid var(--gray-border); gap:0;">
                     <div class="modal-tab active" onclick="switchFeatureTab('planning', this)"><i class="fa-solid fa-circle" style="font-size:6px; margin-right:4px;"></i> 1. Planning</div>
                     <div class="modal-tab" onclick="switchFeatureTab('prd', this)"><i class="fa-solid fa-circle" style="font-size:6px; margin-right:4px;"></i> 2. PRD & UI/UX</div>
                     <div class="modal-tab" onclick="switchFeatureTab('dev', this)"><i class="fa-solid fa-circle" style="font-size:6px; margin-right:4px;"></i> 3. Development</div>
@@ -1391,23 +1514,17 @@
 
                 <!-- TAB CONTENT: PLANNING -->
                 <div id="tab-planning" class="modal-tab-content active">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
-                        <div>
-                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Planning status</label>
-                            <select id="feat-plan-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
-                        </div>
-                        <div>
-                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Squad</label>
-                            <select style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option></select>
-                        </div>
+                    <div style="margin-bottom:15px;">
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Planning status</label>
+                        <select id="feat-plan-stat" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Reference / idea source URL</label>
-                        <input type="text" placeholder="Google Slides, Notion, any URL..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Reference / idea source URL</label>
+                        <input type="text" placeholder="Google Slides, Notion, any URL..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Notes</label>
-                        <textarea placeholder="Brainstorm notes, context, goals..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 60px;"></textarea>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Notes</label>
+                        <textarea placeholder="Brainstorm notes, context, goals..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 60px;"></textarea>
                     </div>
                 </div>
 
@@ -1415,21 +1532,21 @@
                 <div id="tab-prd" class="modal-tab-content">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
                         <div>
-                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">PRD & Design status</label>
-                            <select id="feat-prd-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
+                            <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">PRD & Design status</label>
+                            <select id="feat-prd-stat" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
                         </div>
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">PRD document (Google Docs URL)</label>
-                        <input type="text" placeholder="https://docs.google.com/..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">PRD document (Google Docs URL)</label>
+                        <input type="text" placeholder="https://docs.google.com/..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Figma design URL</label>
-                        <input type="text" placeholder="https://www.figma.com/file/..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;">
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Figma design URL</label>
+                        <input type="text" placeholder="https://www.figma.com/file/..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;">
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Notes</label>
-                        <textarea placeholder="Design decisions, open questions..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 60px;"></textarea>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Notes</label>
+                        <textarea placeholder="Design decisions, open questions..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 60px;"></textarea>
                     </div>
                 </div>
 
@@ -1437,13 +1554,13 @@
                 <div id="tab-dev" class="modal-tab-content">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
                         <div>
-                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Dev status</label>
-                            <select id="feat-dev-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="In Progress">In Progress</option><option value="Done">Done</option></select>
+                            <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Dev status</label>
+                            <select id="feat-dev-stat" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="In Progress">In Progress</option><option value="Done">Done</option></select>
                         </div>
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Dev remark (filled by Dev team)</label>
-                        <textarea placeholder="Technical notes, blockers, implementation details..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 80px;"></textarea>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Dev remark (filled by Dev team)</label>
+                        <textarea placeholder="Technical notes, blockers, implementation details..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 80px;"></textarea>
                     </div>
                 </div>
                 
@@ -1451,13 +1568,13 @@
                 <div id="tab-qa" class="modal-tab-content">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
                         <div>
-                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">QA status</label>
-                            <select id="feat-qa-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
+                            <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">QA status</label>
+                            <select id="feat-qa-stat" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
                         </div>
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">QA checking result / remarks</label>
-                        <textarea placeholder="Test results, bugs found, pass/fail notes..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 80px;"></textarea>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">QA checking result / remarks</label>
+                        <textarea placeholder="Test results, bugs found, pass/fail notes..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 80px;"></textarea>
                     </div>
                 </div>
 
@@ -1465,19 +1582,37 @@
                 <div id="tab-deploy" class="modal-tab-content">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
                         <div>
-                            <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Deployment status</label>
-                            <select id="feat-deploy-stat" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
+                            <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Deployment status</label>
+                            <select id="feat-deploy-stat" style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px;"><option value="">— select —</option><option value="Done">Done</option></select>
                         </div>
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-size:12px; font-weight:700; color:#aaa; display:block; margin-bottom:5px;">Deployment remark</label>
-                        <textarea placeholder="Deployment notes, environment, rollback plan..." style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:6px; font-size:13px; height: 80px;"></textarea>
+                        <label style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:5px;">Deployment remark</label>
+                        <textarea placeholder="Deployment notes, environment, rollback plan..." style="width:100%; padding:10px; border:1px solid var(--gray-border); border-radius:6px; font-size:13px; height: 80px;"></textarea>
                     </div>
                 </div>
 
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px; border-top:1px solid #333; padding-top:15px;">
-                    <button class="btn" style="background:transparent; color:#fff; border:1px solid #666;" onclick="closeAddFeatureModal()">Cancel</button>
+                <!-- Tombol Action di Bawah -->
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px; border-top:1px solid var(--gray-border); padding-top:15px;">
+                    <button class="btn btn-outline" onclick="closeAddFeatureModal()">Cancel</button>
                     <button class="btn btn-primary" onclick="saveFeature()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FEATURE EDIT HISTORY -->
+    <div id="feature-log-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <h3 style="font-size:16px; font-weight:800; color:var(--dark);" id="feature-log-title">Feature Edit History</h3>
+                <button style="background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted); padding:5px;" onclick="closeFeatureLogModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 20px; max-height: 60vh; overflow-y: auto;">
+                <div id="feature-log-container">
+                    <!-- Log History akan dirender di sini -->
                 </div>
             </div>
         </div>
@@ -3264,8 +3399,10 @@
                 closeUserDetailModal();
                 closeLastLoginReportModal();
                 closeCompanyDetailModal();
-                closeEditCompanyModal(); // Pastikan Edit modal juga tertutup
-                closeAddCompanyModal();  // <-- Tutup modal Create Company
+                closeEditCompanyModal();
+                closeAddCompanyModal();
+                closeAddFeatureModal();
+                closeFeatureLogModal();
             }
         }
 
@@ -3291,7 +3428,7 @@
             
             // 👇 LOGIKA BARU: SEMBUNYIKAN PANEL KIRI AGAR TABEL FULL WIDTH 👇
             const editorPanel = document.querySelector('.editor-panel');
-            if (tab === 'user_company') {
+            if (tab === 'user_company' || tab === 'feature_history') {
                 editorPanel.style.display = 'none'; // Hilangkan panel kiri khusus di tab ini
             } else {
                 editorPanel.style.display = 'block'; // Tampilkan kembali di tab lain
@@ -3309,9 +3446,11 @@
                 'user_report': 'User Behavior & Feedback Report',
                 'company_report': 'Company Performance Report',
                 'nps_report': 'NPS History Report Archive',
-                'user_company': 'User Company Master Data', // TAB BARU
+                'user_company': 'User Company Master Data',
                 'account_master': 'Account Master Management',
-                'roadmap': 'PM Hub - Feature Roadmap Planner'
+                'roadmap': 'PM Hub - Feature Roadmap Planner',
+                'roadmap': 'PM Hub - Feature Roadmap Planner',
+                'feature_history': 'PM Hub - Historical Feature Tracker'
             };
             document.getElementById('page-header-title').innerText = titles[tab];
         }
@@ -4920,6 +5059,53 @@ function openLastLoginReportDetail(idx) {
         // 1. Inisialisasi State Roadmap (Mencegah error jika data kosong)
         appState.roadmapFeatures = appState.roadmapFeatures || [];
 
+        // ================= MAPPING DATA MODULE KE PAGES =================
+        const modulePagesMap = {
+            "Purchasing": ["Purchase Request Form", "Purchase Request Fulfillment", "Purchase Invoice Register", "Direct Purchase", "Purchase Return", "Stock Suggestions", "Purchase Request List", "Purchase Report", "Purchase Return Report", "Purchase Invoice Report"],
+            "Inbound": ["Inbound", "QC Inbound", "Barcode Generator", "Inbound Report", "QC Report", "Putaway Report", "Putaway App", "Stock Entry With Putaway", "Inbound Shipment", "Inbound Shipment Report", "Inbound Manual"],
+            "Sales": ["Sales Order", "Sales Return", "Point Of Sales", "SO Report", "Sales Report", "Sales Return Report", "POS Report"],
+            "Outbound": ["Create Delivery Order", "Dispatch Delivery Order", "Unassigned Picklist", "Picklist App", "Packing System", "Process Stock Sales Invoice", "Material Usage", "Material Usage With Picklist", "DO Report", "Outbound Manual"],
+            "Stock Movement": ["Stock Transfer Request", "STO OUT", "Dispatch STO", "STO IN", "Stock Transfer With Sloc", "Stock Transfer Between Barcode", "Replenishment Task", "Goods Loan", "STO Report", "Stock Transfer Plan", "Inbound Outbound Manual Report"],
+            "Inventory Management": ["Inventory", "Inventory Multi Company", "Stock Opname", "Process Stock Opname","Split Stock", "Stock Report", "Stock Opname Report", "Storage Layout Preview", "Loss Prevention Report", "Inbound Outbound Manual Report", "Stock Convert To RFID"],
+            "Production": ["Create Assembly Product", "Disassembly Stock", "Assembly Product With Picklist", "Bill Of Material"],
+            "Master": ["Customer Management", "Supplier Management", "Salesman Management", "Product Management", "Storage Management", "Replenishment Stock", "Create Expedition", "Promo Management", "Point Management", "Voucher Management", "Export/Import", "Document Layout", "Change Document Log", "Configuration Setup", "Replace Stock Data", "Barcode Generator", "Stock Suggestions", "Modular Field Management", "SKU Mapping"],
+            "Accounting": ["Sales Invoice Manual", "Sales Invoice Register", "Purchase Invoice Register", "Down Payment Management", "Pay Bills", "Take Payment", "Billing Register", "Adjusting Entries", "Fixed Assets Management", "Amortization Management", "Report"],
+            "Integration & Tools": ["3rd Party Integration", "Accurate Setup"],
+            "Approval Documents": ["Approval Documents"],
+            "Warehouse Dashboard": ["Warehouse Dashboard"],
+            "Ticketing Support": ["Ticketing Support"],
+            "RFID OPERATIONAL": ["Inbound Manual RFID Mobile", "Inbound RFID by PO", "Outbound Manual RFID Mobile", "Outbound RFID by DO", "Outbound RFID by PRTN", "Process Opname RFID", "Inbound RFID by SRTN", "Outbound RFID by STO"]
+        };
+
+        function updateImpactedPages() {
+            const moduleSelect = document.getElementById('feat-impact-module');
+            const pageSelect = document.getElementById('feat-impact');
+            const selectedModule = moduleSelect.value;
+
+            pageSelect.innerHTML = ''; // Kosongkan opsi lama
+
+            if (selectedModule === '-') {
+                pageSelect.innerHTML = '<option value="-">-- Pilih Modul Terlebih Dahulu --</option>';
+                pageSelect.disabled = true;
+                pageSelect.style.backgroundColor = 'var(--gray-light)';
+            } else {
+                pageSelect.disabled = false;
+                pageSelect.style.backgroundColor = '#fff';
+
+                const pages = modulePagesMap[selectedModule] || [selectedModule];
+                
+                let optionsHtml = '<option value="-">-- Pilih Page --</option>';
+                pages.forEach(page => {
+                    optionsHtml += `<option value="${page}">${page}</option>`;
+                });
+                pageSelect.innerHTML = optionsHtml;
+                
+                if (pages.length === 1 && pages[0] === selectedModule) {
+                    pageSelect.value = selectedModule;
+                }
+            }
+        }
+
         // 2. Fungsi untuk berpindah tab di dalam Modal Add Feature
         function switchFeatureTab(tabId, element) {
             // Hapus class 'active' dari semua tombol tab
@@ -4933,16 +5119,85 @@ function openLastLoginReportDetail(idx) {
             document.getElementById(`tab-${tabId}`).classList.add('active');
         }
 
+        // Fungsi untuk mengembalikan Modal ke keadaan normal (bisa diedit)
+        function resetFeatureModalState() {
+            const modal = document.getElementById('add-feature-modal');
+            
+            // Enable semua input, select, textarea
+            const inputs = modal.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.disabled = false;
+                input.style.backgroundColor = '#fff';
+            });
+
+            // Kembalikan tombol Save dan teks Cancel
+            const saveBtn = modal.querySelector('button[onclick="saveFeature()"]');
+            if (saveBtn) saveBtn.style.display = 'inline-flex';
+
+            const cancelBtn = modal.querySelector('button[onclick="closeAddFeatureModal()"]');
+            if (cancelBtn) cancelBtn.innerText = 'Cancel';
+        }
+
+        // Fungsi khusus untuk melihat Detail (Read-Only)
+        function viewFeatureDetail(id) {
+            // 1. Panggil fungsi editFeature untuk mengisi data ke dalam form
+            editFeature(id);
+
+            // 2. Ubah Judul Modal
+            document.getElementById('feature-modal-title').innerText = 'Detail Feature (Read-Only)';
+
+            // 3. Kunci (Disable) semua inputan agar Read-Only
+            const modal = document.getElementById('add-feature-modal');
+            const inputs = modal.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.style.backgroundColor = 'var(--gray-light)';
+            });
+
+            // 4. Sembunyikan tombol Save & ubah teks Cancel jadi Close
+            const saveBtn = modal.querySelector('button[onclick="saveFeature()"]');
+            if (saveBtn) saveBtn.style.display = 'none';
+
+            const cancelBtn = modal.querySelector('button[onclick="closeAddFeatureModal()"]');
+            if (cancelBtn) cancelBtn.innerText = 'Close';
+        }
+
+        // Fungsi untuk mengembalikan fitur (Reopen) ke status In Progress
+        function reopenFeature(id) {
+            if (confirm("⚠️ Yakin ingin membuka kembali (reopen) fitur ini?\n\nFitur akan dikembalikan ke tab Roadmap Dashboard dengan status 'In Progress'.")) {
+                const f = appState.roadmapFeatures.find(feat => String(feat.id) === String(id));
+                if (f) {
+                    f.overallStatus = 'In Progress';
+                    
+                    // Tambahkan log history perubahan
+                    const logEntry = { timestamp: new Date().toLocaleString('id-ID'), changes: ["Status dikembalikan ke 'In Progress' (Reopen)"] };
+                    if (!f.editLogs) f.editLogs = [];
+                    f.editLogs.unshift(logEntry);
+
+                    saveDataToLocal();
+                    initFeatureHistoryView(); // Refresh tabel history
+                    if (typeof initRoadmapView === "function") initRoadmapView(); // Refresh tabel roadmap
+                    
+                    alert(`✅ Fitur "${f.name}" berhasil di-reopen!`);
+                }
+            }
+        }
+
         // 3. Fungsi untuk membuka Modal Add Feature
         function openAddFeatureModal() {
+            resetFeatureModalState();
             // Kosongkan form input dasar
             document.getElementById('feat-id').value = '';
             document.getElementById('feat-name').value = '';
+            document.getElementById('feat-year').value = 'Unassigned';
+            document.getElementById('feat-quarter-only').value = 'Unassigned';            
+            document.getElementById('feat-impact-module').value = '-';
+            updateImpactedPages(); // Memaksa dropdown pages mereset diri dan terkunci
+            
+            document.getElementById('feat-is-integration').value = 'No';
             document.getElementById('feature-modal-title').innerText = 'Add feature';
             
-            // Set default value ke Unassigned atau sesuai kebutuhan awal
-            document.getElementById('feat-quarter').value = 'Unassigned'; 
-            updateDueDateBasedOnQuarter(); // <--- TAMBAHKAN BARIS INI
+            updateDueDateBasedOnQuarter(); 
             
             // Reset modal agar selalu kembali ke tab '1. Planning' saat dibuka
             switchFeatureTab('planning', document.querySelector('.modal-tabs .modal-tab:first-child'));
@@ -4956,6 +5211,101 @@ function openLastLoginReportDetail(idx) {
             document.getElementById('add-feature-modal').classList.remove('active');
         }
 
+        // Fungsi Auto Generate ID FT-00001
+        function generateFeatureId() {
+            const features = appState.roadmapFeatures || [];
+            if (features.length === 0) return 'FT-00001';
+            
+            let maxId = 0;
+            features.forEach(f => {
+                if (f.featureId && f.featureId.startsWith('FT-')) {
+                    const num = parseInt(f.featureId.replace('FT-', ''), 10);
+                    if (!isNaN(num) && num > maxId) maxId = num;
+                }
+            });
+            return `FT-${String(maxId + 1).padStart(5, '0')}`;
+        }
+
+        // Buka Modal Edit
+        function editFeature(id) {
+            resetFeatureModalState();
+
+            const f = appState.roadmapFeatures.find(feat => String(feat.id) === String(id));
+            if (!f) return;
+
+            document.getElementById('feat-id').value = f.id;
+            document.getElementById('feat-name').value = f.name || '';
+            let savedQuarter = f.quarter || 'Unassigned';
+            if (savedQuarter !== 'Unassigned' && savedQuarter.includes(' ')) {
+                let parts = savedQuarter.split(' ');
+                document.getElementById('feat-quarter-only').value = parts[0]; // Misal: Q1
+                document.getElementById('feat-year').value = parts[1]; // Misal: 2026
+            } else {
+                document.getElementById('feat-quarter-only').value = 'Unassigned';
+                document.getElementById('feat-year').value = 'Unassigned';
+            }
+            document.getElementById('feat-priority').value = f.priority || 'Medium';
+            document.getElementById('feat-duedate').value = f.dueDate || '';
+            document.getElementById('feat-status').value = f.overallStatus || 'Planned';
+            document.getElementById('feat-impact-module').value = f.impactedModule || '-';
+            updateImpactedPages(); // 1. Load dulu pilihan pages-nya berdasarkan module tersimpan
+            document.getElementById('feat-impact').value = f.impactedPages || '-'; // 2. Baru assign page spesifik-nya            
+            document.getElementById('feat-is-integration').value = f.isIntegration ? 'Yes' : 'No';
+
+            // Set Status Tabs
+            document.getElementById('feat-plan-stat').value = f.stages?.planning ? 'Done' : '';
+            document.getElementById('feat-prd-stat').value = f.stages?.prd ? 'Done' : '';
+            document.getElementById('feat-dev-stat').value = f.stages?.dev ? 'Done' : '';
+            document.getElementById('feat-qa-stat').value = f.stages?.qa ? 'Done' : '';
+            document.getElementById('feat-deploy-stat').value = f.stages?.deploy ? 'Done' : '';
+
+            document.getElementById('feature-modal-title').innerText = `Edit Feature - ${f.featureId}`;
+            
+            switchFeatureTab('planning', document.querySelector('.modal-tabs .modal-tab:first-child'));
+            document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            document.getElementById('add-feature-modal').classList.add('active');
+        }
+
+        // Hapus Fitur
+        function deleteFeature(id) {
+            if (confirm("⚠️ Yakin ingin menghapus fitur ini dari Roadmap?")) {
+                appState.roadmapFeatures = appState.roadmapFeatures.filter(f => String(f.id) !== String(id));
+                saveDataToLocal();
+                initRoadmapView();
+            }
+        }
+
+        // Buka Modal Log History
+        function viewFeatureHistory(id) {
+            const f = appState.roadmapFeatures.find(feat => String(feat.id) === String(id));
+            if (!f) return;
+
+            document.getElementById('feature-log-title').innerText = `Edit History - ${f.featureId || f.name}`;
+            const container = document.getElementById('feature-log-container');
+
+            if (!f.editLogs || f.editLogs.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">Belum ada riwayat perubahan.</div>`;
+            } else {
+                container.innerHTML = f.editLogs.map(log => `
+                    <div style="border-left: 2px solid var(--primary); padding-left: 15px; margin-bottom: 15px;">
+                        <div style="font-size:11px; color:var(--text-muted); font-weight:700; margin-bottom:4px;">
+                            <i class="fa-regular fa-clock"></i> ${log.timestamp}
+                        </div>
+                        <ul style="margin:0; padding-left:15px; font-size:12px; color:var(--dark);">
+                            ${log.changes.map(c => `<li>${c}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+            }
+            
+            document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            document.getElementById('feature-log-modal').classList.add('active');
+        }
+
+        function closeFeatureLogModal() {
+            document.getElementById('feature-log-modal').classList.remove('active');
+        }
+
         // 5. Fungsi untuk menyimpan data fitur baru ke dalam sistem
         function saveFeature() {
             const name = document.getElementById('feat-name').value;
@@ -4964,25 +5314,91 @@ function openLastLoginReportDetail(idx) {
                 return;
             }
             
-            const newFeature = {
-                id: document.getElementById('feat-id').value || Date.now(),
-                name: name,
-                quarter: document.getElementById('feat-quarter').value,
-                priority: document.getElementById('feat-priority').value,
-                dueDate: document.getElementById('feat-duedate').value,
-                overallStatus: document.getElementById('feat-status').value,
-                stages: {
-                    planning: document.getElementById('feat-plan-stat').value === 'Done',
-                    prd: document.getElementById('feat-prd-stat').value === 'Done',
-                    dev: document.getElementById('feat-dev-stat').value === 'Done',
-                    qa: document.getElementById('feat-qa-stat').value === 'Done',
-                    deploy: document.getElementById('feat-deploy-stat').value === 'Done'
-                }
-            };
+            const idField = document.getElementById('feat-id').value;
+            const isEditing = !!idField;
+            const featureInternalId = isEditing ? idField : Date.now(); 
+
+            // Tarik semua value dari form
+            const yearVal = document.getElementById('feat-year').value;
+            const qVal = document.getElementById('feat-quarter-only').value;
+            const quarter = (yearVal === 'Unassigned' || qVal === 'Unassigned') ? 'Unassigned' : `${qVal} ${yearVal}`;
             
-            appState.roadmapFeatures.push(newFeature);
-            saveDataToLocal(); // Simpan ke Firebase / LocalStorage
-            initRoadmapView(); // Render ulang tampilan tabel dan pipeline
+            const priority = document.getElementById('feat-priority').value;
+            const dueDate = document.getElementById('feat-duedate').value;
+            const overallStatus = document.getElementById('feat-status').value;
+            
+            // 👇 INI BAGIAN YANG BARU KITA TAMBAHKAN 👇
+            const impactedPages = document.getElementById('feat-impact').value;
+            const impactedModule = document.getElementById('feat-impact-module').value; 
+            const isIntegration = document.getElementById('feat-is-integration').value === 'Yes';
+            // 👆 ================================= 👆
+
+            const stages = {
+                planning: document.getElementById('feat-plan-stat').value === 'Done',
+                prd: document.getElementById('feat-prd-stat').value === 'Done',
+                dev: document.getElementById('feat-dev-stat').value === 'Done',
+                qa: document.getElementById('feat-qa-stat').value === 'Done',
+                deploy: document.getElementById('feat-deploy-stat').value === 'Done'
+            };
+
+            if (isEditing) {
+                // LOGIC EDIT & LOGGING
+                const existing = appState.roadmapFeatures.find(f => String(f.id) === String(featureInternalId));
+                if (existing) {
+                    let changes = [];
+                    if (existing.name !== name) changes.push(`Judul diubah menjadi "${name}"`);
+                    if (existing.quarter !== quarter) changes.push(`Quarter diubah menjadi "${quarter}"`);
+                    if (existing.overallStatus !== overallStatus) changes.push(`Status diubah menjadi "${overallStatus}"`);
+                    if (existing.dueDate !== dueDate) changes.push(`Due Date diubah menjadi "${dueDate || '-'}"`);
+                    
+                    // 👇 LOGGING KETIKA MODULE DIUBAH 👇
+                    if (existing.impactedModule !== impactedModule) changes.push(`Impacted Module diubah menjadi "${impactedModule}"`);
+                    
+                    if (changes.length === 0) changes.push(`Data diperbarui tanpa perubahan spesifik.`);
+
+                    const logEntry = { timestamp: new Date().toLocaleString('id-ID'), changes: changes };
+
+                    existing.name = name;
+                    existing.quarter = quarter;
+                    existing.priority = priority;
+                    existing.dueDate = dueDate;
+                    existing.overallStatus = overallStatus;
+                    
+                    // 👇 UPDATE OBJECT DATA KETIKA DI-SAVE 👇
+                    existing.impactedPages = impactedPages;
+                    existing.impactedModule = impactedModule;
+                    existing.isIntegration = isIntegration;
+                    
+                    existing.stages = stages;
+                    
+                    if(!existing.editLogs) existing.editLogs = [];
+                    existing.editLogs.unshift(logEntry); // Tambahkan log terbaru di atas
+                }
+            } else {
+                // LOGIC CREATE BARU
+                const newFeature = {
+                    id: featureInternalId,
+                    featureId: generateFeatureId(), // Buat ID Unique Baru
+                    name: name,
+                    quarter: quarter,
+                    priority: priority,
+                    dueDate: dueDate,
+                    overallStatus: overallStatus,
+                    
+                    // 👇 SIMPAN KE OBJECT SAAT BIKIN BARU 👇
+                    impactedPages: impactedPages,
+                    impactedModule: impactedModule,
+                    isIntegration: isIntegration,
+                    
+                    stages: stages,
+                    editLogs: [{ timestamp: new Date().toLocaleString('id-ID'), changes: ["Feature berhasil dibuat"] }]
+                };
+                appState.roadmapFeatures.push(newFeature);
+            }
+            
+            saveDataToLocal();
+            initRoadmapView();
+            if (typeof initFeatureHistoryView === "function") initFeatureHistoryView(); // Trigger auto update tab history
             closeAddFeatureModal();
         }
 
@@ -4999,11 +5415,12 @@ function openLastLoginReportDetail(idx) {
             const search = (document.getElementById('roadmap-search')?.value || '').toLowerCase();
             const qtr = document.getElementById('roadmap-filter-quarter')?.value || 'all';
 
-            // Filter data berdasarkan inputan user
+            // Filter data berdasarkan inputan user dan JANGAN tampilkan yang sudah 'Done'
             let data = appState.roadmapFeatures.filter(f => {
                 const mSearch = f.name.toLowerCase().includes(search);
                 const mQtr = qtr === 'all' || f.quarter === qtr;
-                return mSearch && mQtr;
+                const mNotDone = f.overallStatus !== 'Done'; // <--- TAMBAHAN FILTER
+                return mSearch && mQtr && mNotDone;
             });
 
             // Kalkulasi Data Pipeline (Berapa banyak yang sudah 'Done' di tiap fase)
@@ -5055,15 +5472,36 @@ function openLastLoginReportDetail(idx) {
             }
 
             // Render baris tabel untuk setiap fitur
-            const rowsHtml = data.map(f => {
+            const rowsHtml = data.map((f, idx) => {
                 let badgeColor = f.overallStatus === 'Done' ? 'var(--success)' : f.overallStatus === 'In Progress' ? 'var(--primary)' : 'var(--text-muted)';
+                let fId = f.featureId || '-'; // Jaga-jaga data lama yang belum punya ID
+                
                 return `
                 <tr>
+                    <td><span style="font-family:'Roboto Mono', monospace; font-size:11px; font-weight:700; color:var(--text-muted); background:var(--gray-light); padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${fId}</span></td>
                     <td style="font-weight:700; color:var(--dark);">${f.name}</td>
                     <td><span style="font-size:11px; background:var(--gray-light); padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${f.quarter}</span></td>
                     <td>${f.priority}</td>
                     <td><span style="font-size:11px; font-weight:700; color:${badgeColor}; border:1px solid ${badgeColor}; padding:2px 6px; border-radius:4px;">${f.overallStatus}</span></td>
                     <td style="font-size:11px;">${f.dueDate || '-'}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('rm-drop-${idx}', event)">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div id="rm-drop-${idx}" class="dropdown-content">
+                                <div class="dropdown-item" onclick="editFeature('${f.id}')">
+                                    <i class="fa-solid fa-pen" style="color:var(--warning);"></i> Edit Fitur
+                                </div>
+                                <div class="dropdown-item" onclick="viewFeatureHistory('${f.id}')">
+                                    <i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i> Edit History
+                                </div>
+                                <div class="dropdown-item" onclick="deleteFeature('${f.id}')">
+                                    <i class="fa-solid fa-trash" style="color:var(--danger);"></i> Delete
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             `}).join('');
 
@@ -5072,11 +5510,13 @@ function openLastLoginReportDetail(idx) {
                 <table class="anomaly-table">
                     <thead>
                         <tr>
+                            <th style="width:100px;">Feature ID</th>
                             <th>Feature Name</th>
                             <th>Quarter</th>
                             <th>Priority</th>
                             <th>Status</th>
                             <th>Due Date</th>
+                            <th style="width:70px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>${rowsHtml}</tbody>
@@ -5087,6 +5527,128 @@ function openLastLoginReportDetail(idx) {
         // 8. Trigger inisialisasi saat file diload pertama kali
         setTimeout(() => { 
             if (typeof initRoadmapView === "function") initRoadmapView(); 
+        }, 1000);
+
+        function filterHistory() {
+            initFeatureHistoryView();
+        }
+
+        function initFeatureHistoryView() {
+            const container = document.getElementById('feature-history-table-container');
+            const summaryCont = document.getElementById('history-summary-cards');
+            const yearFilter = document.getElementById('hist-filter-year')?.value || 'all';
+            const typeFilter = document.getElementById('hist-filter-type')?.value || 'all';
+            
+            // 👇 TAMBAHAN VARIABEL FILTER BARU 👇
+            const moduleFilter = document.getElementById('hist-filter-module')?.value || 'all';
+            const pageSearch = (document.getElementById('hist-filter-page')?.value || '').toLowerCase();
+
+            // Filter otomatis: HANYA TAMPILKAN YANG SUDAH SELESAI (Done)
+            let data = (appState.roadmapFeatures || []).filter(f => f.overallStatus === 'Done');
+
+            // Hitung Rekap per Tahun (Mini Dashboard) SEBELUM filter dropdown diterapkan
+            let count2024 = data.filter(f => (f.quarter || '').includes('2024')).length;
+            let count2025 = data.filter(f => (f.quarter || '').includes('2025')).length;
+            let count2026 = data.filter(f => (f.quarter || '').includes('2026')).length;
+
+            summaryCont.innerHTML = `
+                <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total Rilis 2024</h5>
+                    <h2 style="font-size:28px; font-weight:800; color:var(--dark); margin:0;">${count2024} <span style="font-size:12px">Fitur</span></h2>
+                </div>
+                <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total Rilis 2025</h5>
+                    <h2 style="font-size:28px; font-weight:800; color:var(--dark); margin:0;">${count2025} <span style="font-size:12px">Fitur</span></h2>
+                </div>
+                <div style="background:#fff; border:1px solid var(--gray-border); padding:15px; border-radius:12px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <h5 style="font-size:11px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Total Rilis 2026</h5>
+                    <h2 style="font-size:28px; font-weight:800; color:var(--primary); margin:0;">${count2026} <span style="font-size:12px">Fitur</span></h2>
+                </div>
+            `;
+
+            // Terapkan Filter
+            if (yearFilter !== 'all') {
+                data = data.filter(f => (f.quarter || '').includes(yearFilter));
+            }
+            if (typeFilter === 'integration') {
+                data = data.filter(f => f.isIntegration);
+            } else if (typeFilter === 'non-integration') {
+                data = data.filter(f => !f.isIntegration);
+            }
+            // 👇 TERAPKAN FILTER MODULE & PAGES 👇
+            if (moduleFilter !== 'all') {
+                data = data.filter(f => f.impactedModule === moduleFilter);
+            }
+            if (pageSearch !== '') {
+                data = data.filter(f => (f.impactedPages || '').toLowerCase().includes(pageSearch));
+            }
+
+            if (data.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">Belum ada histori rilis (Done) pada filter ini.</div>`;
+                return;
+            }
+
+            // Sort Descending
+            data.sort((a, b) => {
+                let qA = a.quarter || ''; let qB = b.quarter || '';
+                if (qA < qB) return 1;
+                if (qA > qB) return -1;
+                return 0;
+            });
+
+            const rowsHtml = data.map((f, idx) => `
+                <tr>
+                    <td><span style="font-size:11px; font-weight:700; background:var(--gray-light); padding:4px 8px; border:1px solid var(--gray-border); border-radius:4px;">${f.quarter}</span></td>
+                    <td style="font-weight:700; color:var(--primary);">${f.name}</td>
+                    <!-- 👇 TAMBAHAN KOLOM MODULE 👇 -->
+                    <td><span style="font-size:11px; background:#f1f5f9; padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${f.impactedModule || '-'}</span></td>
+                    <td style="font-size:11px; font-weight:600; color:var(--text-main);">${f.impactedPages || '-'}</td>
+                    <td>${f.isIntegration 
+                        ? '<span style="font-size:10px; background:#fef3c7; color:var(--warning); padding:3px 8px; border-radius:6px; font-weight:800;"><i class="fa-solid fa-link"></i> Integrasi</span>' 
+                        : '<span style="font-size:10px; background:#f1f5f9; color:var(--text-muted); padding:3px 8px; border-radius:6px; font-weight:700;">Internal</span>'}</td>
+                    <td style="font-size:11px;">${f.dueDate || '-'}</td>
+                    <td><span style="font-size:11px; font-weight:700; color:var(--success);"><i class="fa-solid fa-check-circle"></i> Shipped</span></td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('hist-drop-${idx}', event)">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <div id="hist-drop-${idx}" class="dropdown-content">
+                                <div class="dropdown-item" onclick="viewFeatureDetail('${f.id}')">
+                                    <i class="fa-solid fa-eye" style="color:var(--primary);"></i> Detail
+                                </div>
+                                <div class="dropdown-item" onclick="reopenFeature('${f.id}')">
+                                    <i class="fa-solid fa-rotate-left" style="color:var(--warning);"></i> Reopen Feature
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <table class="anomaly-table">
+                    <thead>
+                        <tr>
+                            <th style="width:100px;">Quarter</th>
+                            <th>Nama Fitur</th>
+                            <!-- 👇 TAMBAHAN HEADER MODULE 👇 -->
+                            <th>Modul Terdampak</th>
+                            <th>Halaman Target</th>
+                            <th>Tipe Fitur</th>
+                            <th>Tanggal Rilis</th>
+                            <th>Status</th>
+                            <th style="width:80px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `;
+        }
+
+        // Tambahkan inisialisasi ini di dalam timeout saat window load
+        setTimeout(() => { 
+            if (typeof initFeatureHistoryView === "function") initFeatureHistoryView(); 
         }, 1000);
 
         // ================= FUNGSI KIRIM TELEGRAM MANUAL =================
@@ -5309,37 +5871,30 @@ function openLastLoginReportDetail(idx) {
 
         // ================= AUTOMATION DUE DATE =================
         function updateDueDateBasedOnQuarter() {
-            const quarterSelect = document.getElementById('feat-quarter').value;
+            const yearVal = document.getElementById('feat-year').value;
+            const qVal = document.getElementById('feat-quarter-only').value;
             const dueDateInput = document.getElementById('feat-duedate');
 
-            // Kosongkan due date jika memilih "Unassigned"
-            if (quarterSelect === 'Unassigned') {
+            // Kosongkan due date jika salah satu masih "Unassigned"
+            if (yearVal === 'Unassigned' || qVal === 'Unassigned') {
                 dueDateInput.value = '';
                 return;
             }
 
-            // Memecah teks "Q1 2027" menjadi ["Q1", "2027"]
-            const parts = quarterSelect.split(' ');
-            if (parts.length === 2) {
-                const q = parts[0];
-                const year = parts[1];
-                let lastDay = '';
+            let lastDay = '';
+            // Tentukan tanggal terakhir berdasarkan format YYYY-MM-DD
+            switch (qVal) {
+                case 'Q1': lastDay = `${yearVal}-03-31`; break;
+                case 'Q2': lastDay = `${yearVal}-06-30`; break;
+                case 'Q3': lastDay = `${yearVal}-09-30`; break;
+                case 'Q4': lastDay = `${yearVal}-12-31`; break;
+            }
 
-                // Tentukan tanggal terakhir berdasarkan format YYYY-MM-DD
-                switch (q) {
-                    case 'Q1': lastDay = `${year}-03-31`; break;
-                    case 'Q2': lastDay = `${year}-06-30`; break;
-                    case 'Q3': lastDay = `${year}-09-30`; break;
-                    case 'Q4': lastDay = `${year}-12-31`; break;
-                }
-
-                // Set otomatis nilai input due date
-                if (lastDay) {
-                    dueDateInput.value = lastDay;
-                }
+            // Set otomatis nilai input due date
+            if (lastDay) {
+                dueDateInput.value = lastDay;
             }
         }
     </script>
-    
 </body>
 </html>
