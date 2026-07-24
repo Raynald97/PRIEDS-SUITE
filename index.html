@@ -5597,7 +5597,6 @@ function openLastLoginReportDetail(idx) {
             const yearFilter = document.getElementById('hist-filter-year')?.value || 'all';
             const typeFilter = document.getElementById('hist-filter-type')?.value || 'all';
             
-            // 👇 TAMBAHAN VARIABEL FILTER BARU 👇
             const moduleFilter = document.getElementById('hist-filter-module')?.value || 'all';
             const pageSearch = (document.getElementById('hist-filter-page')?.value || '').toLowerCase();
 
@@ -5633,7 +5632,7 @@ function openLastLoginReportDetail(idx) {
             } else if (typeFilter === 'non-integration') {
                 data = data.filter(f => !f.isIntegration);
             }
-            // 👇 TERAPKAN FILTER MODULE & PAGES 👇
+            
             if (moduleFilter !== 'all') {
                 data = data.filter(f => f.impactedModule === moduleFilter);
             }
@@ -5646,65 +5645,142 @@ function openLastLoginReportDetail(idx) {
                 return;
             }
 
-            // Sort Descending
-            data.sort((a, b) => {
-                let qA = a.quarter || ''; let qB = b.quarter || '';
-                if (qA < qB) return 1;
-                if (qA > qB) return -1;
+            // 1. KELOMPOKKAN DATA BERDASARKAN QUARTER (GROUPING)
+            const groupedData = {};
+            data.forEach(f => {
+                const qtr = f.quarter || 'Unassigned';
+                if (!groupedData[qtr]) {
+                    let yearStr = '-';
+                    let qtrStr = qtr;
+                    if (qtr.includes(' ')) {
+                        const parts = qtr.split(' ');
+                        qtrStr = parts[0];
+                        yearStr = parts[1];
+                    }
+                    
+                    groupedData[qtr] = {
+                        quarterFull: qtr,
+                        quarterOnly: qtrStr,
+                        yearOnly: yearStr,
+                        features: [],
+                        integrationCount: 0,
+                        internalCount: 0
+                    };
+                }
+                
+                groupedData[qtr].features.push(f);
+                if (f.isIntegration) {
+                    groupedData[qtr].integrationCount++;
+                } else {
+                    groupedData[qtr].internalCount++;
+                }
+            });
+
+            // Urutkan grup secara descending (Terbaru ke Terlama)
+            const groupedArray = Object.values(groupedData).sort((a, b) => {
+                if (a.quarterFull < b.quarterFull) return 1;
+                if (a.quarterFull > b.quarterFull) return -1;
                 return 0;
             });
 
-            const rowsHtml = data.map((f, idx) => `
-                <tr>
-                    <td><span style="font-size:11px; font-weight:700; background:var(--gray-light); padding:4px 8px; border:1px solid var(--gray-border); border-radius:4px;">${f.quarter}</span></td>
-                    <td style="font-weight:700; color:var(--primary);">${f.name}</td>
-                    <!-- 👇 TAMBAHAN KOLOM MODULE 👇 -->
-                    <td><span style="font-size:11px; background:#f1f5f9; padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${f.impactedModule || '-'}</span></td>
-                    <td style="font-size:11px; font-weight:600; color:var(--text-main);">${f.impactedPages || '-'}</td>
-                    <td>${f.isIntegration 
-                        ? '<span style="font-size:10px; background:#fef3c7; color:var(--warning); padding:3px 8px; border-radius:6px; font-weight:800;"><i class="fa-solid fa-link"></i> Integrasi</span>' 
-                        : '<span style="font-size:10px; background:#f1f5f9; color:var(--text-muted); padding:3px 8px; border-radius:6px; font-weight:700;">Internal</span>'}</td>
+            // 2. BUILD STRUKTUR TABEL ACCORDION
+            let rowsHtml = '';
+            groupedArray.forEach((group, gIdx) => {
+                const total = group.features.length;
+
+                // Parent Row (Yang bisa diklik / Accordion Header)
+                rowsHtml += `
+                    <tr style="cursor: pointer; background: #ffffff; transition: 0.2s;" onclick="toggleHistoryGroup('group-hist-${gIdx}', this)">
+                        <td style="font-weight:800; color:var(--dark);">${group.yearOnly}</td>
+                        <td style="font-weight:800; color:var(--primary);"><span style="background:#e0f2fe; padding:4px 10px; border-radius:6px;">${group.quarterOnly}</span></td>
+                        <td><span style="font-weight:700; color:var(--dark);">${total} Feature</span></td>
+                        <td><span style="font-size:12px; background:#fef3c7; color:var(--warning); padding:4px 10px; border-radius:6px; font-weight:800;"><i class="fa-solid fa-link"></i> ${group.integrationCount} Fitur</span></td>
+                        <td><span style="font-size:12px; background:var(--gray-light); color:var(--text-muted); border:1px solid var(--gray-border); padding:4px 10px; border-radius:6px; font-weight:700;">${group.internalCount} Fitur</span></td>
+                        <td style="text-align:center; color:var(--text-muted);"><i class="fa-solid fa-chevron-down arrow-icon" style="transition: transform 0.3s; pointer-events: none;"></i></td>
+                    </tr>
+                `;
+
+                // Susun isi baris sub-tabel (Child Rows)
+                const childRows = group.features.map((f, idx) => {
+                    // 👇 LOGIKA DOC STATUS (Cek PRD dan Figma URL) 👇
+                    const hasPRD = f.tabDetails && f.tabDetails.prdUrl && f.tabDetails.prdUrl.trim() !== '';
+                    const hasFigma = f.tabDetails && f.tabDetails.figmaUrl && f.tabDetails.figmaUrl.trim() !== '';
                     
-                    <!-- 👇 TAMBAHAN KOLOM PACKAGE 👇 -->
-                    <td><span style="font-size:11px; font-weight:700; color:var(--dark); background:#e0f2fe; border:1px solid #bae6fd; padding:2px 6px; border-radius:4px;">${f.package || 'All'}</span></td>
-                    
-                    <td style="font-size:11px;">${f.dueDate || '-'}</td>
-                    <td><span style="font-size:11px; font-weight:700; color:var(--success);"><i class="fa-solid fa-check-circle"></i> Shipped</span></td>
-                    <td>
-                        <div class="dropdown">
-                            <button class="btn btn-outline" style="padding:6px 12px; font-size:14px;" onclick="toggleDropdown('hist-drop-${idx}', event)">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                            <div id="hist-drop-${idx}" class="dropdown-content">
-                                <div class="dropdown-item" onclick="viewFeatureDetail('${f.id}')">
-                                    <i class="fa-solid fa-eye" style="color:var(--primary);"></i> Detail
-                                </div>
-                                <div class="dropdown-item" onclick="reopenFeature('${f.id}')">
-                                    <i class="fa-solid fa-rotate-left" style="color:var(--warning);"></i> Reopen Feature
+                    const prdStatus = hasPRD ? '✅' : '❌';
+                    const figmaStatus = hasFigma ? '✅' : '❌';
+                    // 👆 AKHIR LOGIKA DOC STATUS 👆
+
+                    return `
+                    <tr style="background:#fff;">
+                        <td style="font-weight:700; color:var(--dark); padding-left:15px;">${f.name}</td>
+                        <td><span style="font-size:11px; background:#f1f5f9; padding:2px 6px; border:1px solid var(--gray-border); border-radius:4px;">${f.impactedModule || '-'}</span></td>
+                        <td style="font-size:11px; font-weight:600; color:var(--text-main);">${f.impactedPages || '-'}</td>
+                        <td>${f.isIntegration ? '<span style="font-size:10px; color:var(--warning); font-weight:800;"><i class="fa-solid fa-link"></i> Integrasi</span>' : '<span style="font-size:10px; color:var(--text-muted); font-weight:700;">Internal</span>'}</td>
+                        <td><span style="font-size:11px; font-weight:700; color:var(--primary);">${f.package || 'All'}</span></td>
+                        
+                        <!-- 👇 KOLOM DOC STATUS BARU 👇 -->
+                        <td style="font-size:10px; font-weight:700; color:var(--dark); line-height:1.4;">
+                            <div>PRD ${prdStatus}</div>
+                            <div>Figma ${figmaStatus}</div>
+                        </td>
+                        
+                        <td style="font-size:11px;">${f.dueDate || '-'}</td>
+                        <td><span style="font-size:11px; font-weight:700; color:var(--success); background:#dcfce7; padding:2px 8px; border-radius:6px;">Done</span></td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-outline" style="padding:4px 8px; font-size:12px;" onclick="toggleDropdown('hist-drop-${gIdx}-${idx}', event)">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                                <div id="hist-drop-${gIdx}-${idx}" class="dropdown-content">
+                                    <div class="dropdown-item" onclick="viewFeatureDetail('${f.id}')">
+                                        <i class="fa-solid fa-eye" style="color:var(--primary);"></i> Detail
+                                    </div>
+                                    <div class="dropdown-item" onclick="reopenFeature('${f.id}')">
+                                        <i class="fa-solid fa-rotate-left" style="color:var(--warning);"></i> Reopen Feature
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+                        </td>
+                    </tr>
+                    `;
+                }).join('');
 
+                // Child Row Container (Disembunyikan secara default, berisi tabel detail warna Teal)
+                rowsHtml += `
+                    <tr id="group-hist-${gIdx}" style="display: none; background: #f8fafc;">
+                        <td colspan="6" style="padding: 10px 15px 20px 15px;">
+                            <table style="width:100%; border-collapse:collapse; border-radius:8px; overflow:hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                <thead>
+                                    <tr style="background:#0e7490; color:#fff; text-align:left;">
+                                        <th style="padding:10px 15px; font-size:11px; font-weight:700;">Nama Fitur</th>
+                                        <th style="padding:10px 15px; font-size:11px; font-weight:700;">Modul Terdampak</th>
+                                        <th style="padding:10px 15px; font-size:11px; font-weight:700;">Halaman Target</th>
+                                        <th style="padding:10px 15px; font-size:11px; font-weight:700;">Tipe Fitur</th>
+                                        <th style="padding:10px 15px; font-size:11px; font-weight:700;">Package</th>
+                                        <th style="padding:10px 15px; font-size:11px; font-weight:700;">Doc Status</th> <!-- HEADER BARU -->
+                                        <th style="padding:10px 15px; font-size:11px; font-weight:700;">Tanggal Rilis</th>
+                                        <th style="padding:10px 15px; font-size:11px; font-weight:700;">Status</th>
+                                        <th style="padding:10px 15px; font-size:11px; font-weight:700; width:60px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${childRows}</tbody>
+                            </table>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // 3. RENDER MAIN TABLE
             container.innerHTML = `
-                <table class="anomaly-table">
-                    <thead>
+                <table class="anomaly-table" style="border-collapse: collapse;">
+                    <thead style="background: var(--gray-light);">
                         <tr>
-                            <th style="width:100px;">Quarter</th>
-                            <th>Nama Fitur</th>
-                            <!-- 👇 TAMBAHAN HEADER MODULE 👇 -->
-                            <th>Modul Terdampak</th>
-                            <th>Halaman Target</th>
-                            <th>Tipe Fitur</th>
-                            
-                            <!-- 👇 TAMBAHAN HEADER PACKAGE 👇 -->
-                            <th>Package</th>
-                            
-                            <th>Tanggal Rilis</th>
-                            <th>Status</th>
-                            <th style="width:80px;">Action</th>
+                            <th style="width:100px;">Tahun</th>
+                            <th style="width:120px;">Quarter</th>
+                            <th>Total Feature</th>
+                            <th>Integration Feature</th>
+                            <th>Internal Feature</th>
+                            <th style="width:50px; text-align:center;">Action</th>
                         </tr>
                     </thead>
                     <tbody>${rowsHtml}</tbody>
@@ -5959,6 +6035,20 @@ function openLastLoginReportDetail(idx) {
             // Set otomatis nilai input due date
             if (lastDay) {
                 dueDateInput.value = lastDay;
+            }
+        }
+
+        function toggleHistoryGroup(groupId, element) {
+            const target = document.getElementById(groupId);
+            const icon = element.querySelector('.arrow-icon');
+            if (target.style.display === 'none') {
+                target.style.display = 'table-row';
+                icon.style.transform = 'rotate(180deg)';
+                element.style.backgroundColor = '#f1f5f9';
+            } else {
+                target.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+                element.style.backgroundColor = '#ffffff';
             }
         }
     </script>
